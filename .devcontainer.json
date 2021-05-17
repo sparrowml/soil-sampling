@@ -1,0 +1,25 @@
+{
+  "name": "api",
+  "dockerComposeFile": [
+    "./docker-compose.dev.yml"
+  ],
+  "service": "api",
+  "shutdownAction": "none",
+  "settings": {
+    "terminal.integrated.defaultProfile.linux": "/bin/bash",
+    "python.pythonPath": "/usr/local/bin/python",
+    "python.languageServer": "Pylance",
+    "python.formatting.provider": "black",
+    "python.formatting.blackPath": "/home/dev/.local/bin/black",
+    "[python]": {
+      "editor.formatOnSave": true,
+    }
+  },
+  "extensions": [
+    "dbaeumer.vscode-eslint",
+    "ms-python.python",
+    "ms-python.vscode-pylance",
+  ],
+  "workspaceFolder": "/code",
+  "postCreateCommand": "pip install -r api/requirements-dev.txt --no-warn-script-location",
+}

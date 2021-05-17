@@ -8,6 +8,9 @@ RUN chown -R dev:dev /code
 USER dev
 WORKDIR /code
 
+RUN mkdir api
+WORKDIR /code/ui
+
 ADD package.json .
 ADD yarn.lock .
 RUN yarn

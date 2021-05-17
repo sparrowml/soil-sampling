@@ -8,6 +8,9 @@ RUN chown -R dev:dev /code
 USER dev
 WORKDIR /code
 
+RUN mkdir api
+WORKDIR /code/api
+
 ENV PATH="/home/dev/.local/bin:${PATH}"
 
 ADD requirements.txt .
