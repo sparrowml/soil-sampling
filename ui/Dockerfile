@@ -8,7 +8,7 @@ RUN chown -R dev:dev /code
 USER dev
 WORKDIR /code
 
-RUN mkdir api
+RUN mkdir ui
 WORKDIR /code/ui
 
 ADD package.json .

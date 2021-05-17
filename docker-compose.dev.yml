@@ -2,7 +2,7 @@ version: "3.9"
 services:
   api:
     extends:
-      file: docker-compose.yml
+      file: common-services.yml
       service: api
     volumes:
       - .:/code:cached
@@ -11,7 +11,7 @@ services:
     command: /bin/sh -c "while sleep 1000; do :; done"
   ui:
     extends:
-      file: docker-compose.yml
+      file: common-services.yml
       service: ui
     volumes:
       - .:/code:cached

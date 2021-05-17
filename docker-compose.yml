@@ -1,15 +1,12 @@
 version: "3.9"
 services:
   api:
-    build: api
-    ports:
-      - "9000:9000"
-    environment:
-      - FLASK_APP=/code/api/app.py
-      - FLASK_DEBUG=0
-    command: flask run --port 9000 --host 0.0.0.0
+    extends:
+      file: common-services.yml
+      service: api
   ui:
-    build: ui
-    ports:
-      - "3000:3000"
-    command: yarn start
+    extends:
+      file: common-services.yml
+      service: ui
+    depends_on:
+      - api
