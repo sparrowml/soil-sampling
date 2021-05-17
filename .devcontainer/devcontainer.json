@@ -1,10 +1,10 @@
 // For format details, see https://aka.ms/vscode-remote/devcontainer.json or this file's README at:
 // https://github.com/microsoft/vscode-dev-containers/tree/v0.163.0/containers/python-3
 {
-	"name": "Python 3",
+	"name": "Soil Sampling App",
 	"build": {
-		"dockerfile": "../api/Dockerfile",
-		"context": "../api",
+		"dockerfile": "../ui/Dockerfile",
+		"context": "../ui",
 	},
 
 	// Set *default* container specific settings.json values on container create.
@@ -21,6 +21,7 @@
 
 	// Add the IDs of extensions you want installed when the container is created.
 	"extensions": [
+		"dbaeumer.vscode-eslint",
 		"ms-python.python",
 		"ms-python.vscode-pylance"
 	],
@@ -30,8 +31,12 @@
 
 	// Use 'portsAttributes' to set default properties for specific forwarded ports. More info: https://code.visualstudio.com/docs/remote/devcontainerjson-reference.
 	"portsAttributes": {
+		"3000": {
+			"label": "UI Server",
+			"onAutoForward": "notify"
+		},		
 		"9000": {
-			"label": "Hello Remote World",
+			"label": "API Server",
 			"onAutoForward": "notify"
 		}
 	},
@@ -42,7 +47,7 @@
 	],
 
 	// Use 'postCreateCommand' to run commands after the container is created.
-	"postCreateCommand": "pip install -r api/requirements-dev.txt --no-warn-script-location",
+	// "postCreateCommand": "pip install -r api/requirements-dev.txt --no-warn-script-location",
 
 	// Comment out to connect as root instead. More info: https://aka.ms/vscode-remote/containers/non-root.
 	"remoteUser": "dev",
