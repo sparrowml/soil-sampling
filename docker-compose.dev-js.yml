@@ -1,0 +1,17 @@
+version: "3.9"
+services:
+  api:
+    extends:
+      file: common-services.yml
+      service: api
+    volumes:
+      - .:/code:cached
+  ui:
+    extends:
+      file: common-services.yml
+      service: ui
+    volumes:
+      - .:/code:cached
+      - ${HOME}/.gitconfig:/home/dev/.gitconfig:cached
+      - ${HOME}/.ssh:/home/dev/.ssh:cached
+    command: /bin/sh -c "while sleep 1000; do :; done"
