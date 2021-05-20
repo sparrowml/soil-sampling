@@ -3,7 +3,7 @@
   "dockerComposeFile": [
     "../docker-compose.dev-js.yml"
   ],
-  "service": "api",
+  "service": "ui",
   "shutdownAction": "none",
   "settings": {
     "terminal.integrated.defaultProfile.linux": "/bin/bash",
