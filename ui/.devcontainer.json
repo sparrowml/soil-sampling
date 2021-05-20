@@ -1,0 +1,15 @@
+{
+  "name": "api",
+  "dockerComposeFile": [
+    "../docker-compose.dev-js.yml"
+  ],
+  "service": "api",
+  "shutdownAction": "none",
+  "settings": {
+    "terminal.integrated.defaultProfile.linux": "/bin/bash",
+  },
+  "extensions": [
+    "dbaeumer.vscode-eslint",
+  ],
+  "workspaceFolder": "/code"
+}
