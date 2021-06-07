@@ -1,10 +1,45 @@
 .map-container {
     position: absolute;
-    top: 0;
+    top: 100px;
     bottom: 0;
-    left: 0;
+    left: 175px;
+    right: 0;
+    width: 1600px;
+    height: 800px;
+  }
+
+  .form {
+    position: absolute;
+    top: 50px;
+    bottom: 0;
+    left: 25px;
     right: 0;
   }
+
+  .background-image {
+    background-image: url(https://cdn.landesa.org/wp-content/uploads/Myanmar-landscape-webpage-header.jpg);
+    background-size: cover;
+    height: 100vh;
+    color: #f5f5f5;
+  }
+
+  .header {
+    font-family: "Arial Black", Gadget, sans-serif;
+    font-size: 22px;
+    letter-spacing: 0px;
+    word-spacing: 2px;
+    color: #000000;
+    font-weight: 700;
+    text-decoration: underline rgb(68, 68, 68);
+    font-style: normal;
+    font-variant: normal;
+    text-transform: uppercase;
+  }
+  
+  .headearbox{
+    height: 100%;
+  }
+
 
   .sidebar {
     background-color: rgba(4, 27, 49, 0.9);

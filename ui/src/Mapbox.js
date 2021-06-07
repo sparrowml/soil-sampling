@@ -69,11 +69,13 @@ const Mapbox = () => {
 
   return (
     <div>
-      <div ref={mapContainer} style={{ width: "100%", height: "100vh" }} />
+      <div ref={mapContainer} className="map-container">
+      <div ref={mapContainer} style={{ width: "100%", height: "100" }} />
        <div className="sidebar">
         Longitude: {lng} | Latitude: {lat} | Zoom: {zoom} | Pitch: {pitch} | Bearing: {bearing}
        </div>
-       <div ref={mapContainer} className="map-container" />
+       </div>
+      
      </div>
   );
 };

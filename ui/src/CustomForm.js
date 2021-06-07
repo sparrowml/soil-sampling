@@ -1,39 +1,39 @@
-import React from "react";
-import { useForm } from 'react-hook-form'
-import { FormInput } from "./Forminput";
+import React, { useState } from "react";
+import "./App.css";
 
-export const LoginForm = () => {
-  const {register, handleSubmit, errors} = useForm({
-    mode: 'onBlur',
-  })
+function Form() {
+  const [Name, setName] = useState("");
+  const [Latitude, setLatitude] = useState("");
+  const [Longitude, setLongitude] = useState("");
 
-  const onSubmit = ({Latitude, Longitude}) => {
-    alert(`Latitude: ${Latitude}, password: ${Longitude}`);
-  };
-
-  return (
-    <form onSubmit={handleSubmit(onSubmit)}>
-      <header>
-      </header>
-      <FormInput 
-        id="Latitude"
+return (
+    <form className="form">
+      <input
+        value={Name}
+        onChange={e => setName(e.target.value)}
+        placeholder="Name"
+        type="text"
+        name="Name"
+        required
+      />
+      <input
+        value={Latitude}
+        onChange={e => setLatitude(e.target.value)}
+        placeholder="Latitude"
+        type="text"
         name="Latitude"
-        type="text"
-        label="Latitude"
-        register={register}
-      //  error={errors.Latitude}
+        required
       />
-      <FormInput 
-        id="Longitude"
-        type="text"
+      <input
+        value={Longitude}
+        onChange={e => setLongitude(e.target.value)}
+        placeholder="Longitude"
+        type="Longitude"
         name="Longitude"
-        label="Longitude"
-        register={register}
-      //  error={errors.Longitude}
+        required
       />
-      <button type="submit">Submit Coordinates</button>
-    </form>
+    <button type="submit">Submit</button>
+  </form>
   );
-};
 
-export default LoginForm;
+}export default Form;
