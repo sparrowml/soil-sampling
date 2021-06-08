@@ -4,7 +4,6 @@ import React, { useState, useRef, useEffect, Component } from 'react';
 
 import CssBaseline from '@material-ui/core/CssBaseline';
 import Container from '@material-ui/core/Container';
-import Grid from '@material-ui/core/Grid';
 
 import "./App.css";
 
@@ -17,25 +16,23 @@ class App extends Component {
   render() {
     return (
       <main>
-        <CssBaseline />
-        <Container fixed>
-          <Grid container direction="column" justify="center" alignItems="flex-start" spacing={3}>
-            <div>
-            
-            <div className="Headerbox">
-                <Header/>
-            </div>
+      <CssBaseline />
+      <Container fixed>
+          <div>
+          
+          <div className="Headerbox">
+              <Header/>
+          </div>
 
-            <section>
-              <Form/>
-            </section>
+          <section>
+            <Form/>
+          </section>
 
-            {/* <div className="Mapbox">
-                <Mapbox/>
-            </div> */}
-            
-            </div>
-          </Grid>
+          {/* <div className="Mapbox">
+              <Mapbox/>
+          </div> */}
+          
+          </div>
         </Container>
       </main>
     );
