@@ -7,7 +7,6 @@ mapboxgl.accessToken = process.env.REACT_APP_MAPBOX_ACCESS_TOKEN_PK;
 
 const Mapbox = () => {
   const mapContainer = useRef(null);
-  const map = useRef(null);
   const [lng, setLng] = useState(-96.7);
   const [lat, setLat] = useState(40.8);
   const [zoom, setZoom] = useState(8);
@@ -28,6 +27,7 @@ const Mapbox = () => {
       zoom: zoom,
       pitch: pitch,
       bearing: bearing,
+      attributionControl: false,
     });
 
     //make sure the map is loaded into the DOM
@@ -69,14 +69,8 @@ const Mapbox = () => {
 
   return (
     <div>
-      <div ref={mapContainer} className="map-container">
-      <div ref={mapContainer} style={{ width: "100%", height: "100" }} />
-       <div className="sidebar">
-        Longitude: {lng} | Latitude: {lat} | Zoom: {zoom} | Pitch: {pitch} | Bearing: {bearing}
-       </div>
-       </div>
-      
-     </div>
+      <div ref={mapContainer} className="mapbox-container" />
+    </div>
   );
 };
 
