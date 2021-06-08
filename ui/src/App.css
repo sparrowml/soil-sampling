@@ -27,3 +27,16 @@
   .headearbox{
     height: 100%;
   }
+
+  .sidebar {
+    background-color: rgba(4, 27, 49, 0.9);
+    color: #ffffff;
+    padding: 6px 12px;
+    font-family: monospace;
+    z-index: 1;
+    position: relative;
+    top: 0;
+    left: 0;
+    margin: 12px;
+    border-radius: 4px;
+    } 
