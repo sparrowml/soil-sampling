@@ -10,6 +10,6 @@ test('basic api call', () => {
 
   // Basic Header Pattern.
   // Header for using a subscription key.
-  const headers = {'Ocp-Apim-Subscription-Key': process.env.SSURGO_API_KEY}
+  const headers = {'Content-Type': 'application/x-www-form-urlencoded', 'Ocp-Apim-Subscription-Key': process.env.SSURGO_API_KEY}
   return ssurgoService(values, headers).then(console.log);
 });

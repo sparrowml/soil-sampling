@@ -3,7 +3,7 @@ export async function ssurgoService(values, headers) {
   return window.fetch(url, {
     method: 'POST',
     headers: headers,
-    body: JSON.stringify(values),
+    body: new URLSearchParams(values),
   })
     .then(response => response.json())
     .catch(console.error);
