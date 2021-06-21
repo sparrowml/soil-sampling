@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 
-import { createMuiTheme } from '@material-ui/core/styles';
 import Grid from '@material-ui/core/Grid';
 import TextField from '@material-ui/core/TextField';
 import Checkbox from "@material-ui/core/Checkbox";
@@ -14,18 +13,15 @@ import FormHelperText from "@material-ui/core/FormHelperText";
 import Mapbox from "./Mapbox";
 
 
-const useStyles = createMuiTheme({
-  "palette":
-  {"common":
-      {"black":"#000","white":"#fff"},
-      "background":{"paper":"rgba(255, 255, 255, 1)","default":"rgba(201, 231, 240, 1)"},
-      "primary":{"light":"rgba(48, 161, 62, 0.49)","main":"rgba(48, 161, 62, 1)","dark":"rgba(7, 64, 14, 1)","contrastText":"#fff"},
-      "secondary":{"light":"rgba(50, 82, 185, 0.6)","main":"rgba(50, 82, 185, 1)","dark":"rgba(13, 5, 107, 1)","contrastText":"#fff"},
-      "error":{"light":"#e57373","main":"#f44336","dark":"#d32f2f","contrastText":"#fff"},
-      "text":{"primary":"rgba(0, 0, 0, 0.87)","secondary":"rgba(0, 0, 0, 0.54)","disabled":"rgba(0, 0, 0, 0.38)","hint":"rgba(0, 0, 0, 0.38)"}
-}
+const useStyles = makeStyles((theme) => ({
+  root: {
+    flexGrow: 1,
+  },
+  inlineField: {
+    marginRight: '20px',
+  }
+}));
 
-});
 
 function Form() {
   const [name, setName] = useState("");
