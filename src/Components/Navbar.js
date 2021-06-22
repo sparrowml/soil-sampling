@@ -50,17 +50,17 @@ export default function ButtonAppBar() {
               Menu
             </Button> 
             <Menu
-  id="fade-menu"
-  anchorEl={anchorEl}
-  keepMounted
-  open={open}
-  onClose={handleClose}
-  TransitionComponent={Fade}
->
-  <MenuItem onClick={handleClose}>Main App</MenuItem>
-  <MenuItem onClick={handleClose}>About Us</MenuItem>
-  <MenuItem onClick={handleClose}>References</MenuItem>
-</Menu>
+                id="fade-menu"
+                anchorEl={anchorEl}
+                keepMounted
+                open={open}
+                onClose={handleClose}
+                TransitionComponent={Fade}
+            >
+                <MenuItem onClick={handleClose}>Main App</MenuItem>
+                <MenuItem onClick={handleClose}>About Us</MenuItem>
+                <MenuItem onClick={handleClose}>References</MenuItem>
+            </Menu>
         </Toolbar>
       </AppBar>
     </div>
