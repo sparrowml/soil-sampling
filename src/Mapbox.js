@@ -1,9 +1,13 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useContext } from 'react';
 
 import './App.css';
 import mapboxgl from 'mapbox-gl';
 
+import { store } from './Store.js';
+
 mapboxgl.accessToken = 'pk.eyJ1IjoidGhlc3luZWF0ZXIiLCJhIjoiY2twMWJ3MGdjMG9hbzJvbzRkaGxxMG05dyJ9.FuJyojD0OlXLSJbpZlUM3A';
+
+ 
 
 const Mapbox = () => {
   const mapContainer = useRef(null);
@@ -12,6 +16,29 @@ const Mapbox = () => {
   const [zoom, setZoom] = useState(8);
   const [pitch, setPitch] = useState(0);
   const [bearing, setBearing] = useState(0);
+
+  const globalState = useContext(store);
+  const { state } = globalState;
+
+  var newlat = state.lng;
+  var newlng = state.lat;
+  var newname = state.name;
+  
+  //input validation for the forms - start by making sure they are all the right data type
+  if (typeof newlat == 'number' && typeof newlng =='number' && typeof newname == 'string'){
+    //next check if the numbers are in the accepted lat & lng range
+    if(newlat < 90 || newlat > -90 || newlng < 180 || newlng > -180){
+      //next check if the numbers are decimals or not
+      if(newlat % 1 == 0 && newlng % 1 == 0){
+        //if the numbers are decimals cut them down to 
+        newlng = newlng.toPrecision(6);
+        newlat = newlat.toPrecision(6);
+      };
+      //make the new point on the map - place it here because we will place the point with or without decimals
+    };
+  } else {
+    console.log("Error incorrect data type")
+  }; 
    
    // this is where all of our map logic is going to live
   // adding the empty dependency array ensures that the map
@@ -59,8 +86,6 @@ const Mapbox = () => {
       setLng(map.getCenter().lng.toFixed(4));
       setLat(map.getCenter().lat.toFixed(4));
       setZoom(map.getZoom().toFixed(2));
-      //setPitch(map.getPitch().toFixed(2));
-      //setBearing(map.getBearing().toFixed(2));
     });
 
     // cleanup function to remove map on unmount
@@ -72,8 +97,8 @@ const Mapbox = () => {
       <div ref={mapContainer} className="mapbox-container">
         <div ref={mapContainer} style={{ width: "100%", height: "100" }} />
           <div className="sidebar">
-          Longitude: {lng} | Latitude: {lat} | Zoom: {zoom} 
-       </div>
+            Longitude: {lng} | Latitude: {lat} | Zoom: {zoom} 
+          </div>
       </div>
      </div>
   );

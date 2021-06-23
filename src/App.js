@@ -6,7 +6,6 @@ import Container from '@material-ui/core/Container';
 
 import "./App.css";
 
-
 import Form from "./CustomForm";
 import Header from "./Components/Header";
 import Navbar from "./Components/Navbar";
@@ -17,13 +16,13 @@ class App extends Component {
   render() {
     return (
       <main>
-      <Navbar />
-      <CssBaseline />
-      <Container fixed>
-          <div>
-            <div className="Headerbox">
-              <Header/>
-            </div>
+        <Navbar />
+          <CssBaseline />
+            <Container fixed>
+              <div>
+                <div className="Headerbox">
+                  <Header/>
+              </div>
 
             <section>
               <Form/>
@@ -31,9 +30,10 @@ class App extends Component {
 
           </div>
         </Container>
-      </main>
+
+    </main>
     );
-  }
-}
+  };
+};
 
 export default App;
