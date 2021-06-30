@@ -26,29 +26,14 @@ const useStyles = makeStyles((theme) => ({
 
 
 function Form() {
-  const [name, setName] = useState("");
-  const [latitude, setLatitude] = useState("");
-  const [longitude, setLongitude] = useState("");
-
   const globalState = useContext(store);
   const { dispatch, state } = globalState;
 
- useEffect(() => {
-  console.log(state.name);
-  
-}, [state.name] );
-
-  // const [layer1, setLayer1] = useState("");
-  // const [layer2, setlayer2] = useState("");
-  // const [layer3, setLayer3] = useState("");
+  useEffect(() => {
+    console.log(state.name); 
+  }, [state.name] );
 
   const classes = useStyles();
-
-  const [checked, setChecked] = React.useState(true);
-
-  const handleCheckmarks = (event) => {
-    setChecked(event.target.checked);
-  };
 
   const [layers, setLayers] = React.useState({
     layer1: true,
@@ -103,7 +88,7 @@ function Form() {
                 control={
                   <Checkbox
                   checked={layer1}
-                  onChange={e=> dispatch({ type: 'set layer1', value:e.target.value })}
+                  onChange={e=> dispatch({ type: 'set layer1', value:e.target.value }), handleChanges}
                   name="layer1"
                   />
                 }
@@ -113,7 +98,7 @@ function Form() {
                 control={
                   <Checkbox
                   checked={layer2}
-                  onChange={e=> dispatch({ type: 'set layer2', value:e.target.value })}
+                  onChange={e=> dispatch({ type: 'set layer2', value:e.target.value }), handleChanges}
                   name="layer2"
                   />
                 }
@@ -123,7 +108,7 @@ function Form() {
                 control={
                   <Checkbox
                   checked={layer3}
-                  onChange={e=> dispatch({ type: 'set layer3', value:e.target.value })}
+                  onChange={e=> dispatch({ type: 'set layer3', value:e.target.value }), handleChanges}
                   name="layer3"
                   />
                 }
