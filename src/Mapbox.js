@@ -7,8 +7,6 @@ import { store } from './Store.js';
 
 mapboxgl.accessToken = 'pk.eyJ1IjoidGhlc3luZWF0ZXIiLCJhIjoiY2twMWJ3MGdjMG9hbzJvbzRkaGxxMG05dyJ9.FuJyojD0OlXLSJbpZlUM3A';
 
- 
-
 const Mapbox = () => {
   const mapContainer = useRef(null);
   const [lng, setLng] = useState(-96.7);
@@ -20,32 +18,47 @@ const Mapbox = () => {
   const globalState = useContext(store);
   const { state } = globalState;
 
-  var newlat = state.lng;
-  var newlng = state.lat;
+  var newlng = state.lng;
+  var newlat = state.lat;
   var newname = state.name;
+  var geocords = [];
+
+  geocords.push(coordinateFeature(newlng, newlat));
   
-  //input validation for the forms - start by making sure they are all the right data type
-  if (typeof newlat == 'number' && typeof newlng =='number' && typeof newname == 'string'){
-    //next check if the numbers are in the accepted lat & lng range
-    if(newlat < 90 || newlat > -90 || newlng < 180 || newlng > -180){
-      //next check if the numbers are decimals or not
-      if(newlat % 1 == 0 && newlng % 1 == 0){
-        //if the numbers are decimals cut them down to 
-        newlng = newlng.toPrecision(6);
-        newlat = newlat.toPrecision(6);
+  // //input validation for the forms - start by making sure they are all the right data type
+  // if (typeof newlat == 'number' && typeof newlng =='number' && typeof newname == 'string'){
+  //   //next check if the numbers are in the accepted lat & lng range
+  //   if(newlat < 90 || newlat > -90 || newlng < 180 || newlng > -180){
+  //     //next check if the numbers are decimals or not
+  //     if(newlat % 1 == 0 && newlng % 1 == 0){
+  //       //if the numbers are decimals cut them down to 
+  //       newlng = newlng.toPrecision(5);
+  //       newlat = newlat.toPrecision(5);
+  //     };
+  //     //make the new point on the map - place it here because we will place the point with or without decimals
+  //     geocords.push(coordinateFeature(newlng, newlat));
+  //   };
+  // } else {
+  //   console.log("Error incorrect data type")
+  // }; 
+
+  function coordinateFeature(lng, lat) {
+    return {
+      center: [lng, lat],
+      geometry: {
+        type: 'Point',
+        coordinates: [lng, lat]
+      },
+      place_name: 'Lat: ' + lat + ' Lng: ' + lng,
+      place_type: ['coordinate'],
+      properties: {},
+      type: 'Feature'
       };
-      //make the new point on the map - place it here because we will place the point with or without decimals
-    };
-  } else {
-    console.log("Error incorrect data type")
-  }; 
+    }
    
-   // this is where all of our map logic is going to live
-  // adding the empty dependency array ensures that the map
-  // is only rendered once
+  // this is where all of our map logic is going to live
+  // adding the empty dependency array ensures that the map is only rendered once
   useEffect(() => {
-    // create the map and configure it
-    // check out the API reference for more options
     // https://docs.mapbox.com/mapbox-gl-js/api/map/
     const map = new mapboxgl.Map({
       container: mapContainer.current,
