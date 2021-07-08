@@ -1,29 +1,27 @@
-import React, { useRef, useEffect } from "react"
-import mapboxgl from "mapbox-gl"
+import * as React from 'react';
+import {MapContext} from 'react-map-gl';
 
-const Marker = ({ map, place }) => {
-  const markerRef = useRef()
+import * as MapPin from './Components/MapMarker.png';
 
-  useEffect(() => {
-    const marker = new mapboxgl.Marker(markerRef)
-      .setLngLat([place.longitude, place.latitude])
-      .addTo(map)
+function CustomMarker(props) {
+  const context = React.useContext(MapContext);
+  
+  const {longitude, latitude} = props;
 
-    return () => marker.remove()
-  })
+  const [x, y] = context.viewport.project([longitude, latitude]);
 
-  return <div ref={markerRef} />
-}
+  const markerStyle = {
+    position: 'absolute',
+    background: '#fff',
+    left: x,
+    top: y
+  };
 
-const Markers = ({ map, places }) => {
   return (
-    <>
-      {places &&
-        places.map(place => (
-          <Marker key={place.name} map={map} place={place} />
-        ))}
-    </>
-  )
+    <div style={markerStyle} >
+      ({longitude}, {latitude})
+    </div>
+  );
 }
 
-export default Markers
+export default CustomMarker;
