@@ -29,9 +29,9 @@ function Form() {
   const globalState = useContext(store);
   const { dispatch, state } = globalState;
 
-  useEffect(() => {
-    console.log(state.name); 
-  }, [state.name] );
+  // useEffect(() => {
+  //   console.log(state.name); 
+  // }, [state.name] );
 
   const classes = useStyles();
 
@@ -71,12 +71,14 @@ function Form() {
                 label="Longitude"
                 onChange={e=> dispatch({ type: 'set latitude', value:e.target.value })}
                 className={classes.inlineField}
+                placeholder="-96.7"
               />
               <TextField
                 id="latitude"
                 label="Latitude"
                 onChange={e=> dispatch({ type: 'set longitude', value:e.target.value })}
                 className={classes.inlineField}
+                placeholder="40.8"
               />
             </Grid>
 
@@ -88,7 +90,7 @@ function Form() {
                 control={
                   <Checkbox
                   checked={layer1}
-                  onChange={e=> dispatch({ type: 'set layer1', value:e.target.value }), handleChanges}
+                  onChange={e=> dispatch({ type: 'set layer1', value:e.target.value}), handleChanges}
                   name="layer1"
                   />
                 }

@@ -35,9 +35,9 @@ const scaleControlStyle = {
 
 export default function Mapbox() {
   const [viewport, setViewport] = useState({
-    latitude: 40,
-    longitude: -100,
-    zoom: 3.5,
+    latitude: 40.8,
+    longitude: -96.7,
+    zoom: 7,
     bearing: 0,
     pitch: 0
     
@@ -48,9 +48,12 @@ const { state } = globalState;
 
 var newlat = state.lng;
 var newlng = state.lat;
-console.log(newlng, newlat)
+//console.log(newlng, newlat)
 //var newname = state.name;
 var geocords = [];
+
+// console.log('layer1')
+// console.log(state.layer1)
 
   //input validation for the forms - start by making sure they are all the right data type
   if (typeof parseFloat(newlat) === 'number' && typeof parseFloat(newlng) ==='number' && newlat != null && newlng != null){
@@ -68,8 +71,8 @@ var geocords = [];
     };
   } else {
     newlng = -96.7;
-    newlat = 48.5;
-    console.log("Error incorrect data type")
+    newlat = 40.8;
+    //console.log("Error incorrect data type")
   }; 
 
   function coordinateFeature(lng, lat, name) {
@@ -92,13 +95,12 @@ var geocords = [];
         {...viewport}
         width="600px"
         height="600px"
-        mapStyle="mapbox://styles/mapbox/dark-v9"
+        mapStyle='mapbox://styles/thesyneater/ckqwgecqe0eka17mri7ud5xt9'
         onViewportChange={setViewport}
         mapboxApiAccessToken={TOKEN}
       >
 
-        
-        <CustomMarker longitude={newlng ? parseFloat(newlng) : -96.7} latitude={newlat ? parseFloat(newlat) : 48} />
+        <CustomMarker longitude={newlng ? parseFloat(newlng) : -96.7} latitude={newlat ? parseFloat(newlat) : 40.8} />
 
         <GeolocateControl style={geolocateStyle} />
         <FullscreenControl style={fullscreenControlStyle} />
