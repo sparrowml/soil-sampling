@@ -8,7 +8,7 @@ import MapGL, {
 } from "react-map-gl";
 
 import CustomMarker from "./Markers";
-import { store } from "./Store.js";
+import { store } from "../Store.js";
 
 const TOKEN = process.env.REACT_APP_MAPBOX_ACCESS_TOKEN_PK;
 const MapH = "600px";

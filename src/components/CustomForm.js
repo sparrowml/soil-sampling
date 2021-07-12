@@ -10,7 +10,7 @@ import FormControl from "@material-ui/core/FormControl";
 import FormGroup from "@material-ui/core/FormGroup";
 import FormHelperText from "@material-ui/core/FormHelperText";
 
-import { store } from "./Store.js";
+import { store } from "../Store.js";
 import Mapbox from "./Mapbox";
 
 const useStyles = makeStyles((theme) => ({
