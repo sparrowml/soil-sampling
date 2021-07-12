@@ -1,6 +1,5 @@
-import * as React from "react";
-import { useState, useContext } from "react";
-import { render } from "react-dom";
+import React from "react";
+
 import MapGL, {
   NavigationControl,
   FullscreenControl,
@@ -40,7 +39,7 @@ const scaleControlStyle = {
 };
 
 export default function Mapbox() {
-  const [viewport, setViewport] = useState({
+  const [viewport, setViewport] = React.useState({
     latitude: 40.8,
     longitude: -96.7,
     zoom: 7,
@@ -48,8 +47,7 @@ export default function Mapbox() {
     pitch: 0,
   });
 
-  const globalState = useContext(store);
-  const { state } = globalState;
+  const { state } = React.useContext(store);
 
   var newlat = state.lng;
   var newlng = state.lat;
@@ -72,12 +70,10 @@ export default function Mapbox() {
       }
       //make the new point on the map - place it here because we will place the point with or without decimals
       geocords.push(coordinateFeature(newlng, newlat));
-      console.log("Geocords", geocords);
     }
   } else {
     newlng = -96.7;
     newlat = 40.8;
-    //console.log("Error incorrect data type")
   }
 
   function coordinateFeature(lng, lat, name) {
@@ -116,8 +112,4 @@ export default function Mapbox() {
       </MapGL>
     </>
   );
-}
-
-export function renderToDom(container) {
-  render(<Mapbox />, container);
 }
