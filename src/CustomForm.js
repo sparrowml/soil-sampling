@@ -1,4 +1,4 @@
-import React, { useState, useContext, useEffect } from "react";
+import React from "react";
 
 import Grid from "@material-ui/core/Grid";
 import TextField from "@material-ui/core/TextField";
@@ -23,18 +23,11 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 function Form() {
-  const globalState = useContext(store);
-  const { dispatch, state } = globalState;
-
-  // useEffect(() => {
-  //   console.log(state.name);
-  // }, [state.name] );
-
+  const { dispatch } = React.useContext(store);
   const classes = useStyles();
 
   const handleChanges = (type, event) => {
     dispatch({ type, value: event.target.checked });
-    console.log("e.value:", event.target.checked);
   };
 
   return (
