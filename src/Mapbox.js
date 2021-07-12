@@ -1,13 +1,16 @@
 import * as React from 'react';
-import { useState, useContext } from 'react';
+import { useState, useContext} from 'react';
 import {render} from 'react-dom';
 import MapGL, { NavigationControl, FullscreenControl, ScaleControl, GeolocateControl } from 'react-map-gl';
 
 import CustomMarker from "./Markers"
-
 import { store } from './Store.js';
 
-const TOKEN = 'pk.eyJ1IjoidGhlc3luZWF0ZXIiLCJhIjoiY2twMWJ3MGdjMG9hbzJvbzRkaGxxMG05dyJ9.FuJyojD0OlXLSJbpZlUM3A'; 
+
+const TOKEN = process.env.REACT_APP_MAPBOX_ACCESS_TOKEN_PK;
+const MapH = '600px';
+const MapW = '600px'; 
+
 
 const geolocateStyle = {
   top: 0,
@@ -48,12 +51,7 @@ const { state } = globalState;
 
 var newlat = state.lng;
 var newlng = state.lat;
-//console.log(newlng, newlat)
-//var newname = state.name;
 var geocords = [];
-
-// console.log('layer1')
-// console.log(state.layer1)
 
   //input validation for the forms - start by making sure they are all the right data type
   if (typeof parseFloat(newlat) === 'number' && typeof parseFloat(newlng) ==='number' && newlat != null && newlng != null){
@@ -62,8 +60,8 @@ var geocords = [];
       //next check if the numbers are decimals or not
       if(newlat % 1 === 0 && newlng % 1 === 0){
         //if the numbers are decimals cut them down to 
-        newlng = newlng.toPrecision(5);
-        newlat = newlat.toPrecision(5);
+        // newlng = newlng.toPrecision(5);
+        // newlat = newlat.toPrecision(5);
       };
       //make the new point on the map - place it here because we will place the point with or without decimals
       geocords.push(coordinateFeature(newlng, newlat));
@@ -89,12 +87,13 @@ var geocords = [];
       };
     }
 
+
   return (
     <>
       <MapGL
         {...viewport}
-        width="600px"
-        height="600px"
+        width={MapW}
+        height={MapH}
         mapStyle='mapbox://styles/thesyneater/ckqwgecqe0eka17mri7ud5xt9'
         onViewportChange={setViewport}
         mapboxApiAccessToken={TOKEN}
@@ -106,8 +105,8 @@ var geocords = [];
         <FullscreenControl style={fullscreenControlStyle} />
         <NavigationControl style={navStyle} />
         <ScaleControl style={scaleControlStyle} />
-      </MapGL>
 
+      </MapGL>
     </>
   );
   

@@ -35,16 +35,9 @@ function Form() {
 
   const classes = useStyles();
 
-  const [layers, setLayers] = React.useState({
-    layer1: true,
-    layer2: false,
-    layer3: false
-  });
-
-  const { layer1, layer2, layer3 } = layers;
-
-  const handleChanges = (event) => {
-    setLayers({ ...layers, [event.target.name]: event.target.checked });
+  const handleChanges = (type, event) => {
+    dispatch({ type, value:event.target.checked})
+    console.log("e.value:", event.target.checked);
   };
 
 
@@ -89,8 +82,7 @@ function Form() {
               <FormControlLabel
                 control={
                   <Checkbox
-                  checked={layer1}
-                  onChange={e=> dispatch({ type: 'set layer1', value:e.target.value}), handleChanges}
+                  onChange={e=> handleChanges("set layer1", e)}
                   name="layer1"
                   />
                 }
@@ -99,8 +91,7 @@ function Form() {
               <FormControlLabel
                 control={
                   <Checkbox
-                  checked={layer2}
-                  onChange={e=> dispatch({ type: 'set layer2', value:e.target.value }), handleChanges}
+                  onChange={e=> handleChanges("set layer2", e)}
                   name="layer2"
                   />
                 }
@@ -109,8 +100,7 @@ function Form() {
               <FormControlLabel
                 control={
                   <Checkbox
-                  checked={layer3}
-                  onChange={e=> dispatch({ type: 'set layer3', value:e.target.value }), handleChanges}
+                  onChange={e=> handleChanges("set layer3", e)}
                   name="layer3"
                   />
                 }
