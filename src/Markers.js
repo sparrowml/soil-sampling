@@ -1,7 +1,6 @@
-import * as React from "react";
-import { MapContext } from "react-map-gl";
+import React from "react";
 
-import * as MapPin from "./Components/MapMarker.png";
+import { MapContext } from "react-map-gl";
 
 function CustomMarker(props) {
   const context = React.useContext(MapContext);
