@@ -16,24 +16,22 @@ class App extends Component {
   render() {
     return (
       <main>
-        <Navbar />
-          <CssBaseline />
-            <Container fixed>
-              <div>
-                <div className="Headerbox">
-                  <Header/>
-              </div>
-
+      <Navbar />
+      <CssBaseline />
+      <Container fixed>
+          <div>
+            <div className="Headerbox">
+              <Header/>
+            </div>
             <section>
               <Form/>
             </section>
 
           </div>
         </Container>
-
-    </main>
+      </main>
     );
-  };
-};
+  }
+}
 
 export default App;
