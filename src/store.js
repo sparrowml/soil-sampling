@@ -9,6 +9,7 @@ const initialState = {
   layer1: false,
   layer2: false,
   layer3: false,
+  drawnPolygons: [],
 };
 const store = React.createContext(initialState);
 const { Provider } = store;
@@ -28,6 +29,8 @@ const StateProvider = ({ children }) => {
         return { ...state, layer2: action.value };
       case actions.SET_LAYER3:
         return { ...state, layer3: action.value };
+      case actions.SET_DRAWN_POLYGONS:
+        return { ...state, drawnPolygons: action.value };
       default:
         throw new Error();
     }
