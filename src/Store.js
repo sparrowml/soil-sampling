@@ -1,4 +1,4 @@
-import React, { createContext, useReducer } from "react";
+import React from "react";
 
 const initialState = {
   name: null,
@@ -8,11 +8,11 @@ const initialState = {
   layer2: false,
   layer3: false,
 };
-const store = createContext(initialState);
+const store = React.createContext(initialState);
 const { Provider } = store;
 
 const StateProvider = ({ children }) => {
-  const [state, dispatch] = useReducer((state, action) => {
+  const [state, dispatch] = React.useReducer((state, action) => {
     switch (action.type) {
       case "set name":
         return { ...state, name: action.value };
