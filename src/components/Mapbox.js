@@ -18,7 +18,7 @@ const TOKEN = process.env.REACT_APP_MAPBOX_ACCESS_TOKEN_PK;
 const MAP_HEIGHT = "600px";
 const MAP_WIDTH = "600px";
 
-function getEditHandleStyle({ feature, state }) {
+function getEditHandleStyle({ state }) {
   switch (state) {
     case RENDER_STATE.SELECTED:
     case RENDER_STATE.HOVERED:
@@ -42,7 +42,7 @@ function getEditHandleStyle({ feature, state }) {
   }
 }
 
-function getFeatureStyle({ feature, index, state }) {
+function getFeatureStyle({ state }) {
   switch (state) {
     case RENDER_STATE.SELECTED:
     case RENDER_STATE.HOVERED:
@@ -69,33 +69,45 @@ function getFeatureStyle({ feature, index, state }) {
 export default function Mapbox() {
   const { state, dispatch } = React.useContext(store);
 
-  const [viewport, setViewport] = React.useState({
-    latitude: 40.8,
-    longitude: -96.7,
-    zoom: 7,
-    bearing: 0,
-    pitch: 0,
-  });
-
   const [mode, setMode] = React.useState(null);
   const [selectedFeatureIndex, setSelectedFeatureIndex] = React.useState(null);
   const editorRef = React.useRef(null);
+
+  const onDrawMode = React.useCallback((event) => {
+    event.preventDefault();
+    setMode(new DrawPolygonMode());
+  }, []);
 
   const onSelect = React.useCallback((options) => {
     setSelectedFeatureIndex(options && options.selectedFeatureIndex);
   }, []);
 
-  const onDelete = React.useCallback(() => {
-    if (selectedFeatureIndex !== null && selectedFeatureIndex >= 0) {
-      editorRef.current.deleteFeatures(selectedFeatureIndex);
-    }
-  }, [selectedFeatureIndex]);
+  const onDelete = React.useCallback(
+    (event) => {
+      event.preventDefault();
+      if (selectedFeatureIndex !== null && selectedFeatureIndex >= 0) {
+        editorRef.current.deleteFeatures(selectedFeatureIndex);
+        dispatch({
+          type: actions.SET_DRAWN_POLYGONS,
+          value: editorRef.current.getFeatures(),
+        });
+      }
+    },
+    [selectedFeatureIndex, dispatch]
+  );
 
-  const onUpdate = React.useCallback(({ editType }) => {
-    if (editType === "addFeature") {
-      setMode(new EditingMode());
-    }
-  }, []);
+  const onUpdate = React.useCallback(
+    ({ editType }) => {
+      if (editType === "addFeature") {
+        dispatch({
+          type: actions.SET_DRAWN_POLYGONS,
+          value: editorRef.current.getFeatures(),
+        });
+        setMode(new EditingMode());
+      }
+    },
+    [dispatch]
+  );
 
   const drawTools = (
     <div className="mapboxgl-ctrl-top-left">
@@ -103,37 +115,27 @@ export default function Mapbox() {
         <button
           className="mapbox-gl-draw_ctrl-draw-btn mapbox-gl-draw_polygon"
           title="Polygon tool (p)"
-          onClick={(e) => {
-            e.preventDefault();
-            setMode(new DrawPolygonMode());
-          }}
+          onClick={onDrawMode}
         />
         <button
           className="mapbox-gl-draw_ctrl-draw-btn mapbox-gl-draw_trash"
           title="Delete"
-          onClick={(e) => {
-            e.preventDefault();
-            onDelete(e);
-          }}
+          onClick={onDelete}
         />
       </div>
     </div>
   );
 
-  // Polygon features
-  // const features = editorRef.current && editorRef.current.getFeatures();
-  // const selectedFeature =
-  //   features &&
-  //   (features[selectedFeatureIndex] || features[features.length - 1]);
-
   return (
     <>
       <MapGL
-        {...viewport}
+        {...state.viewport}
         width={MAP_WIDTH}
         height={MAP_HEIGHT}
-        mapStyle="mapbox://styles/thesyneater/ckqwgecqe0eka17mri7ud5xt9"
-        onViewportChange={setViewport}
+        mapStyle="mapbox://styles/mapbox/satellite-v9"
+        onViewportChange={(viewport) =>
+          dispatch({ type: actions.SET_VIEWPORT, value: viewport })
+        }
         mapboxApiAccessToken={TOKEN}
       >
         <Editor
