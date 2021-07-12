@@ -4,8 +4,8 @@ import CssBaseline from "@material-ui/core/CssBaseline";
 import Container from "@material-ui/core/Container";
 
 import Form from "./CustomForm";
-import Header from "./Components/Header";
-import Navbar from "./Components/Navbar";
+import Header from "./components/Header";
+import Navbar from "./components/Navbar";
 
 import "./App.css";
 
