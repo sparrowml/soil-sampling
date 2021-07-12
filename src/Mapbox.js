@@ -1,82 +1,117 @@
-import { useState, useRef, useEffect } from 'react';
+import * as React from 'react';
+import { useState, useContext} from 'react';
+import {render} from 'react-dom';
+import MapGL, { NavigationControl, FullscreenControl, ScaleControl, GeolocateControl } from 'react-map-gl';
 
-import './App.css';
-import mapboxgl from 'mapbox-gl';
+import CustomMarker from "./Markers"
+import { store } from './Store.js';
 
-mapboxgl.accessToken = 'pk.eyJ1IjoidGhlc3luZWF0ZXIiLCJhIjoiY2twMWJ3MGdjMG9hbzJvbzRkaGxxMG05dyJ9.FuJyojD0OlXLSJbpZlUM3A';
 
-const Mapbox = () => {
-  const mapContainer = useRef(null);
-  const [lng, setLng] = useState(-96.7);
-  const [lat, setLat] = useState(40.8);
-  const [zoom, setZoom] = useState(8);
-  const [pitch, setPitch] = useState(0);
-  const [bearing, setBearing] = useState(0);
-   
-   // this is where all of our map logic is going to live
-  // adding the empty dependency array ensures that the map
-  // is only rendered once
-  useEffect(() => {
-    // create the map and configure it
-    // check out the API reference for more options
-    // https://docs.mapbox.com/mapbox-gl-js/api/map/
-    const map = new mapboxgl.Map({
-      container: mapContainer.current,
-      style: "mapbox://styles/mapbox/satellite-streets-v11",
-      center: [lng, lat],
-      zoom: zoom,
-      pitch: pitch,
-      bearing: bearing,
-      attributionControl: false,
-    });
+const TOKEN = process.env.REACT_APP_MAPBOX_ACCESS_TOKEN_PK;
+const MapH = '600px';
+const MapW = '600px'; 
 
-    //make sure the map is loaded into the DOM
-    map.on("load", () => {
-      // add mapbox terrain dem source for 3d terrain rendering
-      map.addSource("mapbox-dem", {
-        type: "raster-dem",
-        url: "mapbox://mapbox.mapbox-terrain-dem-v1",
-        tileSize: 512,
-        maxZoom: 16,
-      });
-      map.setTerrain({ source: "mapbox-dem" });
 
-      // add the sky layer
-      map.addLayer({
-        id: "sky",
-        type: "sky",
-        paint: {
-          "sky-type": "atmosphere",
-          "sky-atmosphere-sun": [0.0, 90.0],
-          "sky-atmosphere-sun-intensity": 33,
-        },
-      });
-    });
-
-    //on the fly changing the "sidebar values" lat, lng, zoom, pitch, and bearing
-    if (!map) return; // wait for map to initialize
-      map.on('move', () => {
-      setLng(map.getCenter().lng.toFixed(4));
-      setLat(map.getCenter().lat.toFixed(4));
-      setZoom(map.getZoom().toFixed(2));
-      //setPitch(map.getPitch().toFixed(2));
-      //setBearing(map.getBearing().toFixed(2));
-    });
-
-    // cleanup function to remove map on unmount
-    return () => map.remove();
-  }, []);
-
-  return (
-    <div>
-      <div ref={mapContainer} className="mapbox-container">
-        <div ref={mapContainer} style={{ width: "100%", height: "100" }} />
-          <div className="sidebar">
-          Longitude: {lng} | Latitude: {lat} | Zoom: {zoom} 
-       </div>
-      </div>
-     </div>
-  );
+const geolocateStyle = {
+  top: 0,
+  left: 0,
+  padding: '10px'
 };
 
-export default Mapbox;
+const fullscreenControlStyle = {
+  top: 36,
+  left: 0,
+  padding: '10px'
+};
+
+const navStyle = {
+  top: 72,
+  left: 0,
+  padding: '10px'
+};
+
+const scaleControlStyle = {
+  bottom: 36,
+  left: 0,
+  padding: '10px'
+};
+
+export default function Mapbox() {
+  const [viewport, setViewport] = useState({
+    latitude: 40.8,
+    longitude: -96.7,
+    zoom: 7,
+    bearing: 0,
+    pitch: 0
+    
+  });
+
+const globalState = useContext(store);
+const { state } = globalState;
+
+var newlat = state.lng;
+var newlng = state.lat;
+var geocords = [];
+
+  //input validation for the forms - start by making sure they are all the right data type
+  if (typeof parseFloat(newlat) === 'number' && typeof parseFloat(newlng) ==='number' && newlat != null && newlng != null){
+    //next check if the numbers are in the accepted lat & lng range
+    if(newlat < 90 || newlat > -90 || newlng < 180 || newlng > -180){
+      //next check if the numbers are decimals or not
+      if(newlat % 1 === 0 && newlng % 1 === 0){
+        //if the numbers are decimals cut them down to 
+        // newlng = newlng.toPrecision(5);
+        // newlat = newlat.toPrecision(5);
+      };
+      //make the new point on the map - place it here because we will place the point with or without decimals
+      geocords.push(coordinateFeature(newlng, newlat));
+      console.log("Geocords", geocords)
+    };
+  } else {
+    newlng = -96.7;
+    newlat = 40.8;
+    //console.log("Error incorrect data type")
+  }; 
+
+  function coordinateFeature(lng, lat, name) {
+    return {
+      center: [lng, lat],
+      geometry: {
+        type: 'Point',
+        coordinates: [lng, lat]
+      },
+      place_name: name,
+      place_type: ['coordinate'],
+      properties: {},
+      type: 'Feature'
+      };
+    }
+
+
+  return (
+    <>
+      <MapGL
+        {...viewport}
+        width={MapW}
+        height={MapH}
+        mapStyle='mapbox://styles/thesyneater/ckqwgecqe0eka17mri7ud5xt9'
+        onViewportChange={setViewport}
+        mapboxApiAccessToken={TOKEN}
+      >
+
+        <CustomMarker longitude={newlng ? parseFloat(newlng) : -96.7} latitude={newlat ? parseFloat(newlat) : 40.8} />
+
+        <GeolocateControl style={geolocateStyle} />
+        <FullscreenControl style={fullscreenControlStyle} />
+        <NavigationControl style={navStyle} />
+        <ScaleControl style={scaleControlStyle} />
+
+      </MapGL>
+    </>
+  );
+  
+}
+
+export function renderToDom(container) {
+  render(<Mapbox />, container);
+}

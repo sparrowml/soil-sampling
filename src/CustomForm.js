@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useContext, useEffect } from "react";
 
 import Grid from '@material-ui/core/Grid';
 import TextField from '@material-ui/core/TextField';
@@ -10,6 +10,8 @@ import FormControl from "@material-ui/core/FormControl";
 import FormGroup from "@material-ui/core/FormGroup";
 import FormHelperText from "@material-ui/core/FormHelperText";
 
+
+import { store } from './Store.js';
 import Mapbox from "./Mapbox";
 
 
@@ -24,34 +26,18 @@ const useStyles = makeStyles((theme) => ({
 
 
 function Form() {
-  const [name, setName] = useState("");
-  const [latitude, setLatitude] = useState("");
-  const [longitude, setLongitude] = useState("");
+  const globalState = useContext(store);
+  const { dispatch, state } = globalState;
 
-  const nameSetter = event => {
-    const value = event.target.value;
-    setName(value);
-    console.log(name);
-  }
+  // useEffect(() => {
+  //   console.log(state.name); 
+  // }, [state.name] );
 
   const classes = useStyles();
 
-  const [checked, setChecked] = React.useState(true);
-
-  const handleCheckmarks = (event) => {
-    setChecked(event.target.checked);
-  };
-
-  const [layers, setLayers] = React.useState({
-    layer1: true,
-    layer2: false,
-    layer3: false
-  });
-
-  const { layer1, layer2, layer3 } = layers;
-
-  const handleChanges = (event) => {
-    setLayers({ ...layers, [event.target.name]: event.target.checked });
+  const handleChanges = (type, event) => {
+    dispatch({ type, value:event.target.checked})
+    console.log("e.value:", event.target.checked);
   };
 
 
@@ -63,7 +49,7 @@ function Form() {
               <TextField
                 id="name"
                 label="Name"
-                onChange={nameSetter}
+                onChange={e=> dispatch({ type: 'set name', value:e.target.value })}
               />
               </Grid>
 
@@ -72,17 +58,20 @@ function Form() {
             </Grid>
 
             <Grid item xs={12}>
+            <FormLabel component="legend">Define Field Center</FormLabel>
               <TextField
                 id="longitude"
                 label="Longitude"
-                onChange={e => setLongitude(e.target.value)}
+                onChange={e=> dispatch({ type: 'set latitude', value:e.target.value })}
                 className={classes.inlineField}
+                placeholder="-96.7"
               />
               <TextField
                 id="latitude"
                 label="Latitude"
-                onChange={e => setLatitude(e.target.value)}
+                onChange={e=> dispatch({ type: 'set longitude', value:e.target.value })}
                 className={classes.inlineField}
+                placeholder="40.8"
               />
             </Grid>
 
@@ -93,8 +82,7 @@ function Form() {
               <FormControlLabel
                 control={
                   <Checkbox
-                  checked={layer1}
-                  onChange={handleChanges}
+                  onChange={e=> handleChanges("set layer1", e)}
                   name="layer1"
                   />
                 }
@@ -103,8 +91,7 @@ function Form() {
               <FormControlLabel
                 control={
                   <Checkbox
-                  checked={layer2}
-                  onChange={handleChanges}
+                  onChange={e=> handleChanges("set layer2", e)}
                   name="layer2"
                   />
                 }
@@ -113,8 +100,7 @@ function Form() {
               <FormControlLabel
                 control={
                   <Checkbox
-                  checked={layer3}
-                  onChange={handleChanges}
+                  onChange={e=> handleChanges("set layer3", e)}
                   name="layer3"
                   />
                 }

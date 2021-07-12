@@ -45,5 +45,3 @@ export async function cluBoundary() {
     .then(response => response.json())
     .catch(console.error);
 }
-
-
