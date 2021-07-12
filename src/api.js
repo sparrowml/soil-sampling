@@ -1,14 +1,4 @@
-// export async function ssurgoService(values, headers) {
-//   const url = 'https://ag-analytics.azure-api.net/ssurgo-v2';
-//   return window.fetch(url, {
-//     method: 'POST',
-//     headers: headers,
-//     body: new URLSearchParams(values),
-//   })
-//     .then(response => response.json())
-//     .catch(console.error);
-// }
-
+//Polaris soil data
 export async function polarisService(minlat, maxlat, minlon, maxlon, vari, layer) {
   const url = `http://152.3.67.2:8000/polaris/${minlon}$${minlat}$${maxlon}$${maxlat}$${layer}$${vari}`;
   console.log(url)
@@ -20,16 +10,40 @@ export async function polarisService(minlat, maxlat, minlon, maxlon, vari, layer
     .catch(console.error);
 }
 
-// import urllib3
-// import numpy as np
-// import json
-// http = urllib3.PoolManager()
+//Elevation
+export async function DEMService(values, headers) {
+  const url = 'https://ag-analytics.azure-api.net/dem-service';
+  return window.fetch(url, {
+    method: 'POST',
+    headers: headers,
+    body: new URLSearchParams(values),
+  })
+    .then(response => response.json())
+    .catch(console.error);
+}
 
-// def get_data(minlat,maxlat,minlon,maxlon,var,layer):
-//  #Extract box
-//  string = '%.6f$%.6f$%.6f$%6f$%s$%s' % (minlon, minlat, maxlon, maxlat, layer, var)
-//  r = http.request('GET', 'http://152.3.67.2:8000/polaris/%s' % string)
-//  data = json.loads(r.data)
-//  for var in data:
-//   data[var] = np.array(data[var])
-//  return data
+
+//May not use below
+
+//SSurgo
+export async function ssurgoService(values, headers) {
+  const url = 'https://ag-analytics.azure-api.net/ssurgo-v2';
+  return window.fetch(url, {
+    method: 'POST',
+    headers: headers,
+    body: new URLSearchParams(values),
+  })
+    .then(response => response.json())
+    .catch(console.error);
+}
+
+//CLU 2008 Boundary 
+export async function cluBoundary() {
+  const url = 'https://ag-analytics.azure-api.net/CommonLandUnitBoundary-v2';
+  return window.fetch(url, {
+  })
+    .then(response => response.json())
+    .catch(console.error);
+}
+
+
