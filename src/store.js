@@ -1,9 +1,11 @@
 import React from "react";
 
+import * as actions from "./actions";
+
 const initialState = {
   name: null,
-  lat: null,
-  lng: null,
+  latitude: 40.8,
+  longitude: -96.7,
   layer1: false,
   layer2: false,
   layer3: false,
@@ -14,17 +16,17 @@ const { Provider } = store;
 const StateProvider = ({ children }) => {
   const [state, dispatch] = React.useReducer((state, action) => {
     switch (action.type) {
-      case "set name":
+      case actions.SET_NAME:
         return { ...state, name: action.value };
-      case "set latitude":
-        return { ...state, lat: action.value };
-      case "set longitude":
-        return { ...state, lng: action.value };
-      case "set layer1":
+      case actions.SET_LATITUDE:
+        return { ...state, latitude: action.value };
+      case actions.SET_LONGITUDE:
+        return { ...state, longitude: action.value };
+      case actions.SET_LAYER1:
         return { ...state, layer1: action.value };
-      case "set layer2":
+      case actions.SET_LAYER2:
         return { ...state, layer2: action.value };
-      case "set layer3":
+      case actions.SET_LAYER3:
         return { ...state, layer3: action.value };
       default:
         throw new Error();

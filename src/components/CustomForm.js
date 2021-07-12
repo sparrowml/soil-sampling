@@ -10,8 +10,10 @@ import FormControl from "@material-ui/core/FormControl";
 import FormGroup from "@material-ui/core/FormGroup";
 import FormHelperText from "@material-ui/core/FormHelperText";
 
-import { store } from "../Store.js";
 import Mapbox from "./Mapbox";
+
+import { store } from "../store";
+import * as actions from "../actions";
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -30,6 +32,27 @@ function Form() {
     dispatch({ type, value: event.target.checked });
   };
 
+  const setFloat = (type, value) => {
+    // Validate that value before dispatching it
+    const floatValue = parseFloat(value);
+    if (!isNaN(floatValue)) {
+      if (
+        type === actions.SET_LONGITUDE &&
+        floatValue >= -180 &&
+        floatValue <= 180
+      ) {
+        // Set Longitude
+        dispatch({ type, value: floatValue });
+      } else if (
+        type === actions.SET_LATITUDE &&
+        floatValue >= -90 &&
+        floatValue <= 90
+      ) {
+        dispatch({ type, value: floatValue });
+      }
+    }
+  };
+
   return (
     <div className={classes.root}>
       <form>
@@ -45,7 +68,7 @@ function Form() {
               id="name"
               label="Name"
               onChange={(e) =>
-                dispatch({ type: "set name", value: e.target.value })
+                dispatch({ type: actions.SET_NAME, value: e.target.value })
               }
             />
           </Grid>
@@ -59,20 +82,16 @@ function Form() {
             <TextField
               id="longitude"
               label="Longitude"
-              onChange={(e) =>
-                dispatch({ type: "set latitude", value: e.target.value })
-              }
+              onChange={(e) => setFloat(actions.SET_LONGITUDE, e.target.value)}
               className={classes.inlineField}
-              placeholder="-96.7"
+              placeholder="Longitude"
             />
             <TextField
               id="latitude"
               label="Latitude"
-              onChange={(e) =>
-                dispatch({ type: "set longitude", value: e.target.value })
-              }
+              onChange={(e) => setFloat(actions.SET_LATITUDE, e.target.value)}
               className={classes.inlineField}
-              placeholder="40.8"
+              placeholder="Latitude"
             />
           </Grid>
 
@@ -83,7 +102,7 @@ function Form() {
                 <FormControlLabel
                   control={
                     <Checkbox
-                      onChange={(e) => handleChanges("set layer1", e)}
+                      onChange={(e) => handleChanges(actions.SET_LAYER1, e)}
                       name="layer1"
                     />
                   }
@@ -92,7 +111,7 @@ function Form() {
                 <FormControlLabel
                   control={
                     <Checkbox
-                      onChange={(e) => handleChanges("set layer2", e)}
+                      onChange={(e) => handleChanges(actions.SET_LAYER2, e)}
                       name="layer2"
                     />
                   }
@@ -101,7 +120,7 @@ function Form() {
                 <FormControlLabel
                   control={
                     <Checkbox
-                      onChange={(e) => handleChanges("set layer3", e)}
+                      onChange={(e) => handleChanges(actions.SET_LAYER3, e)}
                       name="layer3"
                     />
                   }
