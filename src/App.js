@@ -1,32 +1,28 @@
-import ReactDOM from 'react-dom';
-import React, { useState, useRef, useEffect, Component } from 'react';
+import React from "react";
 
-import CssBaseline from '@material-ui/core/CssBaseline';
-import Container from '@material-ui/core/Container';
+import CssBaseline from "@material-ui/core/CssBaseline";
+import Container from "@material-ui/core/Container";
+
+import Form from "./components/CustomForm";
+import Header from "./components/Header";
+import Navbar from "./components/Navbar";
 
 import "./App.css";
 
-import Form from "./CustomForm";
-import Header from "./Components/Header";
-import Navbar from "./Components/Navbar";
-import Footer from "./Components/Footer";
-
-
-class App extends Component {
+class App extends React.Component {
   render() {
     return (
       <main>
-      <Navbar />
-      <CssBaseline />
-      <Container fixed>
+        <Navbar />
+        <CssBaseline />
+        <Container fixed>
           <div>
             <div className="Headerbox">
-              <Header/>
+              <Header />
             </div>
             <section>
-              <Form/>
+              <Form />
             </section>
-
           </div>
         </Container>
       </main>

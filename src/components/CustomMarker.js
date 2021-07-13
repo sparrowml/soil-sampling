@@ -1,12 +1,11 @@
-import * as React from 'react';
-import {MapContext} from 'react-map-gl';
+import React from "react";
 
-import * as MapPin from './Components/MapMarker.png';
+import { MapContext } from "react-map-gl";
 
 function CustomMarker(props) {
   const context = React.useContext(MapContext);
-  
-  const {longitude, latitude} = props;
+
+  const { longitude, latitude } = props;
 
   const [x, y] = context.viewport.project([longitude, latitude]);
 
@@ -17,21 +16,21 @@ function CustomMarker(props) {
   const SIZE = 20;
 
   const markerStyle = {
-    position: 'absolute',
+    position: "absolute",
     left: x,
-    top: y
+    top: y,
   };
 
   return (
-    <div style={markerStyle} >
+    <div style={markerStyle}>
       <svg
         height={SIZE}
         viewBox="0 0 24 24"
         style={{
-          cursor: 'pointer',
-          fill: '#d00',
-          stroke: 'none',
-          transform: `translate(${-SIZE / 2}px,${-SIZE}px)`
+          cursor: "pointer",
+          fill: "#d00",
+          stroke: "none",
+          transform: `translate(${-SIZE / 2}px,${-SIZE}px)`,
         }}
       >
         <path d={ICON} />
