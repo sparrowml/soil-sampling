@@ -119,12 +119,12 @@ export default function Mapbox() {
   const onDrawMode = React.useCallback((event) => {
     event.preventDefault();
     setMode(new DrawPolygonMode());
-    console.log("Drawn Polygons", state.Drawn_Polygons);
   }, []);
 
   const onSelect = React.useCallback((options) => {
     setSelectedFeatureIndex(options && options.selectedFeatureIndex);
     console.log(state.Drawn_Polygons);
+    console.log("Drawn Polygons", state.Drawn_Polygons);
   }, []);
 
   const onDelete = React.useCallback(
