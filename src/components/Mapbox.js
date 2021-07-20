@@ -71,45 +71,73 @@ function getFeatureStyle({ state }) {
 export default function Mapbox() {
   const { state, dispatch } = React.useContext(store);
 
+  const Polarisdata = [];
+  const SSURGOdata = [];
+  const DEMdata = [];
+
+//-------------------------GeoJSON Testing-----------------------------//
+// var pt1 = state.viewport.latitude;
+// var pt2 = state.viewport.longitude;
+// var pt3 = state.viewport.longitude + 0.02;
+// var pt4 = state.viewport.latitude + 0.02;
+
+const geojson = {
+  type: 'FeatureCollection',
+  features: [
+    {type: 'Feature', geometry: {type: 'Point', coordinates: [-96.8, 40.9]}}
+  ]
+};
+
+const layerStyle = {
+  id: 'point',
+  type: 'circle',
+  paint: {
+    'circle-radius': 10,
+    'circle-color': '#007cbf'
+  }
+};
+
+//-------------------------GeoJSON Testing-----------------------------//
+
+
 //------------------------POLARIS API---------------------------------//
-//if(state.Polaris === true){
-  // const minlon = state.viewport.longitude;
-  // const minlat = state.viewport.latitude;
-  // const maxlon = state.viewport.longitude + 0.02;
-  // const maxlat = state.viewport.latitude + 0.02;
-  // const vari = 'silt'
-  // const layer = '5_15'
-  // const Polarisdata = polarisService(minlat,maxlat,minlon,maxlon,vari,layer);
-//};
+if(state.Polaris === true){
+  const minlon = state.viewport.longitude;
+  const minlat = state.viewport.latitude;
+  const maxlon = state.viewport.longitude + 0.02;
+  const maxlat = state.viewport.latitude + 0.02;
+  const vari = 'silt'
+  const layer = '5_15'
+  Polarisdata = polarisService(minlat,maxlat,minlon,maxlon,vari,layer);
+};
 //------------------------POLARIS API---------------------------------//
 
 
 //------------------------DEM API------------------------------------//
-// if(state.DEMS === true){
-//   const DEMvalues = {
-//     aoi: '{"type":"Feature","geometry":{"type":"Polygon","coordinates":[[[-76.5907145, 42.443918], [-76.5898132, 42.4224745], [-76.5699863, 42.4230447], [-76.5710592, 42.4443296], [-76.5907145, 42.443918]]]},"properties":{"OBJECTID":4944402,"CALCACRES":46.15999985,"CALCACRES2":null},"id":4944402}',
-//     Elevation_Index: "False",
-//     Legend_Ranges: "20",
-//   };
+if(state.DEMS === true){
+  const DEMvalues = {
+    aoi: '{"type":"Feature","geometry":{"type":"Polygon","coordinates":[[[-76.5907145, 42.443918], [-76.5898132, 42.4224745], [-76.5699863, 42.4230447], [-76.5710592, 42.4443296], [-76.5907145, 42.443918]]]},"properties":{"OBJECTID":4944402,"CALCACRES":46.15999985,"CALCACRES2":null},"id":4944402}',
+    Elevation_Index: "False",
+    Legend_Ranges: "20",
+  };
 
-//   const DEMheaders = { "Content-Type": "application/x-www-form-urlencoded" };
-
-//   const DEMdata = DEMService(DEMvalues, DEMheaders);
-// };
+  const DEMheaders = { "Content-Type": "application/x-www-form-urlencoded" };
+  const DEMdata = DEMService(DEMvalues, DEMheaders);
+};
 //------------------------DEM API------------------------------------//
 
 
 //------------------------SSURGO API---------------------------------//
-// if(state.SSURGO === true) {
-// const SSURGOvalues = {'AOI': '{"geometryType": "esriGeometryPolygon", "features": [{"geometry": {"rings": [[[-85.179, 42.74], [-85.17858886748223, 42.74188232450973], [-85.17858886748223, 42.742675781062474], [-85.1782836915391, 42.742675781062474], [-85.1782226563505, 42.74230956993074], [-85.17529296909521, 42.74230956993074], [-85.17529296909521, 42.74353027370324], [-85.17529296909521, 42.74371337926908], [-85.17492675796348, 42.74389648393566], [-85.17437744126585, 42.744079589501496], [-85.17340087914721, 42.744079589501496], [-85.17327880876996, 42.74749755826576], [-85.17401123013411, 42.74749755826576], [-85.17401123013411, 42.74847412128372], [-85.17529296909521, 42.74847412128372], [-85.17590332008211, 42.74829101571788], [-85.17749023408697, 42.74792480458609], [-85.17761230446422, 42.7470703128447], [-85.1782836915391, 42.746704101712965], [-85.18072509728535, 42.746704101712965], [-85.179, 42.74]]], "spatialReference": {"wkid": 4326}}}]}',
-//   'Soil_Parameter': 'nccpi2all',
-//   'Projection': 'EPSG:4326',
-//   'Resolution': 0.00001,
-//   'Product':'GeoJSON'};
+if(state.SSURGO === true) {
+const SSURGOvalues = {'AOI': '{"geometryType": "esriGeometryPolygon", "features": [{"geometry": {"rings": [[[-85.179, 42.74], [-85.17858886748223, 42.74188232450973], [-85.17858886748223, 42.742675781062474], [-85.1782836915391, 42.742675781062474], [-85.1782226563505, 42.74230956993074], [-85.17529296909521, 42.74230956993074], [-85.17529296909521, 42.74353027370324], [-85.17529296909521, 42.74371337926908], [-85.17492675796348, 42.74389648393566], [-85.17437744126585, 42.744079589501496], [-85.17340087914721, 42.744079589501496], [-85.17327880876996, 42.74749755826576], [-85.17401123013411, 42.74749755826576], [-85.17401123013411, 42.74847412128372], [-85.17529296909521, 42.74847412128372], [-85.17590332008211, 42.74829101571788], [-85.17749023408697, 42.74792480458609], [-85.17761230446422, 42.7470703128447], [-85.1782836915391, 42.746704101712965], [-85.18072509728535, 42.746704101712965], [-85.179, 42.74]]], "spatialReference": {"wkid": 4326}}}]}',
+  'Soil_Parameter': 'nccpi2all',
+  'Projection': 'EPSG:4326',
+  'Resolution': 0.00001,
+  'Product':'GeoJSON'};
 
-//   const SSURGOheaders = {'Content-Type': 'application/x-www-form-urlencoded', 'Ocp-Apim-Subscription-Key': process.env.SSURGO_API_KEY};
-//   const SSURGOdata = ssurgoService(SSURGOvalues, SSURGOheaders);
-// }
+  const SSURGOheaders = {'Content-Type': 'application/x-www-form-urlencoded', 'Ocp-Apim-Subscription-Key': process.env.SSURGO_API_KEY};
+  SSURGOdata = ssurgoService(SSURGOvalues, SSURGOheaders);
+}
   //------------------------SSURGO API---------------------------------//
 
   const [mode, setMode] = React.useState(null);
@@ -183,17 +211,17 @@ export default function Mapbox() {
         }
         mapboxApiAccessToken={TOKEN}
       >
-        {/* <Source type="geojson" data={Polarisdata}>
-          <Layer {...MapStyle} />
-        </Source> */}
+       <Source type="geojson" data={geojson}>
+       <Layer {...layerStyle} />
+        </Source>
 
-        {/* <Source type="geojson" data={DEMdata}>
+       {/* <Source type="geojson" data={DEMdata}>
           <Layer {...MapStyle} />
-        </Source> */}
+        </Source>
 
-        {/* <Source type="geojson" data={Surrgodata}>
+        <Source type="geojson" data={SSURGOdata}>
           <Layer {...MapStyle} />
-        </Source> */}
+        </Source>  */}
 
         <Editor
           ref={editorRef}
