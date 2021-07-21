@@ -71,45 +71,124 @@ function getFeatureStyle({ state }) {
 export default function Mapbox() {
   const { state, dispatch } = React.useContext(store);
 
-  const Polarisdata = [];
+  const Polarisdata = [];    
   const SSURGOdata = [];
   const DEMdata = [];
+  
+  var polarisvis = "none";
+  var demsvis = "none";
+  var ssurgovis = "none";
+  
+  //console.log("polaris:", state.polaris, "DEM:", state.dems)
+
+  if(state.polaris === true){
+    polarisvis = "visible";
+  };
+  if(state.dems === true){
+    demsvis = "visible";
+  };
+  if(state.ssurgo === true){
+    ssurgovis = "visible"
+  };
+
+  //https://docs.mapbox.com/mapbox-gl-js/style-spec/layers/
+  const polarisStyle = {
+    id: 'polarisLayer',
+    type: 'fill',
+    layout: {
+      visibility: polarisvis,
+    },
+    paint: {
+      "fill-color": "#00ffff",
+      "fill-opacity": 0.3
+    }
+  };
+  const demsStyle = {
+    id: 'DEMSLayer',
+    type: 'fill',
+    layout: {
+      visibility: demsvis,
+    },
+    paint: {
+      "fill-color": "#00ffff",
+      "fill-opacity": 0.3
+    }
+  };
+  const ssurgoStyle = {
+    id: 'ssurgoLayer',
+    type: 'fill',
+    layout: {
+      visibility: ssurgovis,
+    },
+    paint: {
+      "fill-color": "#00ffff",
+      "fill-opacity": 0.3
+    }
+  };
+
 
 //-------------------------GeoJSON Testing-----------------------------//
-// var pt1 = state.viewport.latitude;
-// var pt2 = state.viewport.longitude;
-// var pt3 = state.viewport.longitude + 0.02;
-// var pt4 = state.viewport.latitude + 0.02;
 
-const geojson = {
-  type: 'FeatureCollection',
-  features: [
-    {type: 'Feature', geometry: {type: 'Point', coordinates: [-96.8, 40.9]}}
+
+const testgeojson = {
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {},
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -96.74011230468749,
+              40.73633186448861
+            ],
+            [
+              -96.6851806640625,
+              40.70094304347228
+            ],
+            [
+              -96.56158447265624,
+              40.697299008636755
+            ],
+            [
+              -96.55746459960938,
+              40.897424801491276
+            ],
+            [
+              -96.81564331054688,
+              40.89950086329283
+            ],
+            [
+              -96.81907653808592,
+              40.81328954943147
+            ],
+            [
+              -96.74011230468749,
+              40.73633186448861
+            ]
+          ]
+        ]
+      }
+    }
   ]
-};
+}
 
-const layerStyle = {
-  id: 'point',
-  type: 'circle',
-  paint: {
-    'circle-radius': 10,
-    'circle-color': '#007cbf'
-  }
-};
 
 //-------------------------GeoJSON Testing-----------------------------//
 
 
 //------------------------POLARIS API---------------------------------//
-if(state.Polaris === true){
-  const minlon = state.viewport.longitude;
-  const minlat = state.viewport.latitude;
-  const maxlon = state.viewport.longitude + 0.02;
-  const maxlat = state.viewport.latitude + 0.02;
-  const vari = 'silt'
-  const layer = '5_15'
-  Polarisdata = polarisService(minlat,maxlat,minlon,maxlon,vari,layer);
-};
+// if(state.Polaris === true){
+//   const minlon = state.viewport.longitude;
+//   const minlat = state.viewport.latitude;
+//   const maxlon = state.viewport.longitude + 0.02;
+//   const maxlat = state.viewport.latitude + 0.02;
+//   const vari = 'silt'
+//   const layer = '5_15'
+//   Polarisdata = polarisService(minlat,maxlat,minlon,maxlon,vari,layer);
+// };
 //------------------------POLARIS API---------------------------------//
 
 
@@ -211,16 +290,17 @@ const SSURGOvalues = {'AOI': '{"geometryType": "esriGeometryPolygon", "features"
         }
         mapboxApiAccessToken={TOKEN}
       >
-       <Source type="geojson" data={geojson}>
-       <Layer {...layerStyle} />
+
+       <Source type="geojson" data={testgeojson}>
+          <Layer {...polarisStyle} />
         </Source>
 
        {/* <Source type="geojson" data={DEMdata}>
-          <Layer {...MapStyle} />
+          <Layer {...demsStyle} />
         </Source>
 
         <Source type="geojson" data={SSURGOdata}>
-          <Layer {...MapStyle} />
+          <Layer {...ssurgoStyle} />
         </Source>  */}
 
         <Editor
