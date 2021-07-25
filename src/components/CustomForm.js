@@ -106,7 +106,7 @@ function Form() {
                       name="PolarisService"
                     />
                   }
-                  label="PolarisService (currently the test layer - click me!!!)"
+                  label="PolarisService"
                 />
                 <FormControlLabel
                   control={

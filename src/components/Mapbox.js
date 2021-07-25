@@ -74,6 +74,8 @@ export default function Mapbox() {
   const Polarisdata = [];    
   const SSURGOdata = [];
   const DEMdata = [];
+
+  const currentPolygon = JSON.stringify(state.drawnPolygons[0]);
   
   var polarisvis = "none";
   var demsvis = "none";
@@ -83,6 +85,7 @@ export default function Mapbox() {
 
   if(state.polaris === true){
     polarisvis = "visible";
+    console.log("Current Polygon", currentPolygon);
   };
   if(state.dems === true){
     demsvis = "visible";
@@ -99,7 +102,7 @@ export default function Mapbox() {
       visibility: polarisvis,
     },
     paint: {
-      "fill-color": "#00ffff",
+      "fill-color": "#0000ff",
       "fill-opacity": 0.3
     }
   };
@@ -110,7 +113,7 @@ export default function Mapbox() {
       visibility: demsvis,
     },
     paint: {
-      "fill-color": "#00ffff",
+      "fill-color": "#8c2222",
       "fill-opacity": 0.3
     }
   };
@@ -121,15 +124,13 @@ export default function Mapbox() {
       visibility: ssurgovis,
     },
     paint: {
-      "fill-color": "#00ffff",
+      "fill-color": "#228c26",
       "fill-opacity": 0.3
     }
   };
 
 
 //-------------------------GeoJSON Testing-----------------------------//
-
-
 const testgeojson = {
   "type": "FeatureCollection",
   "features": [
@@ -174,8 +175,6 @@ const testgeojson = {
     }
   ]
 }
-
-
 //-------------------------GeoJSON Testing-----------------------------//
 
 
@@ -230,14 +229,12 @@ const SSURGOvalues = {'AOI': '{"geometryType": "esriGeometryPolygon", "features"
 
   const onSelect = React.useCallback((options) => {
     setSelectedFeatureIndex(options && options.selectedFeatureIndex);
-    console.log(state.Drawn_Polygons);
-    console.log("Drawn Polygons", state.Drawn_Polygons);
   }, []);
 
   const onDelete = React.useCallback(
     (event) => {
       event.preventDefault();
-      if (selectedFeatureIndex !== null && selectedFeatureIndex >= 0) {
+      if (selectedFeatureIndex !== null && selectedFeatureIndex >= 0 && editorRef) {
         editorRef.current.deleteFeatures(selectedFeatureIndex);
         dispatch({
           type: actions.SET_DRAWN_POLYGONS,
@@ -291,17 +288,17 @@ const SSURGOvalues = {'AOI': '{"geometryType": "esriGeometryPolygon", "features"
         mapboxApiAccessToken={TOKEN}
       >
 
-       <Source type="geojson" data={testgeojson}>
+       <Source type="geojson" data={currentPolygon}>
           <Layer {...polarisStyle} />
         </Source>
 
-       {/* <Source type="geojson" data={DEMdata}>
+       <Source type="geojson" data={testgeojson}>
           <Layer {...demsStyle} />
         </Source>
 
-        <Source type="geojson" data={SSURGOdata}>
+        <Source type="geojson" data={testgeojson}>
           <Layer {...ssurgoStyle} />
-        </Source>  */}
+        </Source> 
 
         <Editor
           ref={editorRef}
