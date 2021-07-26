@@ -21,9 +21,10 @@ export async function polarisService(
 //Open Elevation
 export async function openElevation(lat1, lng1, lat2, lng2, lat3, lng3){
   const url = `https://api.open-elevation.com/api/v1/lookup?locations=${lat1},${lng1}|${lat2},${lng2}|${lat3},${lng3}`;
+  const proxyurl = "https://cors-anywhere.herokuapp.com/";
   console.log(url);
   return window
-    .fetch(url)
+    .fetch(proxyurl + url)
     .then((response) => {
       console.log(response);
       return response.json();
