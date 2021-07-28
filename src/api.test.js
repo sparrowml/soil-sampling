@@ -1,4 +1,12 @@
-import { ssurgoService, DEMService, DEMGET, cluBoundary, polarisService, openElevation, topoElevation } from "./api";
+import {
+  ssurgoService,
+  DEMService,
+  DEMGET,
+  cluBoundary,
+  polarisService,
+  openElevation,
+  topoElevation,
+} from "./api";
 
 // test('polaris API test', () => {
 //   const minlon = -80.200
@@ -10,27 +18,27 @@ import { ssurgoService, DEMService, DEMGET, cluBoundary, polarisService, openEle
 //   return polarisService(minlat,maxlat,minlon,maxlon,vari,layer).then(console.log);
 // }, 20000);
 
-// test('open Elevation API test', () => {
+// test("open Elevation API test", () => {
 //   const lat1 = 40.771;
 //   const lng1 = -96.832;
 //   const lat2 = 40.8;
 //   const lng2 = -96.8;
-//   const lat3 = 40.80;
+//   const lat3 = 40.8;
 //   const lng3 = -96.79;
 
 //   return openElevation(lat1, lng1, lat2, lng2, lat3, lng3).then(console.log);
 // }, 400000);
 
-test('topo Elevation API test', () => {
-  const lat1 = 40.771;
-  const lng1 = -86.832;
-  const lat2 = 40.8;
-  const lng2 = -86.8;
-  const lat3 = 40.80;
-  const lng3 = -86.79;
+// test('topo Elevation API test', () => {
+//   const lat1 = 40.771;
+//   const lng1 = -86.832;
+//   const lat2 = 40.8;
+//   const lng2 = -86.8;
+//   const lat3 = 40.80;
+//   const lng3 = -86.79;
 
-  return topoElevation(lat1, lng1, lat2, lng2, lat3, lng3).then(console.log);
-}, 400000);
+//   return topoElevation(lat1, lng1, lat2, lng2, lat3, lng3).then(console.log);
+// }, 400000);
 
 // test("elevation data", () => {
 //   // Parameters to call DEM Service
