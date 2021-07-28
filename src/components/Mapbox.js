@@ -1,6 +1,5 @@
 import React from "react";
-
-import MapGL from "react-map-gl";
+import MapGL, {Source, Layer} from 'react-map-gl';
 
 import {
   RENDER_STATE,
@@ -10,6 +9,7 @@ import {
 } from "react-map-gl-draw";
 
 import CustomMarker from "./CustomMarker";
+//import { polarisService, DEMService, ssurgoService, topoElevation } from "../api";
 
 import { store } from "../store";
 import * as actions from "../actions";
@@ -66,8 +66,151 @@ function getFeatureStyle({ state }) {
   }
 }
 
+//-------------------------GeoJSON Test Data-----------------------------//
+const testgeojson = {
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {},
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -96.74011230468749,
+              40.73633186448861
+            ],
+            [
+              -96.6851806640625,
+              40.70094304347228
+            ],
+            [
+              -96.56158447265624,
+              40.697299008636755
+            ],
+            [
+              -96.55746459960938,
+              40.897424801491276
+            ],
+            [
+              -96.81564331054688,
+              40.89950086329283
+            ],
+            [
+              -96.81907653808592,
+              40.81328954943147
+            ],
+            [
+              -96.74011230468749,
+              40.73633186448861
+            ]
+          ]
+        ]
+      }
+    }
+  ]
+}
+//-------------------------GeoJSON Test Data-----------------------------//
+
+
+//------------------------POLARIS API---------------------------------//
+// if(state.Polaris === true){
+//   const minlon = state.viewport.longitude;
+//   const minlat = state.viewport.latitude;
+//   const maxlon = state.viewport.longitude + 0.02;
+//   const maxlat = state.viewport.latitude + 0.02;
+//   const vari = 'silt'
+//   const layer = '5_15'
+//   Polarisdata = polarisService(minlat,maxlat,minlon,maxlon,vari,layer);
+// };
+//------------------------POLARIS API---------------------------------//
+
+
+//------------------------Topo API------------------------------------//
+  // const lat1 = 40.771;
+  // const lng1 = -86.832;
+  // const lat2 = 40.8;
+  // const lng2 = -86.8;
+  // const lat3 = 40.80;
+  // const lng3 = -86.79;
+  // const results = topoElevation(lat1, lng1, lat2, lng2, lat3, lng3);
+  // console.log("topo", results);
+//------------------------Topo API------------------------------------//
+
+
+//------------------------SSURGO API---------------------------------//
+// if(state.SSURGO === true) {
+// const SSURGOvalues = {'AOI': '{"geometryType": "esriGeometryPolygon", "features": [{"geometry": {"rings": [[[-85.179, 42.74], [-85.17858886748223, 42.74188232450973], [-85.17858886748223, 42.742675781062474], [-85.1782836915391, 42.742675781062474], [-85.1782226563505, 42.74230956993074], [-85.17529296909521, 42.74230956993074], [-85.17529296909521, 42.74353027370324], [-85.17529296909521, 42.74371337926908], [-85.17492675796348, 42.74389648393566], [-85.17437744126585, 42.744079589501496], [-85.17340087914721, 42.744079589501496], [-85.17327880876996, 42.74749755826576], [-85.17401123013411, 42.74749755826576], [-85.17401123013411, 42.74847412128372], [-85.17529296909521, 42.74847412128372], [-85.17590332008211, 42.74829101571788], [-85.17749023408697, 42.74792480458609], [-85.17761230446422, 42.7470703128447], [-85.1782836915391, 42.746704101712965], [-85.18072509728535, 42.746704101712965], [-85.179, 42.74]]], "spatialReference": {"wkid": 4326}}}]}',
+//   'Soil_Parameter': 'nccpi2all',
+//   'Projection': 'EPSG:4326',
+//   'Resolution': 0.00001,
+//   'Product':'GeoJSON'};
+
+//   const SSURGOheaders = {'Content-Type': 'application/x-www-form-urlencoded', 'Ocp-Apim-Subscription-Key': process.env.SSURGO_API_KEY};
+//   SSURGOdata = ssurgoService(SSURGOvalues, SSURGOheaders);
+// }
+  //------------------------SSURGO API---------------------------------//
+
 export default function Mapbox() {
   const { state, dispatch } = React.useContext(store);
+
+  // const Polarisdata = [];    
+  // const SSURGOdata = [];
+  // const Topodata = [];
+
+  const currentPolygon = JSON.stringify(state.drawnPolygons[0]);
+
+  var polarisvis = "none";
+  var demsvis = "none";
+  var ssurgovis = "none";
+
+  if(state.polaris === true){
+    polarisvis = "visible";
+    console.log("Current Polygon", currentPolygon);
+  };
+  if(state.dems === true){
+    demsvis = "visible";
+  };
+  if(state.ssurgo === true){
+    ssurgovis = "visible"
+  };
+
+  //https://docs.mapbox.com/mapbox-gl-js/style-spec/layers/
+  const polarisStyle = {
+    id: 'polarisLayer',
+    type: 'fill',
+    layout: {
+      visibility: polarisvis,
+    },
+    paint: {
+      "fill-color": "#0000ff",
+      "fill-opacity": 0.3
+    }
+  };
+  const demsStyle = {
+    id: 'DEMSLayer',
+    type: 'fill',
+    layout: {
+      visibility: demsvis,
+    },
+    paint: {
+      "fill-color": "#8c2222",
+      "fill-opacity": 0.3
+    }
+  };
+  const ssurgoStyle = {
+    id: 'ssurgoLayer',
+    type: 'fill',
+    layout: {
+      visibility: ssurgovis,
+    },
+    paint: {
+      "fill-color": "#228c26",
+      "fill-opacity": 0.3
+    }
+  };
+
 
   const [mode, setMode] = React.useState(null);
   const [selectedFeatureIndex, setSelectedFeatureIndex] = React.useState(null);
@@ -85,7 +228,7 @@ export default function Mapbox() {
   const onDelete = React.useCallback(
     (event) => {
       event.preventDefault();
-      if (selectedFeatureIndex !== null && selectedFeatureIndex >= 0) {
+      if (selectedFeatureIndex !== null && selectedFeatureIndex >= 0 && editorRef) {
         editorRef.current.deleteFeatures(selectedFeatureIndex);
         dispatch({
           type: actions.SET_DRAWN_POLYGONS,
@@ -132,12 +275,25 @@ export default function Mapbox() {
         {...state.viewport}
         width={MAP_WIDTH}
         height={MAP_HEIGHT}
-        mapStyle="mapbox://styles/mapbox/satellite-v9"
+        mapStyle="mapbox://styles/thesyneater/ckqwgecqe0eka17mri7ud5xt9"
         onViewportChange={(viewport) =>
           dispatch({ type: actions.SET_VIEWPORT, value: viewport })
         }
         mapboxApiAccessToken={TOKEN}
       >
+
+       <Source type="geojson" data={currentPolygon}>
+          <Layer {...polarisStyle} />
+        </Source>
+
+       <Source type="geojson" data={testgeojson}>
+          <Layer {...demsStyle} />
+        </Source>
+
+        <Source type="geojson" data={testgeojson}>
+          <Layer {...ssurgoStyle} />
+        </Source> 
+
         <Editor
           ref={editorRef}
           style={{ width: "100%", height: "100%" }}

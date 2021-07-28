@@ -6,8 +6,8 @@ const initialState = {
   name: null,
   latitude: 40.8,
   longitude: -96.7,
-  layer1: false,
-  layer2: false,
+  polaris: false,
+  demservice: false,
   layer3: false,
   drawnPolygons: [],
   viewport: {
@@ -40,12 +40,12 @@ const StateProvider = ({ children }) => {
           longitude,
           viewport: { ...state.viewport, longitude },
         };
-      case actions.SET_LAYER1:
-        return { ...state, layer1: action.value };
-      case actions.SET_LAYER2:
-        return { ...state, layer2: action.value };
-      case actions.SET_LAYER3:
-        return { ...state, layer3: action.value };
+      case actions.SET_POLARIS:
+        return { ...state, polaris: action.value };
+      case actions.SET_DEMS:
+        return { ...state, dems: action.value };
+      case actions.SET_SSURGO:
+        return { ...state, ssurgo: action.value };
       case actions.SET_DRAWN_POLYGONS:
         return { ...state, drawnPolygons: action.value };
       case actions.SET_VIEWPORT:

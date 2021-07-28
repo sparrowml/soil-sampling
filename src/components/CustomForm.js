@@ -102,29 +102,29 @@ function Form() {
                 <FormControlLabel
                   control={
                     <Checkbox
-                      onChange={(e) => handleChanges(actions.SET_LAYER1, e)}
-                      name="layer1"
+                      onChange={(e) => handleChanges(actions.SET_POLARIS, e)}
+                      name="PolarisService"
                     />
                   }
-                  label="layer1"
+                  label="PolarisService"
                 />
                 <FormControlLabel
                   control={
                     <Checkbox
-                      onChange={(e) => handleChanges(actions.SET_LAYER2, e)}
-                      name="layer2"
+                      onChange={(e) => handleChanges(actions.SET_DEMS, e)}
+                      name="DEMService"
                     />
                   }
-                  label="layer2"
+                  label="DEMService (Elevation)"
                 />
                 <FormControlLabel
                   control={
                     <Checkbox
-                      onChange={(e) => handleChanges(actions.SET_LAYER3, e)}
-                      name="layer3"
+                      onChange={(e) => handleChanges(actions.SET_SSURGO, e)}
+                      name="SSURGO"
                     />
                   }
-                  label="layer3"
+                  label="SSURGO"
                 />
               </FormGroup>
               <FormHelperText>
