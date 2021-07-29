@@ -11,9 +11,9 @@ const initialState = {
   layer3: false,
   drawnPolygons: [],
   viewport: {
-    latitude: 40.8,
-    longitude: -96.7,
-    zoom: 7,
+    latitude: 40.745530243920015,
+    longitude: -96.50904174854016,
+    zoom: 13.81594170898739,
     bearing: 0,
     pitch: 0,
   },

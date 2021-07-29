@@ -19,12 +19,10 @@ export async function polarisService(
 }
 
 //Open Elevation
-export async function openElevation(lat1, lng1, lat2, lng2, lat3, lng3){
+export async function openElevation(lat1, lng1, lat2, lng2, lat3, lng3) {
   const url = `https://api.open-elevation.com/api/v1/lookup?locations=${lat1},${lng1}|${lat2},${lng2}|${lat3},${lng3}`;
-  const proxyurl = "https://cors-anywhere.herokuapp.com/";
-  console.log(url);
   return window
-    .fetch(proxyurl + url)
+    .fetch(url)
     .then((response) => {
       console.log(response);
       return response.json();
@@ -33,7 +31,7 @@ export async function openElevation(lat1, lng1, lat2, lng2, lat3, lng3){
 }
 
 //Topo Elevation
-export async function topoElevation(lat1, lng1, lat2, lng2, lat3, lng3){
+export async function topoElevation(lat1, lng1, lat2, lng2, lat3, lng3) {
   const url = `https://api.opentopodata.org/v1/test-dataset?locations=${lng1},${lat1}|${lng2},${lat2}|${lng3},${lat3}`;
   console.log(url);
   return window
@@ -69,8 +67,6 @@ export async function DEMGET(values, local_path) {
     .then((response) => response.json())
     .catch(console.error);
 }
-
-
 
 //May not use below
 
