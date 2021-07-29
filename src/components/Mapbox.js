@@ -1,13 +1,11 @@
 import React from "react";
-// import MapGL, { Source, Layer } from "react-map-gl";
-import MapGL from "react-map-gl";
+import MapGL, { Source, Layer } from "react-map-gl";
 
 import { DrawPolygonMode, EditingMode, Editor } from "react-map-gl-draw";
 
-import CustomMarker from "./CustomMarker";
 //import { polarisService, DEMService, ssurgoService, topoElevation } from "../api";
 
-import { get_polygon_centroid } from "../algorithms/uniform";
+import { uniformGrid } from "../algorithms/uniform";
 import { getEditHandleStyle, getFeatureStyle } from "../draw-helpers";
 
 import { store } from "../store";
@@ -20,19 +18,40 @@ const MAP_WIDTH = "600px";
 export default function Mapbox() {
   const { state, dispatch } = React.useContext(store);
 
-  const [mode, setMode] = React.useState(null);
+  const [mode, setMode] = React.useState(new DrawPolygonMode());
   const [selectedFeatureIndex, setSelectedFeatureIndex] = React.useState(null);
   const editorRef = React.useRef(null);
 
-  const onDrawMode = React.useCallback(
-    (event) => {
-      event.preventDefault();
-      if (state.drawnPolygons.length === 0) {
-        setMode(new DrawPolygonMode());
-      }
-    },
-    [state.drawnPolygons.length]
-  );
+  const [grid, setGrid] = React.useState({
+    type: "FeatureCollection",
+    features: [],
+  });
+
+  React.useEffect(() => {
+    if (state.drawnPolygons.length > 0) {
+      let features = [];
+      state.drawnPolygons.forEach((polygon) => {
+        uniformGrid(polygon.geometry.coordinates[0]).forEach((point) => {
+          features.push({
+            type: "Feature",
+            geometry: {
+              type: "Point",
+              coordinates: point,
+            },
+          });
+        });
+      });
+      setGrid({
+        type: "FeatureCollection",
+        features,
+      });
+    }
+  }, [setGrid, state.drawnPolygons]);
+
+  const onDrawMode = React.useCallback((event) => {
+    event.preventDefault();
+    setMode(new DrawPolygonMode());
+  }, []);
 
   const onSelect = React.useCallback((options) => {
     setSelectedFeatureIndex(options && options.selectedFeatureIndex);
@@ -86,8 +105,6 @@ export default function Mapbox() {
     </div>
   );
 
-  console.log(state.drawnPolygons);
-
   return (
     <>
       <MapGL
@@ -100,18 +117,16 @@ export default function Mapbox() {
         }
         mapboxApiAccessToken={TOKEN}
       >
-        {/* <Source type="geojson" data={currentPolygon}>
-          <Layer {...polarisStyle} />
+        <Source type="geojson" data={grid}>
+          <Layer
+            id="grid"
+            type="circle"
+            paint={{
+              "circle-radius": 2.5,
+              "circle-color": "white",
+            }}
+          />
         </Source>
-
-        <Source type="geojson" data={testgeojson}>
-          <Layer {...demsStyle} />
-        </Source>
-
-        <Source type="geojson" data={testgeojson}>
-          <Layer {...ssurgoStyle} />
-        </Source> */}
-
         <Editor
           ref={editorRef}
           style={{ width: "100%", height: "100%" }}
@@ -124,20 +139,6 @@ export default function Mapbox() {
           editHandleStyle={getEditHandleStyle}
         />
         {drawTools}
-        {state.drawnPolygons.length ? (
-          <CustomMarker
-            longitude={
-              get_polygon_centroid(
-                state.drawnPolygons[0].geometry.coordinates[0]
-              )[0]
-            }
-            latitude={
-              get_polygon_centroid(
-                state.drawnPolygons[0].geometry.coordinates[0]
-              )[1]
-            }
-          />
-        ) : null}
       </MapGL>
     </>
   );

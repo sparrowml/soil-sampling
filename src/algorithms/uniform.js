@@ -1,22 +1,54 @@
-export function get_polygon_centroid(pts) {
-  var first = pts[0],
-    last = pts[pts.length - 1];
-  if (first[0] !== last[0] || first[1] !== last[1]) pts.push(first);
-  var twicearea = 0,
-    x = 0,
-    y = 0,
-    nPts = pts.length,
-    p1,
-    p2,
-    f;
-  for (var i = 0, j = nPts - 1; i < nPts; j = i++) {
-    p1 = pts[i];
-    p2 = pts[j];
-    f = p1[0] * p2[1] - p2[0] * p1[1];
-    twicearea += f;
-    x += (p1[0] + p2[0]) * f;
-    y += (p1[1] + p2[1]) * f;
+import classifyPoint from "robust-point-in-polygon";
+
+import { ACRE, SQUARE_SIDE, BOUNDARY_THRESHOLD } from "./constants";
+import {
+  boundingBox,
+  distanceToLine,
+  lngLatPoints,
+  utmPoints,
+  utmString,
+} from "./utils";
+
+const generateUniformGrid = (bbox) => {
+  const [xmin, ymin, xmax, ymax] = bbox;
+  let i = 1;
+  let j;
+  const grid = [];
+  while (xmin + (i * SQUARE_SIDE[ACRE]) / 2 < xmax) {
+    j = 1;
+    while (ymin + (j * SQUARE_SIDE[ACRE]) / 2 < ymax) {
+      grid.push([
+        xmin + (i * SQUARE_SIDE[ACRE]) / 2,
+        ymin + (j * SQUARE_SIDE[ACRE]) / 2,
+      ]);
+      j++;
+    }
+    i++;
   }
-  f = twicearea * 3;
-  return [x / f, y / f];
+  return grid;
+};
+
+export function uniformGrid(polygon) {
+  const projectionString = utmString(polygon[0]);
+  const utm = utmPoints(polygon, projectionString);
+  const lines = [];
+  for (let i = 0; i < utm.length - 1; i++) {
+    lines.push([utm[i][0], utm[i][1], utm[i + 1][0], utm[i + 1][1]]);
+  }
+  let grid = generateUniformGrid(boundingBox(utm));
+  // console.log(grid.length);
+  grid = grid.filter((point) => classifyPoint(utm, point) === -1);
+  // console.log(grid.length);
+  grid = grid.filter((point) => {
+    const minDistance = Math.min(
+      ...lines.map((line) => distanceToLine(point, line))
+    );
+    if (minDistance < BOUNDARY_THRESHOLD) {
+      return false;
+    }
+    return true;
+  });
+  // console.log(grid.length);
+  const out = lngLatPoints(grid, projectionString);
+  return out;
 }
