@@ -3,12 +3,16 @@ import json
 from flask import Flask, request
 import numpy as np
 from pyproj import Proj
+from shapely.geometry import Polygon
 
-from sampling import bounding_box
+from sampling import (
+    uniform_grid,
+    get_utm_string,
+    in_polygon_filter,
+    boundary_distance_filter,
+)
 
 app = Flask(__name__)
-
-proj = Proj("+proj=utm +ellps=WGS84 +datum=WGS84 +units=m +no_defs")
 
 
 @app.route("/")
@@ -16,12 +20,18 @@ def hello():
     return "Hello World!"
 
 
-@app.route("/uniform")
+@app.route("/uniform", methods=["POST"])
 def uniform():
-    polygon = np.array(json.loads(request.args.get("polygon")))
+    body = request.get_json()
+    polygon = np.array(body.get("polygon"))
+    proj = Proj(get_utm_string(polygon[0]))
     utm = np.stack(proj(polygon[:, 0], polygon[:, 1]), -1)
-    bbox = bounding_box(utm)
-    return json.dumps(bbox.tolist())
+    polygon = Polygon(utm)
+    grid = uniform_grid(utm)
+    grid = in_polygon_filter(grid, polygon)
+    grid = boundary_distance_filter(grid, polygon)
+    grid = np.stack(proj(grid[:, 0], grid[:, 1], inverse=True), -1)
+    return json.dumps(grid.tolist())
 
 
 if __name__ == "__main__":
