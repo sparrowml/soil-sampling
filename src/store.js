@@ -3,12 +3,8 @@ import React from "react";
 import * as actions from "./actions";
 
 const initialState = {
-  name: null,
-  latitude: 40.8,
-  longitude: -96.7,
-  polaris: false,
-  demservice: false,
-  layer3: false,
+  algo: "",
+  sampleArea: "1",
   drawnPolygons: [],
   viewport: {
     latitude: 40.745530243920015,
@@ -24,28 +20,18 @@ const { Provider } = store;
 const StateProvider = ({ children }) => {
   const [state, dispatch] = React.useReducer((state, action) => {
     switch (action.type) {
-      case actions.SET_NAME:
-        return { ...state, name: action.value };
-      case actions.SET_LATITUDE:
-        const latitude = action.value;
+      case actions.SET_ALGO:
+        return { ...state, algo: action.value };
+      case actions.SET_SAMPLE_AREA:
+        return { ...state, sampleArea: action.value };
+      case actions.DELETE_DRAWN_POLYGON:
         return {
           ...state,
-          latitude,
-          viewport: { ...state.viewport, latitude },
+          drawnPolygons: [
+            ...state.drawnPolygons.slice(0, action.value),
+            ...state.drawnPolygons.slice(action.value + 1),
+          ],
         };
-      case actions.SET_LONGITUDE:
-        const longitude = action.value;
-        return {
-          ...state,
-          longitude,
-          viewport: { ...state.viewport, longitude },
-        };
-      case actions.SET_POLARIS:
-        return { ...state, polaris: action.value };
-      case actions.SET_DEMS:
-        return { ...state, dems: action.value };
-      case actions.SET_SSURGO:
-        return { ...state, ssurgo: action.value };
       case actions.SET_DRAWN_POLYGONS:
         return { ...state, drawnPolygons: action.value };
       case actions.SET_VIEWPORT:

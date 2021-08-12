@@ -1,7 +1,11 @@
 import numpy as np
 from shapely.geometry import Polygon, Point
 
-from .constants import BOUNDARY_THRESHOLD, SQUARE_SIDE, ACRE
+SQUARE_SIDE = {
+    "1": 63.615,
+    "2.5": 100.584,
+    "5": 142.247,
+}
 
 
 def in_polygon_filter(grid: np.ndarray, polygon: Polygon) -> np.ndarray:
@@ -13,16 +17,19 @@ def in_polygon_filter(grid: np.ndarray, polygon: Polygon) -> np.ndarray:
     return np.array(keepers)
 
 
-def boundary_distance_filter(grid: np.ndarray, polygon: Polygon) -> np.ndarray:
+def boundary_distance_filter(
+    grid: np.ndarray, polygon: Polygon, acre: str
+) -> np.ndarray:
     """Filter out grid points that are within <threshold> of the polygon boundary."""
+    boundary_threshold = SQUARE_SIDE[acre] / 2
     keepers = []
     for point in grid:
-        if polygon.exterior.distance(Point(point)) > BOUNDARY_THRESHOLD:
+        if polygon.exterior.distance(Point(point)) > boundary_threshold:
             keepers.append(point)
     return np.array(keepers)
 
 
-def uniform_grid(polygon: np.ndarray) -> np.ndarray:
+def uniform_grid(polygon: np.ndarray, acre: str) -> np.ndarray:
     """Generate a uniform grid that covers an entire polygon."""
     x_min = polygon[:, 0].min()
     x_max = polygon[:, 0].max()
@@ -31,13 +38,13 @@ def uniform_grid(polygon: np.ndarray) -> np.ndarray:
 
     i = 1
     grid = []
-    while x_min + i * SQUARE_SIDE[ACRE] / 2 < x_max:
+    while x_min + i * SQUARE_SIDE[acre] / 2 < x_max:
         j = 1
-        while y_min + j * SQUARE_SIDE[ACRE] / 2 < y_max:
+        while y_min + j * SQUARE_SIDE[acre] / 2 < y_max:
             grid.append(
                 [
-                    x_min + i * SQUARE_SIDE[ACRE] / 2,
-                    y_min + j * SQUARE_SIDE[ACRE] / 2,
+                    x_min + i * SQUARE_SIDE[acre] / 2,
+                    y_min + j * SQUARE_SIDE[acre] / 2,
                 ]
             )
             j += 1

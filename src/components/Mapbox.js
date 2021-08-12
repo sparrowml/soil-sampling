@@ -28,24 +28,29 @@ export default function Mapbox() {
     async function fetchGrid() {
       const features = [];
       for (const polygon of state.drawnPolygons) {
-        const grid = await uniformSample(polygon.geometry.coordinates[0]);
-        grid.forEach((point) => {
-          features.push({
-            type: "Feature",
-            geometry: {
-              type: "Point",
-              coordinates: point,
-            },
+        if (state.algo === "uniform") {
+          const grid = await uniformSample(
+            polygon.geometry.coordinates[0],
+            state.sampleArea
+          );
+          grid.forEach((point) => {
+            features.push({
+              type: "Feature",
+              geometry: {
+                type: "Point",
+                coordinates: point,
+              },
+            });
           });
-        });
-        setGrid({
-          type: "FeatureCollection",
-          features,
-        });
+        }
       }
+      setGrid({
+        type: "FeatureCollection",
+        features,
+      });
     }
     fetchGrid();
-  }, [setGrid, state.drawnPolygons]);
+  }, [setGrid, state.drawnPolygons, state.algo, state.sampleArea]);
 
   const onDrawMode = React.useCallback((event) => {
     event.preventDefault();
@@ -66,8 +71,8 @@ export default function Mapbox() {
       ) {
         editorRef.current.deleteFeatures(selectedFeatureIndex);
         dispatch({
-          type: actions.SET_DRAWN_POLYGONS,
-          value: [],
+          type: actions.DELETE_DRAWN_POLYGON,
+          value: selectedFeatureIndex,
         });
       }
     },

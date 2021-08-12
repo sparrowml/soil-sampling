@@ -26,12 +26,13 @@ def hello():
 def uniform():
     body = request.get_json()
     polygon = np.array(body.get("polygon"))
+    acre = body.get("acre", "1")
     proj = Proj(get_utm_string(polygon[0]))
     utm = np.stack(proj(polygon[:, 0], polygon[:, 1]), -1)
     polygon = Polygon(utm)
-    grid = uniform_grid(utm)
+    grid = uniform_grid(utm, acre)
     grid = in_polygon_filter(grid, polygon)
-    grid = boundary_distance_filter(grid, polygon)
+    grid = boundary_distance_filter(grid, polygon, acre)
     grid = np.stack(proj(grid[:, 0], grid[:, 1], inverse=True), -1)
     return json.dumps(grid.tolist())
 
