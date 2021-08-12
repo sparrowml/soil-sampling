@@ -1,7 +1,11 @@
 import numpy as np
 from shapely.geometry import Polygon, Point
 
-from .constants import SQUARE_SIDE
+SQUARE_SIDE = {
+    "1": 63.615,
+    "2.5": 100.584,
+    "5": 142.247,
+}
 
 
 def in_polygon_filter(grid: np.ndarray, polygon: Polygon) -> np.ndarray:
