@@ -3,11 +3,8 @@ import MapGL, { Source, Layer } from "react-map-gl";
 
 import { DrawPolygonMode, EditingMode, Editor } from "react-map-gl-draw";
 
-//import { polarisService, DEMService, ssurgoService, topoElevation } from "../api";
-
-import { uniformGrid } from "../algorithms/uniform";
+import { uniformSample } from "../api";
 import { getEditHandleStyle, getFeatureStyle } from "../draw-helpers";
-
 import { store } from "../store";
 import * as actions from "../actions";
 
@@ -28,10 +25,11 @@ export default function Mapbox() {
   });
 
   React.useEffect(() => {
-    if (state.drawnPolygons.length > 0) {
-      let features = [];
-      state.drawnPolygons.forEach((polygon) => {
-        uniformGrid(polygon.geometry.coordinates[0]).forEach((point) => {
+    async function fetchGrid() {
+      const features = [];
+      for (const polygon of state.drawnPolygons) {
+        const grid = await uniformSample(polygon.geometry.coordinates[0]);
+        grid.forEach((point) => {
           features.push({
             type: "Feature",
             geometry: {
@@ -40,12 +38,13 @@ export default function Mapbox() {
             },
           });
         });
-      });
-      setGrid({
-        type: "FeatureCollection",
-        features,
-      });
+        setGrid({
+          type: "FeatureCollection",
+          features,
+        });
+      }
     }
+    fetchGrid();
   }, [setGrid, state.drawnPolygons]);
 
   const onDrawMode = React.useCallback((event) => {
