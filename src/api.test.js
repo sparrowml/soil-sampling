@@ -6,6 +6,7 @@ import {
   polarisService,
   openElevation,
   topoElevation,
+  uniformSample,
 } from "./api";
 
 // test('polaris API test', () => {
@@ -86,3 +87,17 @@ import {
 //   const headers = {'Ocp-Apim-Subscription-Key': process.env.CLUBound_APIKeyPrim}
 //   return cluBoundary(values, headers).then(console.log);
 // }, 15000);
+
+test("uniform-grid", () => {
+  // Parameters to call SSURGO API
+  const polygon = [
+    [-97.00449252110398, 41.16957981959309],
+    [-97.00432050553388, 41.16267347064354],
+    [-96.9993033847341, 41.16245763550959],
+    [-96.9996474158748, 41.16366630310241],
+    [-96.99927471547274, 41.165544010323515],
+    [-96.99944673104284, 41.16955823838636],
+    [-97.00449252110398, 41.16957981959309],
+  ];
+  uniformSample(polygon).then(() => console.log("foo bar"));
+}, 20000);

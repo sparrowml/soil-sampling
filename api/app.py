@@ -1,6 +1,7 @@
 import json
 
 from flask import Flask, request
+from flask_cors import CORS
 import numpy as np
 from pyproj import Proj
 from shapely.geometry import Polygon
@@ -13,6 +14,7 @@ from sampling import (
 )
 
 app = Flask(__name__)
+CORS(app)
 
 
 @app.route("/")
