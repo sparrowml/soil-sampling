@@ -3,7 +3,8 @@ import React from "react";
 import * as actions from "./actions";
 
 const initialState = {
-  algo: "uniform",
+  algo: "",
+  sampleArea: "1",
   drawnPolygons: [],
   viewport: {
     latitude: 40.745530243920015,
@@ -21,6 +22,16 @@ const StateProvider = ({ children }) => {
     switch (action.type) {
       case actions.SET_ALGO:
         return { ...state, algo: action.value };
+      case actions.SET_SAMPLE_AREA:
+        return { ...state, sampleArea: action.value };
+      case actions.DELETE_DRAWN_POLYGON:
+        return {
+          ...state,
+          drawnPolygons: [
+            ...state.drawnPolygons.slice(0, action.value),
+            ...state.drawnPolygons.slice(action.value + 1),
+          ],
+        };
       case actions.SET_DRAWN_POLYGONS:
         return { ...state, drawnPolygons: action.value };
       case actions.SET_VIEWPORT:

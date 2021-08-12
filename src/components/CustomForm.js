@@ -8,6 +8,7 @@ import Select from "@material-ui/core/Select";
 import { makeStyles } from "@material-ui/core/styles";
 
 import Mapbox from "./Mapbox";
+import UniformForm from "./UniformForm";
 
 import { store } from "../store";
 import * as actions from "../actions";
@@ -27,11 +28,23 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 function Form() {
-  const { state, dispatch } = React.useContext(store);
   const classes = useStyles();
 
+  const { state, dispatch } = React.useContext(store);
   const setAlgo = (event) => {
     dispatch({ type: actions.SET_ALGO, value: event.target.value });
+  };
+
+  const subForm = () => {
+    switch (state.algo) {
+      case "uniform":
+        return <UniformForm className={classes.formControl} />;
+      case "clustering":
+        alert("This algorithm is not currently implemented.");
+        return null;
+      default:
+        return null;
+    }
   };
 
   return (
@@ -43,14 +56,19 @@ function Form() {
 
         <Grid item xs={6}>
           <Paper className={classes.paper}>
-            <FormControl className={classes.formControl}>
-              <InputLabel>Algorithm</InputLabel>
-              <Select value={state.algo} onChange={setAlgo}>
-                <MenuItem value="uniform">Uniform</MenuItem>
-                <MenuItem value="voronoi">Voronoi</MenuItem>
-                <MenuItem value="clustering">Clustering</MenuItem>
-              </Select>
-            </FormControl>
+            <Grid container direction="column">
+              <Grid item>
+                <FormControl className={classes.formControl}>
+                  <InputLabel>Algorithm</InputLabel>
+                  <Select value={state.algo} onChange={setAlgo}>
+                    <MenuItem value="uniform">Uniform</MenuItem>
+                    <MenuItem value="voronoi">Voronoi</MenuItem>
+                    <MenuItem value="clustering">Clustering</MenuItem>
+                  </Select>
+                </FormControl>
+              </Grid>
+              <Grid item>{subForm()}</Grid>
+            </Grid>
           </Paper>
         </Grid>
       </Grid>
