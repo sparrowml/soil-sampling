@@ -29,7 +29,10 @@ export default function Mapbox() {
       const features = [];
       for (const polygon of state.drawnPolygons) {
         if (state.algo === "uniform") {
-          const grid = await uniformSample(polygon.geometry.coordinates[0]);
+          const grid = await uniformSample(
+            polygon.geometry.coordinates[0],
+            state.sampleArea
+          );
           grid.forEach((point) => {
             features.push({
               type: "Feature",
@@ -47,7 +50,7 @@ export default function Mapbox() {
       });
     }
     fetchGrid();
-  }, [setGrid, state.drawnPolygons, state.algo]);
+  }, [setGrid, state.drawnPolygons, state.algo, state.sampleArea]);
 
   const onDrawMode = React.useCallback((event) => {
     event.preventDefault();

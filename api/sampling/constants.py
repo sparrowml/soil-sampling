@@ -1,7 +1,5 @@
-ACRE = "1"
 SQUARE_SIDE = {
     "1": 63.615,
     "2.5": 100.584,
     "5": 142.247,
 }
-BOUNDARY_THRESHOLD = SQUARE_SIDE[ACRE] / 2
