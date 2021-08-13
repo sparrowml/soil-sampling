@@ -8,7 +8,8 @@ import { getEditHandleStyle, getFeatureStyle } from "../draw-helpers";
 import { store } from "../store";
 import * as actions from "../actions";
 
-const TOKEN = process.env.REACT_APP_MAPBOX_ACCESS_TOKEN_PK;
+const TOKEN =
+  "pk.eyJ1IjoidGhlc3luZWF0ZXIiLCJhIjoiY2twMWJ3MGdjMG9hbzJvbzRkaGxxMG05dyJ9.FuJyojD0OlXLSJbpZlUM3A";
 const MAP_HEIGHT = "600px";
 const MAP_WIDTH = "600px";
 
