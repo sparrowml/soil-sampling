@@ -145,8 +145,6 @@ export default function Mapbox() {
     </div>
   );
 
-  console.log(regions);
-
   return (
     <>
       <MapGL
