@@ -3,9 +3,9 @@ import React from "react";
 import * as actions from "./actions";
 
 const initialState = {
-  algo: "uniform",
+  algo: "voronoi",
   sampleArea: "1",
-  nPoints: 5,
+  nPoints: 50,
   drawnPolygons: [],
   viewport: {
     latitude: 40.745530243920015,

@@ -24,24 +24,34 @@ export default function Mapbox() {
     features: [],
   });
 
+  const [regions, setRegions] = React.useState({
+    type: "FeatureCollection",
+    features: [],
+  });
+
   React.useEffect(() => {
     async function fetchGrid() {
-      const features = [];
+      const gridFeatures = [];
+      const regionFeatures = [];
       for (const polygon of state.drawnPolygons) {
-        let grid;
+        let grid = [];
+        let regions = [];
         if (state.algo === "uniform") {
-          grid = await uniformSample(
+          const response = await uniformSample(
             polygon.geometry.coordinates[0],
             state.sampleArea
           );
+          grid = response.points;
         } else if (state.algo === "voronoi") {
-          grid = await voronoiSample(
+          const response = await voronoiSample(
             polygon.geometry.coordinates[0],
             state.nPoints
           );
+          grid = response.points;
+          regions = response.regions;
         }
         grid.forEach((point) => {
-          features.push({
+          gridFeatures.push({
             type: "Feature",
             geometry: {
               type: "Point",
@@ -49,10 +59,23 @@ export default function Mapbox() {
             },
           });
         });
+        regions.forEach((region) => {
+          regionFeatures.push({
+            type: "Feature",
+            geometry: {
+              type: "Polygon",
+              coordinates: [region],
+            },
+          });
+        });
       }
       setGrid({
         type: "FeatureCollection",
-        features,
+        features: gridFeatures,
+      });
+      setRegions({
+        type: "FeatureCollection",
+        features: regionFeatures,
       });
     }
     fetchGrid();
@@ -121,6 +144,8 @@ export default function Mapbox() {
     </div>
   );
 
+  console.log(regions);
+
   return (
     <>
       <MapGL
@@ -140,6 +165,18 @@ export default function Mapbox() {
             paint={{
               "circle-radius": 2.5,
               "circle-color": "white",
+            }}
+          />
+        </Source>
+        <Source type="geojson" data={regions}>
+          <Layer
+            id="regions"
+            type="line"
+            paint={{
+              "line-color": "#fec44f",
+            }}
+            layout={{
+              visibility: "visible",
             }}
           />
         </Source>

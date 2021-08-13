@@ -1,21 +1,42 @@
 from collections import defaultdict
-from typing import Generator
+from typing import Generator, List
 
+from bs4 import BeautifulSoup
 import numpy as np
+import requests
 from scipy.spatial import Voronoi
-from shapely.geometry import Polygon
+from scipy.spatial.qhull import QhullError
+from shapely.geometry import MultiPolygon, Polygon
 
 from .uniform import uniform_sample
 
 
 def voronoi_sample(polygon: np.ndarray, n_points: int) -> np.ndarray:
     """Select n points with Lloyds algorithm inside a polygon"""
+    polygon_min = polygon.min(axis=0)
+    normalized_polygon = polygon - polygon_min
+    starters = np.random.permutation(uniform_sample(normalized_polygon))[:n_points]
+    try:
+        points = lloyds_algorithm(starters, normalized_polygon)
+    except QhullError:
+        return fake_voronoi_sample(polygon, n_points)
+    points += polygon_min
+    return points
+
+
+def fake_voronoi_sample(polygon: np.ndarray, n_points: int) -> np.ndarray:
+    """Randomly select n uniform grid points inside a smaller polygon"""
     xmin = polygon[:, 0].min()
     ymin = polygon[:, 1].min()
     polygon[:, 0] -= xmin
     polygon[:, 1] -= ymin
-    starters = np.random.permutation(uniform_sample(polygon))[:n_points]
-    points = lloyds_algorithm(starters, polygon)[0]
+    points = np.random.permutation(uniform_sample(polygon))[:n_points]
+    if len(points) == 0:
+        shapely_polygon = Polygon(polygon)
+        point = shapely_polygon.centroid
+        if not shapely_polygon.contains(point):
+            return
+        points = np.array(point)[None]
     points[:, 0] += xmin
     points[:, 1] += ymin
     return points
@@ -26,16 +47,18 @@ def lloyds_algorithm(starters: np.ndarray, boundary: np.ndarray) -> np.ndarray:
     shapely_boundary = Polygon(boundary)
     diameter = np.linalg.norm(boundary.ptp(axis=0))
     points = starters
-    for step in range(20):
+    for _ in range(20):
         regions = []
         new_points = []
         for unbounded_region in voronoi_polygons(Voronoi(points), diameter):
             region = unbounded_region.intersection(shapely_boundary)
             regions.append(region)
-            new_points.append(np.array(region.centroid))
+            centroid = np.array(region.centroid)
+            if centroid.shape == (2,):
+                new_points.append(centroid)
         new_points = np.stack(new_points)
         points = new_points
-    return points, regions
+    return points
 
 
 def voronoi_polygons(
@@ -89,3 +112,46 @@ def voronoi_polygons(
             voronoi.vertices[k] + dir_k * length,
         ]
         yield Polygon(np.concatenate((finite_part, extra_edge)))
+
+
+def get_mukey_regions(polygon: np.ndarray) -> List[np.ndarray]:
+    min_lon, min_lat = polygon.min(axis=0)
+    max_lon, max_lat = polygon.max(axis=0)
+    shapely_polygon = Polygon(polygon)
+
+    url = "https://sdmdataaccess.nrcs.usda.gov/Spatial/SDMWGS84Geographic.wfs"
+    xml_filter = f"""
+    <Filter>
+      <BBOX>
+        <PropertyName>Geometry</PropertyName>
+        <Box srsName=\'EPSG:4326\'>
+          <coordinates>{min_lon},{min_lat} {max_lon},{max_lat}</coordinates>
+        </Box>
+      </BBOX>
+    </Filter>
+    """
+    params = dict(
+        SERVICE="WFS",
+        VERSION="1.1.0",
+        REQUEST="GetFeature",
+        TYPENAME="MapunitPoly",
+        FILTER=xml_filter,
+    )
+    response = requests.get(url, params=params)
+    soup = BeautifulSoup(response.content)
+
+    shapely_regions = []
+    for polygon_member in soup.find_all("gml:polygonmember"):
+        points = polygon_member.find("gml:coordinates").text.split()
+        points = np.array([list(map(float, p.split(","))) for p in points])
+        points = points[:, ::-1]
+        shapely_mukey = Polygon(points)
+        shapely_mukey = shapely_polygon.intersection(shapely_mukey)
+        if isinstance(shapely_mukey, MultiPolygon):
+            shapely_regions += [
+                np.stack(mk.exterior.coords.xy, -1) for mk in shapely_mukey
+            ]
+        else:
+            if shapely_mukey.exterior.coords:
+                shapely_regions.append(np.stack(shapely_mukey.exterior.coords.xy, -1))
+    return shapely_regions
