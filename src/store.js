@@ -3,8 +3,9 @@ import React from "react";
 import * as actions from "./actions";
 
 const initialState = {
-  algo: "",
+  algo: "uniform",
   sampleArea: "1",
+  nPoints: 5,
   drawnPolygons: [],
   viewport: {
     latitude: 40.745530243920015,
@@ -24,6 +25,8 @@ const StateProvider = ({ children }) => {
         return { ...state, algo: action.value };
       case actions.SET_SAMPLE_AREA:
         return { ...state, sampleArea: action.value };
+      case actions.SET_N_POINTS:
+        return { ...state, nPoints: action.value };
       case actions.DELETE_DRAWN_POLYGON:
         return {
           ...state,

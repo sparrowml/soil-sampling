@@ -3,7 +3,7 @@ import MapGL, { Source, Layer } from "react-map-gl";
 
 import { DrawPolygonMode, EditingMode, Editor } from "react-map-gl-draw";
 
-import { uniformSample } from "../api";
+import { uniformSample, voronoiSample } from "../api";
 import { getEditHandleStyle, getFeatureStyle } from "../draw-helpers";
 import { store } from "../store";
 import * as actions from "../actions";
@@ -28,21 +28,27 @@ export default function Mapbox() {
     async function fetchGrid() {
       const features = [];
       for (const polygon of state.drawnPolygons) {
+        let grid;
         if (state.algo === "uniform") {
-          const grid = await uniformSample(
+          grid = await uniformSample(
             polygon.geometry.coordinates[0],
             state.sampleArea
           );
-          grid.forEach((point) => {
-            features.push({
-              type: "Feature",
-              geometry: {
-                type: "Point",
-                coordinates: point,
-              },
-            });
-          });
+        } else if (state.algo === "voronoi") {
+          grid = await voronoiSample(
+            polygon.geometry.coordinates[0],
+            state.nPoints
+          );
         }
+        grid.forEach((point) => {
+          features.push({
+            type: "Feature",
+            geometry: {
+              type: "Point",
+              coordinates: point,
+            },
+          });
+        });
       }
       setGrid({
         type: "FeatureCollection",
@@ -50,7 +56,13 @@ export default function Mapbox() {
       });
     }
     fetchGrid();
-  }, [setGrid, state.drawnPolygons, state.algo, state.sampleArea]);
+  }, [
+    setGrid,
+    state.drawnPolygons,
+    state.algo,
+    state.sampleArea,
+    state.nPoints,
+  ]);
 
   const onDrawMode = React.useCallback((event) => {
     event.preventDefault();

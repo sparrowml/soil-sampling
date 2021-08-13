@@ -9,6 +9,7 @@ import { makeStyles } from "@material-ui/core/styles";
 
 import Mapbox from "./Mapbox";
 import UniformForm from "./UniformForm";
+import VoronoiForm from "./VoronoiForm";
 
 import { store } from "../store";
 import * as actions from "../actions";
@@ -39,8 +40,11 @@ function Form() {
     switch (state.algo) {
       case "uniform":
         return <UniformForm className={classes.formControl} />;
+      case "voronoi":
+        return <VoronoiForm className={classes.formControl} />;
       case "clustering":
         alert("This algorithm is not currently implemented.");
+        dispatch({ type: actions.SET_ALGO, value: "uniform" });
         return null;
       default:
         return null;
