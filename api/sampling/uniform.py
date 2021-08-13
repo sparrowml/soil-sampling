@@ -8,28 +8,30 @@ SQUARE_SIDE = {
 }
 
 
-def in_polygon_filter(grid: np.ndarray, polygon: Polygon) -> np.ndarray:
+def in_polygon_filter(grid: np.ndarray, polygon: np.ndarray) -> np.ndarray:
     """Filter out grid points that are not in the polygon."""
+    shapely_polygon = Polygon(polygon)
     keepers = []
     for point in grid:
-        if polygon.contains(Point(point)):
+        if shapely_polygon.contains(Point(point)):
             keepers.append(point)
     return np.array(keepers)
 
 
 def boundary_distance_filter(
-    grid: np.ndarray, polygon: Polygon, acre: str
+    grid: np.ndarray, polygon: np.ndarray, acre: str
 ) -> np.ndarray:
     """Filter out grid points that are within <threshold> of the polygon boundary."""
+    shapely_polygon = Polygon(polygon)
     boundary_threshold = SQUARE_SIDE[acre] / 2
     keepers = []
     for point in grid:
-        if polygon.exterior.distance(Point(point)) > boundary_threshold:
+        if shapely_polygon.exterior.distance(Point(point)) > boundary_threshold:
             keepers.append(point)
     return np.array(keepers)
 
 
-def uniform_grid(polygon: np.ndarray, acre: str) -> np.ndarray:
+def uniform_sample(polygon: np.ndarray, acre: str = "1") -> np.ndarray:
     """Generate a uniform grid that covers an entire polygon."""
     x_min = polygon[:, 0].min()
     x_max = polygon[:, 0].max()
@@ -49,4 +51,7 @@ def uniform_grid(polygon: np.ndarray, acre: str) -> np.ndarray:
             )
             j += 1
         i += 1
-    return np.array(grid)
+    grid = np.array(grid)
+    grid = in_polygon_filter(grid, polygon)
+    grid = boundary_distance_filter(grid, polygon, acre)
+    return grid
