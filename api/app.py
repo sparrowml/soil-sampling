@@ -30,7 +30,15 @@ def uniform():
         acre = body.get("acre", "1")
         proj = Proj(get_utm_string(polygon[0]))
         utm = np.stack(proj(polygon[:, 0], polygon[:, 1]), -1)
+    except:
+        return jsonify({"error": "Invalid request. Check your inputs and try again."})
+    try:
         check_area(utm)
+    except:
+        return jsonify(
+            {"error": "Invalid polygon. The maximum area is 2 square miles."}
+        )
+    try:
         grid = uniform_sample(utm, acre)
         grid = np.stack(proj(grid[:, 0], grid[:, 1], inverse=True), -1)
         return jsonify(
@@ -38,8 +46,15 @@ def uniform():
                 "points": grid.tolist(),
             }
         )
-    except Exception as e:
-        return jsonify({"error": str(e)})
+    except:
+        return jsonify(
+            {
+                "error": (
+                    "Error running the sampling algorithm. "
+                    "You can wait a minute and try again."
+                )
+            }
+        )
 
 
 @app.route("/voronoi", methods=["POST"])
@@ -51,7 +66,15 @@ def voronoi():
         regions = get_mukey_regions(polygon)
         proj = Proj(get_utm_string(polygon[0]))
         utm = np.stack(proj(polygon[:, 0], polygon[:, 1]), -1)
+    except:
+        return jsonify({"error": "Invalid request. Check your inputs and try again."})
+    try:
         check_area(utm)
+    except:
+        return jsonify(
+            {"error": "Invalid polygon. The maximum area is 2 square miles."}
+        )
+    try:
         shapely_utm = Polygon(utm)
         grid_points = []
         for region in regions:
@@ -74,8 +97,15 @@ def voronoi():
                 "regions": [region.tolist() for region in regions],
             }
         )
-    except Exception as e:
-        return jsonify({"error": str(e)})
+    except:
+        return jsonify(
+            {
+                "error": (
+                    "Error running the sampling algorithm. "
+                    "You can wait a minute and try again."
+                )
+            }
+        )
 
 
 if __name__ == "__main__":
