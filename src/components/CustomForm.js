@@ -10,6 +10,7 @@ import { makeStyles } from "@material-ui/core/styles";
 import Mapbox from "./Mapbox";
 import UniformForm from "./UniformForm";
 import VoronoiForm from "./VoronoiForm";
+import Instructions from "./Instructions";
 
 import { store } from "../store";
 import * as actions from "../actions";
@@ -73,6 +74,7 @@ function Form() {
               </Grid>
               <Grid item>{subForm()}</Grid>
             </Grid>
+            <Instructions />
           </Paper>
         </Grid>
       </Grid>
