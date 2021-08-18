@@ -5,7 +5,6 @@ from bs4 import BeautifulSoup
 import numpy as np
 import requests
 from scipy.spatial import Voronoi
-from scipy.spatial.qhull import QhullError
 from shapely.geometry import MultiPolygon, Polygon
 
 from .uniform import uniform_sample
@@ -18,7 +17,7 @@ def voronoi_sample(polygon: np.ndarray, n_points: int) -> np.ndarray:
     starters = np.random.permutation(uniform_sample(normalized_polygon))[:n_points]
     try:
         points = lloyds_algorithm(starters, normalized_polygon)
-    except QhullError:
+    except:
         return fake_voronoi_sample(polygon, n_points)
     points += polygon_min
     return points
