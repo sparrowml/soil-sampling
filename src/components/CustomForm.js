@@ -10,6 +10,7 @@ import { makeStyles } from "@material-ui/core/styles";
 import Mapbox from "./Mapbox";
 import UniformForm from "./UniformForm";
 import VoronoiForm from "./VoronoiForm";
+import Instructions from "./Instructions";
 
 import { store } from "../store";
 import * as actions from "../actions";
@@ -66,13 +67,14 @@ function Form() {
                   <InputLabel>Algorithm</InputLabel>
                   <Select value={state.algo} onChange={setAlgo}>
                     <MenuItem value="uniform">Uniform</MenuItem>
-                    <MenuItem value="voronoi">Voronoi</MenuItem>
+                    <MenuItem value="voronoi">Soil Zones</MenuItem>
                     <MenuItem value="clustering">Clustering</MenuItem>
                   </Select>
                 </FormControl>
               </Grid>
               <Grid item>{subForm()}</Grid>
             </Grid>
+            <Instructions />
           </Paper>
         </Grid>
       </Grid>

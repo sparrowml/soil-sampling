@@ -37,19 +37,23 @@ export default function Mapbox() {
       for (const polygon of state.drawnPolygons) {
         let grid = [];
         let regions = [];
+        let response;
         if (state.algo === "uniform") {
-          const response = await uniformSample(
+          response = await uniformSample(
             polygon.geometry.coordinates[0],
             state.sampleArea
           );
-          grid = response.points;
+          grid = response.points || [];
         } else if (state.algo === "voronoi") {
-          const response = await voronoiSample(
+          response = await voronoiSample(
             polygon.geometry.coordinates[0],
             state.nPoints
           );
-          grid = response.points;
-          regions = response.regions;
+          grid = response.points || [];
+          regions = response.regions || [];
+        }
+        if (response.error) {
+          alert(response.error);
         }
         grid.forEach((point) => {
           gridFeatures.push({
