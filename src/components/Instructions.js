@@ -9,7 +9,10 @@ import ExpandMore from "@material-ui/icons/ExpandMore";
 import ExpandLess from "@material-ui/icons/ExpandLess";
 import { makeStyles } from "@material-ui/core/styles";
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles(() => ({
+  button: {
+    backgroundColor: "transparent",
+  },
   cardContent: {
     paddingTop: "0px",
     marginTop: "-10px",
@@ -19,23 +22,40 @@ const useStyles = makeStyles((theme) => ({
 export default function Instructions() {
   const classes = useStyles();
 
-  const [collapseOpen, setCollapseOpen] = React.useState(false);
+  const [instructions, setInstructions] = React.useState(false);
+  const [disclaimer, setDisclaimer] = React.useState(false);
 
   const toggleInstructions = (event) => {
     event.preventDefault();
-    setCollapseOpen(!collapseOpen);
+    setInstructions(!instructions);
   };
 
-  const button = (
+  const toggleDisclaimer = (event) => {
+    event.preventDefault();
+    setDisclaimer(!disclaimer);
+  };
+
+  const instructionsButton = (
     <IconButton
       size="small"
       disableRipple
       disableFocusRipple
-      style={{ backgroundColor: "transparent" }}
-      aria-label="expand"
+      className={classes.button}
     >
       Instructions
-      {collapseOpen ? <ExpandLess /> : <ExpandMore />}
+      {instructions ? <ExpandLess /> : <ExpandMore />}
+    </IconButton>
+  );
+
+  const disclaimerButton = (
+    <IconButton
+      size="small"
+      disableRipple
+      disableFocusRipple
+      className={classes.button}
+    >
+      Disclaimer
+      {disclaimer ? <ExpandLess /> : <ExpandMore />}
     </IconButton>
   );
 
@@ -43,17 +63,30 @@ export default function Instructions() {
     <>
       <Card>
         <CardHeader
-          subheader={button}
+          subheader={instructionsButton}
           onClick={toggleInstructions}
-          // subheaderTypographyProps={subheaderTypographyProps}
         ></CardHeader>
-        <Collapse in={collapseOpen} unmountOnExit>
+        <Collapse in={instructions} unmountOnExit>
           <CardContent className={classes.cardContent}>
             <ol>
               <li>Zoom to region</li>
               <li>Use the drawing tool to define a field boundary</li>
               <li>Select an algorithm for sampling locations</li>
             </ol>
+          </CardContent>
+        </Collapse>
+        <CardHeader
+          subheader={disclaimerButton}
+          onClick={toggleDisclaimer}
+        ></CardHeader>
+        <Collapse in={disclaimer} unmountOnExit>
+          <CardContent className={classes.cardContent}>
+            <ul>
+              <li>
+                A place for contact information, disclaimer, funding source,
+                author credits, and commercial use rights.
+              </li>
+            </ul>
           </CardContent>
         </Collapse>
       </Card>
