@@ -23,7 +23,7 @@ def boundary_distance_filter(
 ) -> np.ndarray:
     """Filter out grid points that are within <threshold> of the polygon boundary."""
     shapely_polygon = Polygon(polygon)
-    boundary_threshold = SQUARE_SIDE[acre] / 2
+    boundary_threshold = SQUARE_SIDE[acre] / 4
     keepers = []
     for point in grid:
         if shapely_polygon.exterior.distance(Point(point)) > boundary_threshold:

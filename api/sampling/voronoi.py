@@ -137,7 +137,7 @@ def get_mukey_regions(polygon: np.ndarray) -> List[np.ndarray]:
         FILTER=xml_filter,
     )
     response = requests.get(url, params=params)
-    soup = BeautifulSoup(response.content)
+    soup = BeautifulSoup(response.content, features="html.parser")
 
     shapely_regions = []
     for polygon_member in soup.find_all("gml:polygonmember"):

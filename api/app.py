@@ -1,3 +1,5 @@
+import time
+
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 import numpy as np
@@ -63,16 +65,40 @@ def voronoi():
         body = request.get_json()
         polygon = np.array(body.get("polygon"))
         n_points = body.get("nPoints", 10)
-        regions = get_mukey_regions(polygon)
         proj = Proj(get_utm_string(polygon[0]))
         utm = np.stack(proj(polygon[:, 0], polygon[:, 1]), -1)
-    except:
-        return jsonify({"error": "Invalid request. Check your inputs and try again."})
+    except Exception as e:
+        print(e)
+        return (
+            jsonify({"error": "Invalid request. Check your inputs and try again."}),
+            400,
+        )
+    regions = None
+    for _ in range(3):
+        try:
+            regions = get_mukey_regions(polygon)
+            break
+        except Exception as e:
+            time.sleep(1)
+            print(e)
+    if regions is None:
+        return (
+            jsonify(
+                {
+                    "error": (
+                        "Error requesting the MUKEY regions. "
+                        "You can wait a minute and try again."
+                    )
+                }
+            ),
+            400,
+        )
     try:
         check_area(utm)
     except:
-        return jsonify(
-            {"error": "Invalid polygon. The maximum area is 2 square miles."}
+        return (
+            jsonify({"error": "Invalid polygon. The maximum area is 2 square miles."}),
+            400,
         )
     try:
         shapely_utm = Polygon(utm)
@@ -97,14 +123,18 @@ def voronoi():
                 "regions": [region.tolist() for region in regions],
             }
         )
-    except:
-        return jsonify(
-            {
-                "error": (
-                    "Error running the sampling algorithm. "
-                    "You can wait a minute and try again."
-                )
-            }
+    except Exception as e:
+        print(e)
+        return (
+            jsonify(
+                {
+                    "error": (
+                        "Error running the sampling algorithm. "
+                        "You can wait a minute and try again."
+                    )
+                }
+            ),
+            400,
         )
 
 
