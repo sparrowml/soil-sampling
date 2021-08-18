@@ -9,7 +9,7 @@ import { store } from "../store";
 import * as actions from "../actions";
 
 const TOKEN =
-  "pk.eyJ1IjoidGhlc3luZWF0ZXIiLCJhIjoiY2twMWJ3MGdjMG9hbzJvbzRkaGxxMG05dyJ9.FuJyojD0OlXLSJbpZlUM3A";
+  "pk.eyJ1IjoiamJlbmNvb2sxIiwiYSI6ImNrc2h6a3hkazBhd28ydm41MTA4MGw5ODIifQ.i9LnGAqi7LO478W227kNgw";
 const MAP_HEIGHT = "600px";
 const MAP_WIDTH = "600px";
 
@@ -149,13 +149,15 @@ export default function Mapbox() {
     </div>
   );
 
+  console.log(mode);
+
   return (
     <>
       <MapGL
         {...state.viewport}
         width={MAP_WIDTH}
         height={MAP_HEIGHT}
-        mapStyle="mapbox://styles/thesyneater/ckqwgecqe0eka17mri7ud5xt9"
+        mapStyle="mapbox://styles/mapbox/satellite-v9"
         onViewportChange={(viewport) =>
           dispatch({ type: actions.SET_VIEWPORT, value: viewport })
         }
