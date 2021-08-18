@@ -66,7 +66,7 @@ function Form() {
                   <InputLabel>Algorithm</InputLabel>
                   <Select value={state.algo} onChange={setAlgo}>
                     <MenuItem value="uniform">Uniform</MenuItem>
-                    <MenuItem value="voronoi">Voronoi</MenuItem>
+                    <MenuItem value="voronoi">Soil Zones</MenuItem>
                     <MenuItem value="clustering">Clustering</MenuItem>
                   </Select>
                 </FormControl>
