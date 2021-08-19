@@ -4,30 +4,18 @@ import { Grid, Paper, InputLabel } from "@material-ui/core";
 
 import MenuItem from "@material-ui/core/MenuItem";
 import FormControl from "@material-ui/core/FormControl";
+import Button from "@material-ui/core/Button";
 import Select from "@material-ui/core/Select";
-import { makeStyles } from "@material-ui/core/styles";
 
 import Mapbox from "./Mapbox";
 import UniformForm from "./UniformForm";
 import VoronoiForm from "./VoronoiForm";
 import Instructions from "./Instructions";
 
+import * as api from "../api";
 import { store } from "../store";
 import * as actions from "../actions";
-
-const useStyles = makeStyles((theme) => ({
-  root: {
-    flexGrow: 1,
-    marginTop: theme.spacing(10),
-  },
-  paper: {
-    color: theme.palette.text.secondary,
-  },
-  formControl: {
-    margin: theme.spacing(4),
-    minWidth: 200,
-  },
-}));
+import useStyles from "../styles";
 
 function Form() {
   const classes = useStyles();
@@ -52,8 +40,31 @@ function Form() {
     }
   };
 
+  const generatePoints = async (event) => {
+    event.preventDefault();
+    const fieldPoints = [];
+    const fieldMukeys = [];
+    for (const polygon of state.drawnPolygons) {
+      let response;
+      if (state.algo === "uniform") {
+        response = await api.uniformSample(polygon, state.sampleArea);
+        if (response.points) fieldPoints.push(...response.points);
+      } else if (state.algo === "voronoi") {
+        response = await api.voronoiSample(polygon, state.nPoints);
+        if (response.points) fieldPoints.push(...response.points);
+        if (response.regions) fieldMukeys.push(...response.regions);
+      }
+      if (response.error) {
+        alert(response.error);
+        return;
+      }
+    }
+    dispatch({ type: actions.SET_FIELD_POINTS, value: fieldPoints });
+    dispatch({ type: actions.SET_FIELD_MUKEYS, value: fieldMukeys });
+  };
+
   return (
-    <div className={classes.root}>
+    <div className={classes.form}>
       <Grid container spacing={3}>
         <Grid item xs={6}>
           <Mapbox />
@@ -73,6 +84,16 @@ function Form() {
                 </FormControl>
               </Grid>
               <Grid item>{subForm()}</Grid>
+              <Grid item>
+                <Button
+                  variant="contained"
+                  color="primary"
+                  className={classes.formControl}
+                  onClick={generatePoints}
+                >
+                  Generate Points
+                </Button>
+              </Grid>
             </Grid>
             <Instructions />
           </Paper>

@@ -3,7 +3,6 @@ import MapGL, { Source, Layer } from "react-map-gl";
 
 import { DrawPolygonMode, EditingMode, Editor } from "react-map-gl-draw";
 
-import { uniformSample, voronoiSample } from "../api";
 import { getEditHandleStyle, getFeatureStyle } from "../draw-helpers";
 import { store } from "../store";
 import * as actions from "../actions";
@@ -31,66 +30,35 @@ export default function Mapbox() {
   });
 
   React.useEffect(() => {
-    async function fetchGrid() {
-      const gridFeatures = [];
-      const regionFeatures = [];
-      for (const polygon of state.drawnPolygons) {
-        let grid = [];
-        let regions = [];
-        let response;
-        if (state.algo === "uniform") {
-          response = await uniformSample(
-            polygon.geometry.coordinates[0],
-            state.sampleArea
-          );
-          grid = response.points || [];
-        } else if (state.algo === "voronoi") {
-          response = await voronoiSample(
-            polygon.geometry.coordinates[0],
-            state.nPoints
-          );
-          grid = response.points || [];
-          regions = response.regions || [];
-        }
-        if (response.error) {
-          alert(response.error);
-        }
-        grid.forEach((point) => {
-          gridFeatures.push({
-            type: "Feature",
-            geometry: {
-              type: "Point",
-              coordinates: point,
-            },
-          });
-        });
-        regions.forEach((region) => {
-          regionFeatures.push({
-            type: "Feature",
-            geometry: {
-              type: "Polygon",
-              coordinates: [region],
-            },
-          });
-        });
-      }
-      setGrid({
-        type: "FeatureCollection",
-        features: gridFeatures,
+    const gridFeatures = [];
+    const regionFeatures = [];
+    state.fieldPoints.forEach((point) => {
+      gridFeatures.push({
+        type: "Feature",
+        geometry: {
+          type: "Point",
+          coordinates: point,
+        },
       });
-      setRegions({
-        type: "FeatureCollection",
-        features: regionFeatures,
+    });
+    state.fieldMukeys.forEach((region) => {
+      regionFeatures.push({
+        type: "Feature",
+        geometry: {
+          type: "Polygon",
+          coordinates: [region],
+        },
       });
-    }
-    fetchGrid();
-  }, [
-    setGrid,
-    state.drawnPolygons,
-    state.algo,
-    state.sampleArea,
-    state.nPoints,
-  ]);
+    });
+    setGrid({
+      type: "FeatureCollection",
+      features: gridFeatures,
+    });
+    setRegions({
+      type: "FeatureCollection",
+      features: regionFeatures,
+    });
+  }, [setGrid, state.fieldPoints, state.fieldMukeys]);
 
   const onDrawMode = React.useCallback((event) => {
     event.preventDefault();
@@ -124,7 +92,9 @@ export default function Mapbox() {
       if (editType === "addFeature") {
         dispatch({
           type: actions.SET_DRAWN_POLYGONS,
-          value: editorRef.current.getFeatures(),
+          value: editorRef.current.getFeatures().map((polygon) => {
+            return polygon.geometry.coordinates[0];
+          }),
         });
         setMode(new EditingMode());
       }

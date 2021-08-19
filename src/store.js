@@ -7,6 +7,8 @@ const initialState = {
   sampleArea: "1",
   nPoints: 50,
   drawnPolygons: [],
+  fieldPoints: [],
+  fieldMukeys: [],
   viewport: {
     latitude: 40.745530243920015,
     longitude: -96.50904174854016,
@@ -34,11 +36,17 @@ const StateProvider = ({ children }) => {
             ...state.drawnPolygons.slice(0, action.value),
             ...state.drawnPolygons.slice(action.value + 1),
           ],
+          fieldPoints: [],
+          fieldMukeys: [],
         };
       case actions.SET_DRAWN_POLYGONS:
         return { ...state, drawnPolygons: action.value };
       case actions.SET_VIEWPORT:
         return { ...state, viewport: action.value };
+      case actions.SET_FIELD_POINTS:
+        return { ...state, fieldPoints: action.value };
+      case actions.SET_FIELD_MUKEYS:
+        return { ...state, fieldMukeys: action.value };
       default:
         throw new Error();
     }
