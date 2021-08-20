@@ -3,9 +3,9 @@ import React from "react";
 import * as actions from "./actions";
 
 const initialState = {
-  mode: "polygon",
   algo: "voronoi",
   refreshPoints: 0,
+  deleteFeature: 0,
   sampleArea: "1",
   nPoints: 50,
   fieldPolygons: [],
@@ -25,8 +25,6 @@ const { Provider } = store;
 const StateProvider = ({ children }) => {
   const [state, dispatch] = React.useReducer((state, action) => {
     switch (action.type) {
-      case actions.SET_MODE:
-        return { ...state, mode: action.value };
       case actions.SET_ALGO:
         return { ...state, algo: action.value };
       case actions.SET_SAMPLE_AREA:
@@ -35,26 +33,16 @@ const StateProvider = ({ children }) => {
         return { ...state, nPoints: action.value };
       case actions.SET_FIELD_POLYGONS:
         return { ...state, fieldPolygons: action.value };
-      case actions.SET_VIEWPORT:
-        return { ...state, viewport: action.value };
       case actions.SET_FIELD_POINTS:
         return { ...state, fieldPoints: action.value };
       case actions.SET_FIELD_MUKEYS:
         return { ...state, fieldMukeys: action.value };
-      case actions.SET_MARKER:
-        if (action.markerType === "polygon") {
-          return {
-            ...state,
-            fieldPolygon: {
-              [action.markerId]: { ...action.value },
-              ...state.fieldPolygon,
-            },
-          };
-        } else if (action.markerType === "point") {
-        }
-        return state;
+      case actions.SET_VIEWPORT:
+        return { ...state, viewport: action.value };
       case actions.REFRESH_POINTS:
         return { ...state, refreshPoints: state.refreshPoints + 1 };
+      case actions.DELETE_FEATURE:
+        return { ...state, deleteFeature: state.deleteFeature + 1 };
       default:
         throw new Error();
     }

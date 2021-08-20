@@ -60,8 +60,10 @@ function Form() {
 
   const generatePoints = async (event) => {
     event.preventDefault();
+    console.log(state.fieldPolygons);
     dispatch({ type: actions.SET_FIELD_POINTS, value: [] });
     dispatch({ type: actions.SET_FIELD_MUKEYS, value: [] });
+    dispatch({ type: actions.REFRESH_POINTS });
     const fieldPoints = [];
     const fieldMukeys = [];
     for (const feature of state.fieldPolygons) {
@@ -100,36 +102,13 @@ function Form() {
                 <Button
                   className={classes.gridButtons}
                   variant="contained"
-                  color={state.mode === "polygon" ? "secondary" : "primary"}
-                  onClick={() =>
-                    dispatch({ type: actions.SET_MODE, value: "polygon" })
-                  }
+                  color={"primary"}
+                  onClick={(event) => {
+                    event.preventDefault();
+                    dispatch({ type: actions.DELETE_FEATURE });
+                  }}
                 >
-                  Polygon
-                </Button>
-              </Grid>
-              <Grid item>
-                <Button
-                  className={classes.gridButtons}
-                  variant="contained"
-                  color={state.mode === "points" ? "secondary" : "primary"}
-                  onClick={() =>
-                    dispatch({ type: actions.SET_MODE, value: "points" })
-                  }
-                >
-                  Points
-                </Button>
-              </Grid>
-              <Grid item>
-                <Button
-                  className={classes.gridButtons}
-                  variant="contained"
-                  color={state.mode === "path" ? "secondary" : "primary"}
-                  onClick={() =>
-                    dispatch({ type: actions.SET_MODE, value: "path" })
-                  }
-                >
-                  Path
+                  Delete
                 </Button>
               </Grid>
             </Grid>

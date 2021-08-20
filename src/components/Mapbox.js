@@ -18,36 +18,38 @@ function getCursor() {
 export default function Mapbox() {
   const { state, dispatch } = React.useContext(store);
   const [mode, setMode] = React.useState(new DrawPolygonMode());
-  const [selectedFeatureIndex, setSelectedFeatureIndex] = React.useState(null);
+  const [featureIndex, setFeatureIndex] = React.useState(null);
   const editorRef = React.useRef(null);
 
-  const onSelect = React.useCallback((options) => {
-    setSelectedFeatureIndex(options && options.selectedFeatureIndex);
+  const onSelect = React.useCallback(({ selectedFeatureIndex }) => {
+    setFeatureIndex(selectedFeatureIndex);
   }, []);
 
   const onDelete = React.useCallback(() => {
-    if (selectedFeatureIndex !== null && selectedFeatureIndex >= 0) {
-      editorRef.current.deleteFeatures(selectedFeatureIndex);
+    if (featureIndex !== null && featureIndex >= 0) {
+      editorRef.current.deleteFeatures(featureIndex);
     }
-  }, [selectedFeatureIndex]);
+  }, [featureIndex]);
+
+  const updateFeatureState = () => {
+    dispatch({
+      type: actions.SET_FIELD_POLYGONS,
+      value: editorRef.current
+        .getFeatures()
+        .filter((feature) => feature.geometry.type === "Polygon"),
+    });
+    dispatch({
+      type: actions.SET_FIELD_POINTS,
+      value: editorRef.current
+        .getFeatures()
+        .filter((feature) => feature.geometry.type === "Point"),
+    });
+  };
 
   let timeout;
   const onUpdate = React.useCallback(({ editType }) => {
     clearTimeout(timeout);
-    timeout = setTimeout(() => {
-      dispatch({
-        type: actions.SET_FIELD_POLYGONS,
-        value: editorRef.current
-          .getFeatures()
-          .filter((feature) => feature.geometry.type === "Polygon"),
-      });
-      dispatch({
-        type: actions.SET_FIELD_POINTS,
-        value: editorRef.current
-          .getFeatures()
-          .filter((feature) => feature.geometry.type === "Point"),
-      });
-    });
+    timeout = setTimeout(updateFeatureState);
     if (editType === "addFeature") {
       setMode(new EditingMode());
     }
@@ -71,6 +73,16 @@ export default function Mapbox() {
       refresh();
     }
   }, [state.refreshPoints]);
+
+  React.useEffect(() => {
+    const deleteFeature = async () => {
+      if (featureIndex !== null) {
+        await editorRef.current.deleteFeatures(featureIndex);
+        updateFeatureState();
+      }
+    };
+    deleteFeature();
+  }, [state.deleteFeature]);
 
   return (
     <div id="map-container">
