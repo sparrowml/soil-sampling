@@ -11,6 +11,10 @@ const TOKEN =
 const MAP_HEIGHT = "600px";
 const MAP_WIDTH = "600px";
 
+function getCursor() {
+  return "crosshair";
+}
+
 export default function Mapbox() {
   const { state, dispatch } = React.useContext(store);
   const [mode, setMode] = React.useState(new DrawPolygonMode());
@@ -72,6 +76,7 @@ export default function Mapbox() {
     <div id="map-container">
       <MapGL
         {...state.viewport}
+        getCursor={getCursor}
         width={MAP_WIDTH}
         height={MAP_HEIGHT}
         mapStyle="mapbox://styles/mapbox/satellite-v9"
