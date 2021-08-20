@@ -1,5 +1,10 @@
 import React from "react";
-import { Editor, EditingMode, DrawPolygonMode } from "react-map-gl-draw";
+import {
+  Editor,
+  EditingMode,
+  DrawPolygonMode,
+  DrawPointMode,
+} from "react-map-gl-draw";
 import MapGL, { Source, Layer } from "react-map-gl";
 
 import * as actions from "../actions";
@@ -55,34 +60,64 @@ export default function Mapbox() {
     }
   }, []);
 
-  React.useEffect(() => {
-    const refresh = async () => {
-      for (let i = 0; i < 10; i++) {
-        const deleteIndices = editorRef.current
-          .getFeatures()
-          .map((feature, i) => (feature.geometry.type === "Point" ? i : null))
-          .filter((i) => i !== null);
-        if (deleteIndices.length === 0) {
-          break;
-        }
-        await editorRef.current.deleteFeatures(deleteIndices);
+  const refreshPoints = async () => {
+    if (editorRef.current === null) return;
+    for (let i = 0; i < 10; i++) {
+      const deleteIndices = editorRef.current
+        .getFeatures()
+        .map((feature, i) => (feature.geometry.type === "Point" ? i : null))
+        .filter((i) => i !== null);
+      if (deleteIndices.length === 0) {
+        break;
       }
-      editorRef.current.addFeatures(state.fieldPoints);
-    };
-    if (editorRef.current !== null) {
-      refresh();
+      await editorRef.current.deleteFeatures(deleteIndices);
     }
-  }, [state.refreshPoints]);
+    editorRef.current.addFeatures(state.fieldPoints);
+  };
+
+  const clearFeatures = async () => {
+    if (editorRef.current === null) return;
+    for (let i = 0; i < 10; i++) {
+      const indices = editorRef.current.getFeatures().map((_, i) => i);
+      if (indices.length === 0) {
+        break;
+      }
+      await editorRef.current.deleteFeatures(indices);
+    }
+    updateFeatureState();
+  };
+
+  const deleteFeature = async () => {
+    if (editorRef.current === null) return;
+    if (featureIndex !== null) {
+      await editorRef.current.deleteFeatures(featureIndex);
+      updateFeatureState();
+    }
+  };
 
   React.useEffect(() => {
-    const deleteFeature = async () => {
-      if (featureIndex !== null) {
-        await editorRef.current.deleteFeatures(featureIndex);
-        updateFeatureState();
-      }
-    };
-    deleteFeature();
-  }, [state.deleteFeature]);
+    if (state.trigger === null) return;
+    switch (state.trigger) {
+      case "refreshPoints":
+        refreshPoints();
+        break;
+      case "clearFeatures":
+        clearFeatures();
+        break;
+      case "deleteFeature":
+        deleteFeature();
+        break;
+      case "newPolygon":
+        setMode(new DrawPolygonMode());
+        break;
+      case "newPoint":
+        setMode(new DrawPointMode());
+        break;
+      default:
+        throw new Error(`Unknown trigger: ${state.trigger}`);
+    }
+    dispatch(actions.setTrigger(null));
+  }, [state.trigger]);
 
   return (
     <div id="map-container">

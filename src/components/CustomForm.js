@@ -60,10 +60,9 @@ function Form() {
 
   const generatePoints = async (event) => {
     event.preventDefault();
-    console.log(state.fieldPolygons);
     dispatch({ type: actions.SET_FIELD_POINTS, value: [] });
     dispatch({ type: actions.SET_FIELD_MUKEYS, value: [] });
-    dispatch({ type: actions.REFRESH_POINTS });
+    dispatch(actions.setTrigger("refreshPoints"));
     const fieldPoints = [];
     const fieldMukeys = [];
     for (const feature of state.fieldPolygons) {
@@ -85,7 +84,7 @@ function Form() {
     }
     dispatch({ type: actions.SET_FIELD_POINTS, value: fieldPoints });
     dispatch({ type: actions.SET_FIELD_MUKEYS, value: fieldMukeys });
-    dispatch({ type: actions.REFRESH_POINTS });
+    dispatch(actions.setTrigger("refreshPoints"));
   };
 
   return (
@@ -103,12 +102,39 @@ function Form() {
                   className={classes.gridButtons}
                   variant="contained"
                   color={"primary"}
-                  onClick={(event) => {
-                    event.preventDefault();
-                    dispatch({ type: actions.DELETE_FEATURE });
-                  }}
+                  onClick={() => dispatch(actions.setTrigger("deleteFeature"))}
                 >
-                  Delete
+                  Delete Selection
+                </Button>
+              </Grid>
+              <Grid item>
+                <Button
+                  className={classes.gridButtons}
+                  variant="contained"
+                  color={"primary"}
+                  onClick={() => dispatch(actions.setTrigger("clearFeatures"))}
+                >
+                  Clear Features
+                </Button>
+              </Grid>
+              <Grid item>
+                <Button
+                  className={classes.gridButtons}
+                  variant="contained"
+                  color={"primary"}
+                  onClick={() => dispatch(actions.setTrigger("newPolygon"))}
+                >
+                  New Polygon
+                </Button>
+              </Grid>
+              <Grid item>
+                <Button
+                  className={classes.gridButtons}
+                  variant="contained"
+                  color={"primary"}
+                  onClick={() => dispatch(actions.setTrigger("newPoint"))}
+                >
+                  New Point
                 </Button>
               </Grid>
             </Grid>

@@ -6,6 +6,8 @@ export const SET_FIELD_POINTS = "SET_FIELD_POINTS";
 export const SET_FIELD_MUKEYS = "SET_FIELD_MUKEYS";
 export const SET_VIEWPORT = "SET_VIEWPORT";
 
-// Triggers
-export const REFRESH_POINTS = "REFRESH_POINTS";
-export const DELETE_FEATURE = "DELETE_FEATURE";
+export const SET_TRIGGER = "SET_TRIGGER";
+export const setTrigger = (trigger) => ({
+  type: SET_TRIGGER,
+  trigger,
+});

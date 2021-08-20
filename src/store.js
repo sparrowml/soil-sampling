@@ -3,10 +3,9 @@ import React from "react";
 import * as actions from "./actions";
 
 const initialState = {
-  algo: "voronoi",
-  refreshPoints: 0,
-  deleteFeature: 0,
-  sampleArea: "1",
+  algo: "uniform",
+  trigger: null,
+  sampleArea: "5",
   nPoints: 50,
   fieldPolygons: [],
   fieldPoints: [],
@@ -39,10 +38,8 @@ const StateProvider = ({ children }) => {
         return { ...state, fieldMukeys: action.value };
       case actions.SET_VIEWPORT:
         return { ...state, viewport: action.value };
-      case actions.REFRESH_POINTS:
-        return { ...state, refreshPoints: state.refreshPoints + 1 };
-      case actions.DELETE_FEATURE:
-        return { ...state, deleteFeature: state.deleteFeature + 1 };
+      case actions.SET_TRIGGER:
+        return { ...state, trigger: action.trigger };
       default:
         throw new Error();
     }
