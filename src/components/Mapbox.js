@@ -1,6 +1,6 @@
 import React from "react";
 import { Editor, EditingMode, DrawPolygonMode } from "react-map-gl-draw";
-import MapGL from "react-map-gl";
+import MapGL, { Source, Layer } from "react-map-gl";
 
 import * as actions from "../actions";
 import { store } from "../store";
@@ -13,36 +13,60 @@ const MAP_WIDTH = "600px";
 
 export default function Mapbox() {
   const { state, dispatch } = React.useContext(store);
-  const [features, setFeatures] = React.useState({
-    type: "FeatureCollection",
-    features: [],
-  });
   const [mode, setMode] = React.useState(new DrawPolygonMode());
-  const [modeConfig, setModeConfig] = React.useState({});
   const [selectedFeatureIndex, setSelectedFeatureIndex] = React.useState(null);
+  const editorRef = React.useRef(null);
 
   const onSelect = React.useCallback((options) => {
     setSelectedFeatureIndex(options && options.selectedFeatureIndex);
   }, []);
 
+  const onDelete = React.useCallback(() => {
+    if (selectedFeatureIndex !== null && selectedFeatureIndex >= 0) {
+      editorRef.current.deleteFeatures(selectedFeatureIndex);
+    }
+  }, [selectedFeatureIndex]);
+
+  let timeout;
   const onUpdate = React.useCallback(({ editType }) => {
+    clearTimeout(timeout);
+    timeout = setTimeout(() => {
+      dispatch({
+        type: actions.SET_FIELD_POLYGONS,
+        value: editorRef.current
+          .getFeatures()
+          .filter((feature) => feature.geometry.type === "Polygon"),
+      });
+      dispatch({
+        type: actions.SET_FIELD_POINTS,
+        value: editorRef.current
+          .getFeatures()
+          .filter((feature) => feature.geometry.type === "Point"),
+      });
+    });
     if (editType === "addFeature") {
       setMode(new EditingMode());
     }
   }, []);
 
   React.useEffect(() => {
-    switch (state.mode) {
-      case "drawPolygon":
-        setMode(new DrawPolygonMode());
-        break;
-      case "editing":
-        setMode(new EditingMode());
-        break;
-      default:
-        break;
+    const refresh = async () => {
+      for (let i = 0; i < 10; i++) {
+        const deleteIndices = editorRef.current
+          .getFeatures()
+          .map((feature, i) => (feature.geometry.type === "Point" ? i : null))
+          .filter((i) => i !== null);
+        if (deleteIndices.length === 0) {
+          break;
+        }
+        await editorRef.current.deleteFeatures(deleteIndices);
+      }
+      editorRef.current.addFeatures(state.fieldPoints);
+    };
+    if (editorRef.current !== null) {
+      refresh();
     }
-  }, [state.mode]);
+  }, [state.refreshPoints]);
 
   return (
     <div id="map-container">
@@ -56,8 +80,23 @@ export default function Mapbox() {
         }
         mapboxApiAccessToken={TOKEN}
       >
+        <Source
+          type="geojson"
+          data={{ type: "FeatureCollection", features: state.fieldMukeys }}
+        >
+          <Layer
+            id="regions"
+            type="line"
+            paint={{
+              "line-color": "#fec44f",
+            }}
+            layout={{
+              visibility: "visible",
+            }}
+          />
+        </Source>
         <Editor
-          // to make the lines/vertices easier to interact with
+          ref={editorRef}
           clickRadius={12}
           mode={mode}
           onSelect={onSelect}

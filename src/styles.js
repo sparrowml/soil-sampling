@@ -9,6 +9,10 @@ const useStyles = makeStyles((theme) => ({
     flexGrow: 1,
     marginTop: theme.spacing(10),
   },
+  gridButtons: {
+    margin: theme.spacing(2),
+    minWidth: 100,
+  },
   formControl: {
     margin: theme.spacing(4),
     minWidth: 200,
@@ -50,26 +54,53 @@ export function getEditHandleStyle({ feature, state }) {
 }
 
 export function getFeatureStyle({ feature, index, state }) {
-  switch (state) {
-    case RENDER_STATE.SELECTED:
-    case RENDER_STATE.HOVERED:
-    case RENDER_STATE.UNCOMMITTED:
-    case RENDER_STATE.CLOSING:
-      return {
-        stroke: "rgb(251, 176, 59)",
-        strokeWidth: 2,
-        fill: "rgb(251, 176, 59)",
-        fillOpacity: 0.3,
-        strokeDasharray: "4,2",
-      };
-
-    default:
-      return {
-        stroke: "rgb(60, 178, 208)",
-        strokeWidth: 2,
-        fill: "rgb(60, 178, 208)",
-        fillOpacity: 0.1,
-      };
+  if (feature.geometry.type === "Point") {
+    switch (state) {
+      case RENDER_STATE.SELECTED:
+      case RENDER_STATE.HOVERED:
+      case RENDER_STATE.UNCOMMITTED:
+      case RENDER_STATE.CLOSING:
+        return {
+          fill: "#2ca25f",
+          fillOpacity: 0.85,
+          strokeDasharray: "4,2",
+          r: 9,
+        };
+      default:
+        return {
+          fill: "white",
+          fillOpacity: 0.85,
+          r: 3,
+        };
+    }
+  } else {
+    switch (state) {
+      case RENDER_STATE.SELECTED:
+      case RENDER_STATE.UNCOMMITTED:
+      case RENDER_STATE.CLOSING:
+        return {
+          stroke: "rgb(251, 176, 59)",
+          strokeWidth: 2,
+          fill: "rgb(251, 176, 59)",
+          fillOpacity: 0.3,
+          strokeDasharray: "4,2",
+        };
+      case RENDER_STATE.HOVERED:
+        return {
+          stroke: "rgb(251, 176, 59)",
+          strokeWidth: 2,
+          fill: "rgb(60, 178, 208)",
+          fillOpacity: 0.1,
+          strokeDasharray: "4,2",
+        };
+      default:
+        return {
+          stroke: "rgb(60, 178, 208)",
+          strokeWidth: 2,
+          fill: "rgb(60, 178, 208)",
+          fillOpacity: 0.1,
+        };
+    }
   }
 }
 

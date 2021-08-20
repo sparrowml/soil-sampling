@@ -3,12 +3,13 @@ import React from "react";
 import * as actions from "./actions";
 
 const initialState = {
-  mode: "drawPolygon",
+  mode: "polygon",
   algo: "voronoi",
+  refreshPoints: 0,
   sampleArea: "1",
   nPoints: 50,
-  fieldPolygon: {},
-  fieldPoints: {},
+  fieldPolygons: [],
+  fieldPoints: [],
   fieldMukeys: [],
   viewport: {
     latitude: 40.745530243920015,
@@ -32,18 +33,8 @@ const StateProvider = ({ children }) => {
         return { ...state, sampleArea: action.value };
       case actions.SET_N_POINTS:
         return { ...state, nPoints: action.value };
-      case actions.DELETE_DRAWN_POLYGON:
-        return {
-          ...state,
-          drawnPolygons: [
-            ...state.drawnPolygons.slice(0, action.value),
-            ...state.drawnPolygons.slice(action.value + 1),
-          ],
-          fieldPoints: [],
-          fieldMukeys: [],
-        };
-      case actions.SET_DRAWN_POLYGONS:
-        return { ...state, drawnPolygons: action.value };
+      case actions.SET_FIELD_POLYGONS:
+        return { ...state, fieldPolygons: action.value };
       case actions.SET_VIEWPORT:
         return { ...state, viewport: action.value };
       case actions.SET_FIELD_POINTS:
@@ -62,6 +53,8 @@ const StateProvider = ({ children }) => {
         } else if (action.markerType === "point") {
         }
         return state;
+      case actions.REFRESH_POINTS:
+        return { ...state, refreshPoints: state.refreshPoints + 1 };
       default:
         throw new Error();
     }

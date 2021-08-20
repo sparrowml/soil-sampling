@@ -17,6 +17,24 @@ import { store } from "../store";
 import * as actions from "../actions";
 import useStyles from "../styles";
 
+const pointMap = (point) => ({
+  type: "Feature",
+  geometry: {
+    type: "Point",
+    coordinates: point,
+  },
+  properties: {},
+});
+
+const polygonMap = (polygon) => ({
+  type: "Feature",
+  geometry: {
+    type: "Polygon",
+    coordinates: [polygon],
+  },
+  properties: {},
+});
+
 function Form() {
   const classes = useStyles();
 
@@ -42,17 +60,21 @@ function Form() {
 
   const generatePoints = async (event) => {
     event.preventDefault();
+    dispatch({ type: actions.SET_FIELD_POINTS, value: [] });
+    dispatch({ type: actions.SET_FIELD_MUKEYS, value: [] });
     const fieldPoints = [];
     const fieldMukeys = [];
-    for (const polygon of state.drawnPolygons) {
+    for (const feature of state.fieldPolygons) {
+      const polygon = feature.geometry.coordinates[0];
       let response;
       if (state.algo === "uniform") {
         response = await api.uniformSample(polygon, state.sampleArea);
-        if (response.points) fieldPoints.push(...response.points);
+        if (response.points) fieldPoints.push(...response.points.map(pointMap));
       } else if (state.algo === "voronoi") {
         response = await api.voronoiSample(polygon, state.nPoints);
-        if (response.points) fieldPoints.push(...response.points);
-        if (response.regions) fieldMukeys.push(...response.regions);
+        if (response.points) fieldPoints.push(...response.points.map(pointMap));
+        if (response.regions)
+          fieldMukeys.push(...response.regions.map(polygonMap));
       }
       if (response.error) {
         alert(response.error);
@@ -61,6 +83,7 @@ function Form() {
     }
     dispatch({ type: actions.SET_FIELD_POINTS, value: fieldPoints });
     dispatch({ type: actions.SET_FIELD_MUKEYS, value: fieldMukeys });
+    dispatch({ type: actions.REFRESH_POINTS });
   };
 
   return (
@@ -75,24 +98,38 @@ function Form() {
             <Grid container direction="row">
               <Grid item>
                 <Button
+                  className={classes.gridButtons}
                   variant="contained"
-                  color="primary"
+                  color={state.mode === "polygon" ? "secondary" : "primary"}
                   onClick={() =>
-                    dispatch({ type: actions.SET_MODE, value: "drawPolygon" })
+                    dispatch({ type: actions.SET_MODE, value: "polygon" })
                   }
                 >
-                  A
+                  Polygon
                 </Button>
               </Grid>
               <Grid item>
                 <Button
+                  className={classes.gridButtons}
                   variant="contained"
-                  color="primary"
+                  color={state.mode === "points" ? "secondary" : "primary"}
                   onClick={() =>
-                    dispatch({ type: actions.SET_MODE, value: "editing" })
+                    dispatch({ type: actions.SET_MODE, value: "points" })
                   }
                 >
-                  B
+                  Points
+                </Button>
+              </Grid>
+              <Grid item>
+                <Button
+                  className={classes.gridButtons}
+                  variant="contained"
+                  color={state.mode === "path" ? "secondary" : "primary"}
+                  onClick={() =>
+                    dispatch({ type: actions.SET_MODE, value: "path" })
+                  }
+                >
+                  Path
                 </Button>
               </Grid>
             </Grid>
