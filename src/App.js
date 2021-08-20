@@ -5,7 +5,6 @@ import Container from "@material-ui/core/Container";
 
 import Form from "./components/CustomForm";
 import Navbar from "./components/Navbar";
-import Drawer from "./components/Drawer";
 
 import useStyles from "./styles";
 import "./App.css";
@@ -16,7 +15,6 @@ export default function App() {
     <main className={classes.root}>
       <Navbar />
       <CssBaseline />
-      <Drawer />
       <Container className={classes.content} fixed>
         <div>
           <section>

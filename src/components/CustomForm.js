@@ -72,6 +72,30 @@ function Form() {
 
         <Grid item xs={6}>
           <Paper className={classes.paper}>
+            <Grid container direction="row">
+              <Grid item>
+                <Button
+                  variant="contained"
+                  color="primary"
+                  onClick={() =>
+                    dispatch({ type: actions.SET_MODE, value: "drawPolygon" })
+                  }
+                >
+                  A
+                </Button>
+              </Grid>
+              <Grid item>
+                <Button
+                  variant="contained"
+                  color="primary"
+                  onClick={() =>
+                    dispatch({ type: actions.SET_MODE, value: "editing" })
+                  }
+                >
+                  B
+                </Button>
+              </Grid>
+            </Grid>
             <Grid container direction="column">
               <Grid item>
                 <FormControl className={classes.formControl}>

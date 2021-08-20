@@ -3,11 +3,12 @@ import React from "react";
 import * as actions from "./actions";
 
 const initialState = {
+  mode: "drawPolygon",
   algo: "voronoi",
   sampleArea: "1",
   nPoints: 50,
-  drawnPolygons: [],
-  fieldPoints: [],
+  fieldPolygon: {},
+  fieldPoints: {},
   fieldMukeys: [],
   viewport: {
     latitude: 40.745530243920015,
@@ -23,6 +24,8 @@ const { Provider } = store;
 const StateProvider = ({ children }) => {
   const [state, dispatch] = React.useReducer((state, action) => {
     switch (action.type) {
+      case actions.SET_MODE:
+        return { ...state, mode: action.value };
       case actions.SET_ALGO:
         return { ...state, algo: action.value };
       case actions.SET_SAMPLE_AREA:
@@ -47,6 +50,18 @@ const StateProvider = ({ children }) => {
         return { ...state, fieldPoints: action.value };
       case actions.SET_FIELD_MUKEYS:
         return { ...state, fieldMukeys: action.value };
+      case actions.SET_MARKER:
+        if (action.markerType === "polygon") {
+          return {
+            ...state,
+            fieldPolygon: {
+              [action.markerId]: { ...action.value },
+              ...state.fieldPolygon,
+            },
+          };
+        } else if (action.markerType === "point") {
+        }
+        return state;
       default:
         throw new Error();
     }

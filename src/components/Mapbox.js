@@ -1,11 +1,10 @@
 import React from "react";
-import MapGL, { Source, Layer } from "react-map-gl";
+import { Editor, EditingMode, DrawPolygonMode } from "react-map-gl-draw";
+import MapGL from "react-map-gl";
 
-import { DrawPolygonMode, EditingMode, Editor } from "react-map-gl-draw";
-
-import { getEditHandleStyle, getFeatureStyle } from "../draw-helpers";
-import { store } from "../store";
 import * as actions from "../actions";
+import { store } from "../store";
+import { getFeatureStyle, getEditHandleStyle } from "../styles";
 
 const TOKEN =
   "pk.eyJ1IjoiamJlbmNvb2sxIiwiYSI6ImNrc2h6a3hkazBhd28ydm41MTA4MGw5ODIifQ.i9LnGAqi7LO478W227kNgw";
@@ -14,115 +13,39 @@ const MAP_WIDTH = "600px";
 
 export default function Mapbox() {
   const { state, dispatch } = React.useContext(store);
-
+  const [features, setFeatures] = React.useState({
+    type: "FeatureCollection",
+    features: [],
+  });
   const [mode, setMode] = React.useState(new DrawPolygonMode());
+  const [modeConfig, setModeConfig] = React.useState({});
   const [selectedFeatureIndex, setSelectedFeatureIndex] = React.useState(null);
-  const editorRef = React.useRef(null);
-
-  const [grid, setGrid] = React.useState({
-    type: "FeatureCollection",
-    features: [],
-  });
-
-  const [regions, setRegions] = React.useState({
-    type: "FeatureCollection",
-    features: [],
-  });
-
-  React.useEffect(() => {
-    const gridFeatures = [];
-    const regionFeatures = [];
-    state.fieldPoints.forEach((point) => {
-      gridFeatures.push({
-        type: "Feature",
-        geometry: {
-          type: "Point",
-          coordinates: point,
-        },
-      });
-    });
-    state.fieldMukeys.forEach((region) => {
-      regionFeatures.push({
-        type: "Feature",
-        geometry: {
-          type: "Polygon",
-          coordinates: [region],
-        },
-      });
-    });
-    setGrid({
-      type: "FeatureCollection",
-      features: gridFeatures,
-    });
-    setRegions({
-      type: "FeatureCollection",
-      features: regionFeatures,
-    });
-  }, [setGrid, state.fieldPoints, state.fieldMukeys]);
-
-  const onDrawMode = React.useCallback((event) => {
-    event.preventDefault();
-    setMode(new DrawPolygonMode());
-  }, []);
 
   const onSelect = React.useCallback((options) => {
     setSelectedFeatureIndex(options && options.selectedFeatureIndex);
   }, []);
 
-  const onDelete = React.useCallback(
-    (event) => {
-      event.preventDefault();
-      if (
-        selectedFeatureIndex !== null &&
-        selectedFeatureIndex >= 0 &&
-        editorRef
-      ) {
-        editorRef.current.deleteFeatures(selectedFeatureIndex);
-        dispatch({
-          type: actions.DELETE_DRAWN_POLYGON,
-          value: selectedFeatureIndex,
-        });
-      }
-    },
-    [selectedFeatureIndex, dispatch]
-  );
+  const onUpdate = React.useCallback(({ editType }) => {
+    if (editType === "addFeature") {
+      setMode(new EditingMode());
+    }
+  }, []);
 
-  const onUpdate = React.useCallback(
-    ({ editType }) => {
-      if (editType === "addFeature") {
-        dispatch({
-          type: actions.SET_DRAWN_POLYGONS,
-          value: editorRef.current.getFeatures().map((polygon) => {
-            return polygon.geometry.coordinates[0];
-          }),
-        });
+  React.useEffect(() => {
+    switch (state.mode) {
+      case "drawPolygon":
+        setMode(new DrawPolygonMode());
+        break;
+      case "editing":
         setMode(new EditingMode());
-      }
-    },
-    [dispatch]
-  );
-
-  const drawTools = (
-    <div className="mapboxgl-ctrl-top-left">
-      <div className="mapboxgl-ctrl-group mapboxgl-ctrl">
-        <button
-          className="mapbox-gl-draw_ctrl-draw-btn mapbox-gl-draw_polygon"
-          title="Polygon tool (p)"
-          onClick={onDrawMode}
-        />
-        <button
-          className="mapbox-gl-draw_ctrl-draw-btn mapbox-gl-draw_trash"
-          title="Delete"
-          onClick={onDelete}
-        />
-      </div>
-    </div>
-  );
-
-  console.log(mode);
+        break;
+      default:
+        break;
+    }
+  }, [state.mode]);
 
   return (
-    <>
+    <div id="map-container">
       <MapGL
         {...state.viewport}
         width={MAP_WIDTH}
@@ -133,31 +56,8 @@ export default function Mapbox() {
         }
         mapboxApiAccessToken={TOKEN}
       >
-        <Source type="geojson" data={grid}>
-          <Layer
-            id="grid"
-            type="circle"
-            paint={{
-              "circle-radius": 2.5,
-              "circle-color": "white",
-            }}
-          />
-        </Source>
-        <Source type="geojson" data={regions}>
-          <Layer
-            id="regions"
-            type="line"
-            paint={{
-              "line-color": "#fec44f",
-            }}
-            layout={{
-              visibility: "visible",
-            }}
-          />
-        </Source>
         <Editor
-          ref={editorRef}
-          style={{ width: "100%", height: "100%" }}
+          // to make the lines/vertices easier to interact with
           clickRadius={12}
           mode={mode}
           onSelect={onSelect}
@@ -166,8 +66,7 @@ export default function Mapbox() {
           featureStyle={getFeatureStyle}
           editHandleStyle={getEditHandleStyle}
         />
-        {drawTools}
       </MapGL>
-    </>
+    </div>
   );
 }

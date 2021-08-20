@@ -1,3 +1,4 @@
+export const SET_MODE = "SET_MODE";
 export const SET_ALGO = "SET_ALGO";
 export const SET_SAMPLE_AREA = "SET_SAMPLE_AREA";
 export const SET_N_POINTS = "SET_N_POINTS";
@@ -6,3 +7,4 @@ export const SET_DRAWN_POLYGONS = "SET_DRAWN_POLYGONS";
 export const SET_VIEWPORT = "SET_VIEWPORT";
 export const SET_FIELD_POINTS = "SET_FIELD_POINTS";
 export const SET_FIELD_MUKEYS = "SET_FIELD_MUKEYS";
+export const SET_MARKER = "SET_MARKER";
