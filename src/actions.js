@@ -6,6 +6,18 @@ export const SET_FIELD_POINTS = "SET_FIELD_POINTS";
 export const SET_FIELD_MUKEYS = "SET_FIELD_MUKEYS";
 export const SET_VIEWPORT = "SET_VIEWPORT";
 
+export const DELETE_FIELD_PATH = "DELETE_FIELD_PATH";
+export const deleteFieldPath = () => ({ type: DELETE_FIELD_PATH });
+
+export const TOGGLE_FIELD_PATH_MODE = "TOGGLE_FIELD_PATH_MODE";
+export const toggleFieldPathMode = () => ({ type: TOGGLE_FIELD_PATH_MODE });
+
+export const ADD_FIELD_PATH_POINT = "ADD_FIELD_PATH_POINT";
+export const addFieldPathPoint = (point) => ({
+  type: ADD_FIELD_PATH_POINT,
+  point,
+});
+
 export const SET_TRIGGER = "SET_TRIGGER";
 export const setTrigger = (trigger) => ({
   type: SET_TRIGGER,

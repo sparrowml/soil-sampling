@@ -10,6 +10,8 @@ const initialState = {
   fieldPolygons: [],
   fieldPoints: [],
   fieldMukeys: [],
+  fieldPathMode: false,
+  fieldPath: [],
   viewport: {
     latitude: 40.745530243920015,
     longitude: -96.50904174854016,
@@ -40,6 +42,17 @@ const StateProvider = ({ children }) => {
         return { ...state, viewport: action.value };
       case actions.SET_TRIGGER:
         return { ...state, trigger: action.trigger };
+      case actions.ADD_FIELD_PATH_POINT:
+        return { ...state, fieldPath: [...state.fieldPath, action.point] };
+      case actions.TOGGLE_FIELD_PATH_MODE:
+        if (state.fieldPathMode)
+          return { ...state, fieldPathMode: !state.fieldPathMode };
+        else
+          return {
+            ...state,
+            fieldPathMode: !state.fieldPathMode,
+            fieldPath: [],
+          };
       default:
         throw new Error();
     }

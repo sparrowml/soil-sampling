@@ -137,6 +137,16 @@ function Form() {
                   New Point
                 </Button>
               </Grid>
+              <Grid item>
+                <Button
+                  className={classes.gridButtons}
+                  variant="contained"
+                  color={state.fieldPathMode ? "secondary" : "primary"}
+                  onClick={() => dispatch(actions.toggleFieldPathMode())}
+                >
+                  Path Mode
+                </Button>
+              </Grid>
             </Grid>
             <Grid container direction="column">
               <Grid item>

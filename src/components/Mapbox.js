@@ -26,15 +26,23 @@ export default function Mapbox() {
   const [featureIndex, setFeatureIndex] = React.useState(null);
   const editorRef = React.useRef(null);
 
-  const onSelect = React.useCallback(({ selectedFeatureIndex }) => {
-    setFeatureIndex(selectedFeatureIndex);
-  }, []);
-
-  const onDelete = React.useCallback(() => {
-    if (featureIndex !== null && featureIndex >= 0) {
-      editorRef.current.deleteFeatures(featureIndex);
-    }
-  }, [featureIndex]);
+  const onSelect = React.useCallback(
+    ({ selectedFeatureIndex }) => {
+      setFeatureIndex(selectedFeatureIndex);
+      if (
+        !state.fieldPathMode ||
+        editorRef.current === null ||
+        selectedFeatureIndex === null ||
+        selectedFeatureIndex < 0
+      )
+        return;
+      const feature = editorRef.current.getFeatures()[selectedFeatureIndex];
+      if (feature.geometry.type === "Point") {
+        dispatch(actions.addFieldPathPoint(feature.geometry.coordinates));
+      }
+    },
+    [dispatch, state.fieldPathMode]
+  );
 
   const updateFeatureState = () => {
     dispatch({
@@ -51,14 +59,17 @@ export default function Mapbox() {
     });
   };
 
-  let timeout;
-  const onUpdate = React.useCallback(({ editType }) => {
-    clearTimeout(timeout);
-    timeout = setTimeout(updateFeatureState);
-    if (editType === "addFeature") {
-      setMode(new EditingMode());
-    }
-  }, []);
+  let timeout = React.useRef(null);
+  const onUpdate = React.useCallback(
+    ({ editType }) => {
+      clearTimeout(timeout.current);
+      timeout.current = setTimeout(updateFeatureState);
+      if (editType === "addFeature") {
+        setMode(new EditingMode());
+      }
+    },
+    [updateFeatureState]
+  );
 
   const refreshPoints = async () => {
     if (editorRef.current === null) return;
@@ -117,7 +128,7 @@ export default function Mapbox() {
         throw new Error(`Unknown trigger: ${state.trigger}`);
     }
     dispatch(actions.setTrigger(null));
-  }, [state.trigger]);
+  }, [state.trigger, clearFeatures, deleteFeature, dispatch, refreshPoints]);
 
   return (
     <div id="map-container">
@@ -141,6 +152,31 @@ export default function Mapbox() {
             type="line"
             paint={{
               "line-color": "#fec44f",
+            }}
+            layout={{
+              visibility: "visible",
+            }}
+          />
+        </Source>
+        <Source
+          type="geojson"
+          data={{
+            type: "FeatureCollection",
+            features: [
+              {
+                type: "Feature",
+                geometry: { type: "LineString", coordinates: state.fieldPath },
+                properties: {},
+              },
+            ],
+          }}
+        >
+          <Layer
+            id="path"
+            type="line"
+            paint={{
+              "line-color": "black",
+              "line-width": 2,
             }}
             layout={{
               visibility: "visible",
