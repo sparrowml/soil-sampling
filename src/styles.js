@@ -17,6 +17,15 @@ const useStyles = makeStyles((theme) => ({
     margin: theme.spacing(4),
     minWidth: 200,
   },
+  modalFormControl: {
+    margin: theme.spacing(2),
+    minWidth: 250,
+  },
+  modalPaper: {
+    position: "absolute",
+    backgroundColor: theme.palette.background.paper,
+    padding: theme.spacing(2, 4, 3),
+  },
   paper: {
     color: theme.palette.text.secondary,
   },

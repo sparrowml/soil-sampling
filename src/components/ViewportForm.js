@@ -7,7 +7,7 @@ import TextField from "@material-ui/core/TextField";
 import { store } from "../store";
 import * as actions from "../actions";
 
-export default function VoronoiForm({ className }) {
+export default function ViewportForm({ className }) {
   const { state, dispatch } = React.useContext(store);
   const [longitude, setLongitude] = React.useState(state.viewport.longitude);
   const [lonError, setLonError] = React.useState("");

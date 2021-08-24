@@ -35,9 +35,11 @@ const StateProvider = ({ children }) => {
       case actions.SET_FIELD_POLYGONS:
         return { ...state, fieldPolygons: action.value };
       case actions.SET_FIELD_POINTS:
-        return { ...state, fieldPoints: action.value };
+        return { ...state, fieldPoints: action.fieldPoints };
       case actions.SET_FIELD_MUKEYS:
-        return { ...state, fieldMukeys: action.value };
+        return { ...state, fieldMukeys: action.fieldMukeys };
+      case actions.SET_FIELD_PATH:
+        return { ...state, fieldPath: action.fieldPath };
       case actions.SET_VIEWPORT:
         return { ...state, viewport: action.value };
       case actions.SET_LONGITUDE:

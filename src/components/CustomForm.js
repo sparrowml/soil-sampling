@@ -11,30 +11,12 @@ import Mapbox from "./Mapbox";
 import UniformForm from "./UniformForm";
 import VoronoiForm from "./VoronoiForm";
 import Instructions from "./Instructions";
-import Viewport from "./Viewport";
+import ViewportForm from "./ViewportForm";
+import SubmitActions from "./SubmitActions";
 
-import * as api from "../api";
 import { store } from "../store";
 import * as actions from "../actions";
 import useStyles from "../styles";
-
-const pointMap = (point) => ({
-  type: "Feature",
-  geometry: {
-    type: "Point",
-    coordinates: point,
-  },
-  properties: {},
-});
-
-const polygonMap = (polygon) => ({
-  type: "Feature",
-  geometry: {
-    type: "Polygon",
-    coordinates: [polygon],
-  },
-  properties: {},
-});
 
 function Form() {
   const classes = useStyles();
@@ -59,35 +41,6 @@ function Form() {
     }
   };
 
-  const generatePoints = async (event) => {
-    event.preventDefault();
-    dispatch({ type: actions.SET_FIELD_POINTS, value: [] });
-    dispatch({ type: actions.SET_FIELD_MUKEYS, value: [] });
-    dispatch(actions.setTrigger("refreshPoints"));
-    const fieldPoints = [];
-    const fieldMukeys = [];
-    for (const feature of state.fieldPolygons) {
-      const polygon = feature.geometry.coordinates[0];
-      let response;
-      if (state.algo === "uniform") {
-        response = await api.uniformSample(polygon, state.sampleArea);
-        if (response.points) fieldPoints.push(...response.points.map(pointMap));
-      } else if (state.algo === "voronoi") {
-        response = await api.voronoiSample(polygon, state.nPoints);
-        if (response.points) fieldPoints.push(...response.points.map(pointMap));
-        if (response.regions)
-          fieldMukeys.push(...response.regions.map(polygonMap));
-      }
-      if (response.error) {
-        alert(response.error);
-        return;
-      }
-    }
-    dispatch({ type: actions.SET_FIELD_POINTS, value: fieldPoints });
-    dispatch({ type: actions.SET_FIELD_MUKEYS, value: fieldMukeys });
-    dispatch(actions.setTrigger("refreshPoints"));
-  };
-
   return (
     <div className={classes.form}>
       <Grid container spacing={3}>
@@ -97,7 +50,7 @@ function Form() {
 
         <Grid item xs={6}>
           <Paper className={classes.paper}>
-            <Viewport className={classes.formControl} />
+            <ViewportForm className={classes.formControl} />
             <Grid container direction="row">
               <Grid item>
                 <Button
@@ -163,14 +116,7 @@ function Form() {
               </Grid>
               <Grid item>{subForm()}</Grid>
               <Grid item>
-                <Button
-                  variant="contained"
-                  color="primary"
-                  className={classes.formControl}
-                  onClick={generatePoints}
-                >
-                  Generate Points
-                </Button>
+                <SubmitActions className={classes.formControl} />
               </Grid>
             </Grid>
             <Instructions />

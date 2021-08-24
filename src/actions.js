@@ -3,7 +3,23 @@ export const SET_SAMPLE_AREA = "SET_SAMPLE_AREA";
 export const SET_N_POINTS = "SET_N_POINTS";
 export const SET_FIELD_POLYGONS = "SET_FIELD_POLYGONS";
 export const SET_FIELD_POINTS = "SET_FIELD_POINTS";
+export const setFieldPoints = (fieldPoints) => ({
+  type: SET_FIELD_POINTS,
+  fieldPoints,
+});
+
 export const SET_FIELD_MUKEYS = "SET_FIELD_MUKEYS";
+export const setFieldMukeys = (fieldMukeys) => ({
+  type: SET_FIELD_MUKEYS,
+  fieldMukeys,
+});
+
+export const SET_FIELD_PATH = "SET_FIELD_PATH";
+export const setFieldPath = (fieldPath) => ({
+  type: SET_FIELD_PATH,
+  fieldPath,
+});
+
 export const SET_VIEWPORT = "SET_VIEWPORT";
 export const SET_LONGITUDE = "SET_LONGITUDE";
 export const setLongitude = (longitude) => ({ type: SET_LONGITUDE, longitude });
