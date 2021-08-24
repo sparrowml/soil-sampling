@@ -44,7 +44,7 @@ export default function Mapbox() {
     [dispatch, state.fieldPathMode]
   );
 
-  const updateFeatureState = () => {
+  const updateFeatureState = React.useCallback(() => {
     dispatch({
       type: actions.SET_FIELD_POLYGONS,
       value: editorRef.current
@@ -57,7 +57,7 @@ export default function Mapbox() {
         .getFeatures()
         .filter((feature) => feature.geometry.type === "Point"),
     });
-  };
+  }, [dispatch]);
 
   let timeout = React.useRef(null);
   const onUpdate = React.useCallback(
@@ -71,7 +71,7 @@ export default function Mapbox() {
     [updateFeatureState]
   );
 
-  const refreshPoints = async () => {
+  const refreshPoints = React.useCallback(async () => {
     if (editorRef.current === null) return;
     for (let i = 0; i < 10; i++) {
       const deleteIndices = editorRef.current
@@ -84,9 +84,9 @@ export default function Mapbox() {
       await editorRef.current.deleteFeatures(deleteIndices);
     }
     editorRef.current.addFeatures(state.fieldPoints);
-  };
+  }, [state.fieldPoints]);
 
-  const clearFeatures = async () => {
+  const clearFeatures = React.useCallback(async () => {
     if (editorRef.current === null) return;
     for (let i = 0; i < 10; i++) {
       const indices = editorRef.current.getFeatures().map((_, i) => i);
@@ -96,15 +96,15 @@ export default function Mapbox() {
       await editorRef.current.deleteFeatures(indices);
     }
     updateFeatureState();
-  };
+  }, [updateFeatureState]);
 
-  const deleteFeature = async () => {
+  const deleteFeature = React.useCallback(async () => {
     if (editorRef.current === null) return;
     if (featureIndex !== null) {
       await editorRef.current.deleteFeatures(featureIndex);
       updateFeatureState();
     }
-  };
+  }, [updateFeatureState, featureIndex]);
 
   React.useEffect(() => {
     if (state.trigger === null) return;
