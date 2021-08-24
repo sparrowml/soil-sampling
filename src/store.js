@@ -13,8 +13,8 @@ const initialState = {
   fieldPathMode: false,
   fieldPath: [],
   viewport: {
-    latitude: 40.745530243920015,
-    longitude: -96.50904174854016,
+    latitude: 40.7,
+    longitude: -96.5,
     zoom: 13.81594170898739,
     bearing: 0,
     pitch: 0,
@@ -40,6 +40,16 @@ const StateProvider = ({ children }) => {
         return { ...state, fieldMukeys: action.value };
       case actions.SET_VIEWPORT:
         return { ...state, viewport: action.value };
+      case actions.SET_LONGITUDE:
+        return {
+          ...state,
+          viewport: { ...state.viewport, longitude: action.longitude },
+        };
+      case actions.SET_LATITUDE:
+        return {
+          ...state,
+          viewport: { ...state.viewport, latitude: action.latitude },
+        };
       case actions.SET_TRIGGER:
         return { ...state, trigger: action.trigger };
       case actions.ADD_FIELD_PATH_POINT:

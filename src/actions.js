@@ -5,6 +5,11 @@ export const SET_FIELD_POLYGONS = "SET_FIELD_POLYGONS";
 export const SET_FIELD_POINTS = "SET_FIELD_POINTS";
 export const SET_FIELD_MUKEYS = "SET_FIELD_MUKEYS";
 export const SET_VIEWPORT = "SET_VIEWPORT";
+export const SET_LONGITUDE = "SET_LONGITUDE";
+export const setLongitude = (longitude) => ({ type: SET_LONGITUDE, longitude });
+
+export const SET_LATITUDE = "SET_LATITUDE";
+export const setLatitude = (latitude) => ({ type: SET_LATITUDE, latitude });
 
 export const DELETE_FIELD_PATH = "DELETE_FIELD_PATH";
 export const deleteFieldPath = () => ({ type: DELETE_FIELD_PATH });

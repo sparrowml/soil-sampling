@@ -11,6 +11,7 @@ import Mapbox from "./Mapbox";
 import UniformForm from "./UniformForm";
 import VoronoiForm from "./VoronoiForm";
 import Instructions from "./Instructions";
+import Viewport from "./Viewport";
 
 import * as api from "../api";
 import { store } from "../store";
@@ -96,6 +97,7 @@ function Form() {
 
         <Grid item xs={6}>
           <Paper className={classes.paper}>
+            <Viewport className={classes.formControl} />
             <Grid container direction="row">
               <Grid item>
                 <Button
