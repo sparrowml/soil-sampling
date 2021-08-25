@@ -29,6 +29,7 @@
     "react-map-gl-draw": "^0.21",
     "react-scripts": "^4.0.3",
     "robust-point-in-polygon": "^1.0.3",
+    "shp-write": "^0.3.2",
     "tokml": "^0.4.0",
     "web-vitals": "^1.0.1"
   },

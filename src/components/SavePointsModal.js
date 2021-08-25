@@ -1,5 +1,6 @@
 import React from "react";
 
+import shpwrite from "shp-write";
 import Modal from "@material-ui/core/Modal";
 import FormControl from "@material-ui/core/FormControl";
 import Select from "@material-ui/core/Select";
@@ -48,6 +49,40 @@ export default function SavePointsModal() {
         type: "application/vnd.google-earth.kml+xml;charset=utf-8",
       });
       FileSaver.saveAs(blob, fileName);
+    } else if (fileType === "shp") {
+      const output = path.toGeojson(orderedPoints);
+      shpwrite.download(output);
+    }
+  };
+
+  const fileNameInput = () => {
+    switch (fileType) {
+      case "csv":
+        return (
+          <Grid item>
+            <TextField
+              value={fileName}
+              placeholder="filename.csv"
+              helperText="File name"
+              className={classes.modalFormControl}
+              onChange={(e) => setFileName(e.target.value)}
+            />
+          </Grid>
+        );
+      case "kml":
+        return (
+          <Grid item>
+            <TextField
+              value={fileName}
+              placeholder="filename.kml"
+              helperText="File name"
+              className={classes.modalFormControl}
+              onChange={(e) => setFileName(e.target.value)}
+            />
+          </Grid>
+        );
+      default:
+        return null;
     }
   };
 
@@ -64,27 +99,21 @@ export default function SavePointsModal() {
       <Modal open={open} onClose={() => setOpen(false)}>
         <div style={getModalStyle()} className={classes.modalPaper}>
           <h2 id="simple-modal-title">Save Points</h2>
+          <Grid item>
+            <FormControl className={classes.modalFormControl}>
+              <Select
+                value={fileType}
+                onChange={(e) => setFileType(e.target.value)}
+              >
+                <MenuItem value="csv">CSV</MenuItem>
+                <MenuItem value="kml">KML</MenuItem>
+                <MenuItem value="shp">SHP</MenuItem>
+              </Select>
+              <FormHelperText>File Type</FormHelperText>
+            </FormControl>
+          </Grid>
           <Grid container direction="column">
-            <Grid item>
-              <TextField
-                value={fileName}
-                helperText="File name"
-                className={classes.modalFormControl}
-                onChange={(e) => setFileName(e.target.value)}
-              />
-            </Grid>
-            <Grid item>
-              <FormControl className={classes.modalFormControl}>
-                <Select
-                  value={fileType}
-                  onChange={(e) => setFileType(e.target.value)}
-                >
-                  <MenuItem value="csv">CSV</MenuItem>
-                  <MenuItem value="kml">KML</MenuItem>
-                </Select>
-                <FormHelperText>File Type</FormHelperText>
-              </FormControl>
-            </Grid>
+            {fileNameInput()}
             <Grid item>
               <Button
                 variant="contained"
