@@ -1,12 +1,15 @@
 import React from "react";
+import { DrawPolygonMode } from "react-map-gl-draw";
 
 import * as actions from "./actions";
 
 const initialState = {
-  algo: "uniform",
+  mode: "polygon",
+  mapboxMode: new DrawPolygonMode(),
+  algo: "voronoi",
   trigger: null,
   sampleArea: "5",
-  nPoints: 50,
+  nPoints: 15,
   fieldPolygons: [],
   fieldPoints: [],
   fieldMukeys: [],
@@ -26,6 +29,10 @@ const { Provider } = store;
 const StateProvider = ({ children }) => {
   const [state, dispatch] = React.useReducer((state, action) => {
     switch (action.type) {
+      case actions.SET_MODE:
+        return { ...state, mode: action.mode };
+      case actions.SET_MAPBOX_MODE:
+        return { ...state, mapboxMode: action.mode };
       case actions.SET_ALGO:
         return { ...state, algo: action.value };
       case actions.SET_SAMPLE_AREA:
@@ -33,7 +40,8 @@ const StateProvider = ({ children }) => {
       case actions.SET_N_POINTS:
         return { ...state, nPoints: action.value };
       case actions.SET_FIELD_POLYGONS:
-        return { ...state, fieldPolygons: action.value };
+        console.log(action.fieldPolygons);
+        return { ...state, fieldPolygons: action.fieldPolygons };
       case actions.SET_FIELD_POINTS:
         return { ...state, fieldPoints: action.fieldPoints };
       case actions.SET_FIELD_MUKEYS:
@@ -41,7 +49,7 @@ const StateProvider = ({ children }) => {
       case actions.SET_FIELD_PATH:
         return { ...state, fieldPath: action.fieldPath };
       case actions.SET_VIEWPORT:
-        return { ...state, viewport: action.value };
+        return { ...state, viewport: action.viewport };
       case actions.SET_LONGITUDE:
         return {
           ...state,

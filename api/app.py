@@ -11,6 +11,7 @@ from sampling import (
     get_utm_string,
     voronoi_sample,
     get_mukey_regions,
+    munames_from_mukeys,
     fake_voronoi_sample,
     check_area,
 )
@@ -73,15 +74,23 @@ def voronoi():
             jsonify({"error": "Invalid request. Check your inputs and try again."}),
             400,
         )
-    regions = None
+    try:
+        check_area(utm)
+    except:
+        return (
+            jsonify({"error": "Invalid polygon. The maximum area is 2 square miles."}),
+            400,
+        )
+    regions = []
     for _ in range(3):
         try:
-            regions = get_mukey_regions(polygon)
+            regions, region_mukey_ids = get_mukey_regions(polygon)
+            assert len(regions) > 0, "Empty region list"
             break
         except Exception as e:
             time.sleep(1)
             print(e)
-    if regions is None:
+    if len(regions) == 0:
         return (
             jsonify(
                 {
@@ -93,17 +102,18 @@ def voronoi():
             ),
             400,
         )
+    munames = {}
     try:
-        check_area(utm)
-    except:
-        return (
-            jsonify({"error": "Invalid polygon. The maximum area is 2 square miles."}),
-            400,
-        )
+        munames = munames_from_mukeys(set(region_mukey_ids))
+    except Exception as e:
+        print(e)
     try:
         shapely_utm = Polygon(utm)
         grid_points = []
-        for region in regions:
+        point_mukey_ids = []
+        point_mukey_names = []
+        for region, mukey_id in zip(regions, region_mukey_ids):
+            muname = munames.get(mukey_id, "")
             utm_region = np.stack(proj(region[:, 0], region[:, 1]), -1)
             shapely_region = Polygon(utm_region)
             n_region_points = round(n_points * shapely_region.area / shapely_utm.area)
@@ -113,13 +123,20 @@ def voronoi():
                 points = fake_voronoi_sample(utm_region, n_region_points)
                 if points is not None:
                     grid_points.append(points)
+                    point_mukey_ids.extend([mukey_id] * len(points))
+                    point_mukey_names.extend([muname] * len(points))
             else:
-                grid_points.append(voronoi_sample(utm_region, n_region_points))
+                points = voronoi_sample(utm_region, n_region_points)
+                grid_points.append(points)
+                point_mukey_ids.extend([mukey_id] * len(points))
+                point_mukey_names.extend([muname] * len(points))
         grid = np.concatenate(grid_points)
         grid = np.stack(proj(grid[:, 0], grid[:, 1], inverse=True), -1)
         return jsonify(
             {
                 "points": grid.tolist(),
+                "mukey_ids": point_mukey_ids,
+                "mukey_names": point_mukey_names,
                 "regions": [region.tolist() for region in regions],
             }
         )

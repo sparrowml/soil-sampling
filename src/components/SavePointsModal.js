@@ -93,6 +93,7 @@ export default function SavePointsModal() {
         color="primary"
         className={classes.formControl}
         onClick={() => setOpen(true)}
+        disabled={state.fieldPoints.length === 0}
       >
         Save Points
       </Button>

@@ -8,7 +8,7 @@ import * as actions from "../actions";
 import * as api from "../api";
 import SavePointsModal from "./SavePointsModal";
 
-const pointMap = (point, id) => ({
+const pointMap = (point, id, mukey, muname) => ({
   type: "Feature",
   geometry: {
     type: "Point",
@@ -16,6 +16,8 @@ const pointMap = (point, id) => ({
   },
   properties: {
     id,
+    mukey,
+    muname,
   },
 });
 
@@ -51,8 +53,13 @@ export default function SubmitActions({ className }) {
         }
       } else if (state.algo === "voronoi") {
         response = await api.voronoiSample(polygon, state.nPoints);
+        console.log(response);
         if (response.points) {
-          fieldPoints.push(...response.points.map(pointMap));
+          fieldPoints.push(
+            ...response.points.map((point, i) =>
+              pointMap(point, i, response.mukey_ids[i], response.mukey_names[i])
+            )
+          );
           fieldPath.push(...response.points);
         }
         if (response.regions)

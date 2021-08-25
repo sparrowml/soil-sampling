@@ -1,7 +1,18 @@
+export const SET_MODE = "SET_MODE";
+export const setMode = (mode) => ({ type: SET_MODE, mode });
+
+export const SET_MAPBOX_MODE = "SET_MAPBOX_MODE";
+export const setMapboxMode = (mode) => ({ type: SET_MAPBOX_MODE, mode });
+
 export const SET_ALGO = "SET_ALGO";
 export const SET_SAMPLE_AREA = "SET_SAMPLE_AREA";
 export const SET_N_POINTS = "SET_N_POINTS";
 export const SET_FIELD_POLYGONS = "SET_FIELD_POLYGONS";
+export const setFieldPolygons = (fieldPolygons) => ({
+  type: SET_FIELD_POLYGONS,
+  fieldPolygons,
+});
+
 export const SET_FIELD_POINTS = "SET_FIELD_POINTS";
 export const setFieldPoints = (fieldPoints) => ({
   type: SET_FIELD_POINTS,
@@ -21,6 +32,8 @@ export const setFieldPath = (fieldPath) => ({
 });
 
 export const SET_VIEWPORT = "SET_VIEWPORT";
+export const setViewport = (viewport) => ({ type: SET_VIEWPORT, viewport });
+
 export const SET_LONGITUDE = "SET_LONGITUDE";
 export const setLongitude = (longitude) => ({ type: SET_LONGITUDE, longitude });
 

@@ -30,21 +30,19 @@ export const orderedPoints = (fieldPath, points) => {
 
 export const toCsv = (points) => {
   const csv = [
-    "id,longitude,latitude",
+    "id,longitude,latitude,mukey,muname",
     ...points.map((point) => {
-      const id = point.properties.id;
+      const { id, mukey, muname } = point.properties;
       const [x, y] = point.geometry.coordinates;
-      return `${id},${x},${y}`;
+      return `${id},${x},${y},${mukey},${muname}`;
     }),
   ];
   return csv.join("\n");
 };
 
 export const toKml = (points) => {
-  return tokml({
-    type: "FeatureCollection",
-    features: points,
-  });
+  const data = toGeojson(points);
+  return tokml(data);
 };
 
 export const toGeojson = (points) => {
