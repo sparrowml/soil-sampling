@@ -8,24 +8,31 @@ const distance = (point1, point2) => {
 
 const minDistance = (point, points) => {
   let min = Infinity;
-  let bestPoint = points[0];
-  for (let i = 0; i < points.length; i++) {
-    const [x, y] = points[i].geometry.coordinates;
+  const pointObjects = Array.from(points).map(JSON.parse);
+  let bestPoint = pointObjects[0];
+  for (let i = 0; i < pointObjects.length; i++) {
+    const [x, y] = pointObjects[i].geometry.coordinates;
     const dist = distance(point, [x, y]);
     if (dist < min) {
       min = dist;
-      bestPoint = points[i];
+      bestPoint = pointObjects[i];
     }
   }
-  return bestPoint;
+  return JSON.stringify(bestPoint);
 };
 
 export const orderedPoints = (fieldPath, points) => {
   const ordered = [];
+  const allPoints = new Set(points.map(JSON.stringify));
   for (let i = 0; i < fieldPath.length; i++) {
-    ordered.push(minDistance(fieldPath[i], points));
+    const nextPoint = minDistance(fieldPath[i], allPoints);
+    allPoints.delete(nextPoint);
+    ordered.push(JSON.parse(nextPoint));
   }
-  return ordered;
+  const remaining = Array.from(allPoints)
+    .map(JSON.parse)
+    .sort((a, b) => a.id - b.id);
+  return [...ordered, ...remaining];
 };
 
 export const toCsv = (points, mukeyNameMap) => {
