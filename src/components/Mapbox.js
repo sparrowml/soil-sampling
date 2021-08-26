@@ -1,177 +1,211 @@
 import React from "react";
+import {
+  Editor,
+  EditingMode,
+  DrawPolygonMode,
+  DrawPointMode,
+} from "react-map-gl-draw";
 import MapGL, { Source, Layer } from "react-map-gl";
 
-import { DrawPolygonMode, EditingMode, Editor } from "react-map-gl-draw";
-
-import { uniformSample, voronoiSample } from "../api";
-import { getEditHandleStyle, getFeatureStyle } from "../draw-helpers";
-import { store } from "../store";
+import Display from "./Display";
+import Toolbox from "./Toolbox";
 import * as actions from "../actions";
+import { store } from "../store";
+import { getFeatureStyle, getEditHandleStyle } from "../styles";
 
 const TOKEN =
-  "pk.eyJ1IjoidGhlc3luZWF0ZXIiLCJhIjoiY2twMWJ3MGdjMG9hbzJvbzRkaGxxMG05dyJ9.FuJyojD0OlXLSJbpZlUM3A";
+  "pk.eyJ1IjoiamJlbmNvb2sxIiwiYSI6ImNrc2h6a3hkazBhd28ydm41MTA4MGw5ODIifQ.i9LnGAqi7LO478W227kNgw";
 const MAP_HEIGHT = "600px";
 const MAP_WIDTH = "600px";
 
+function getCursor(mode, mapboxMode) {
+  if (
+    mapboxMode instanceof DrawPolygonMode ||
+    mapboxMode instanceof DrawPointMode ||
+    mode === "path"
+  )
+    return "crosshair";
+  return "default";
+}
+
 export default function Mapbox() {
   const { state, dispatch } = React.useContext(store);
-
-  const [mode, setMode] = React.useState(new DrawPolygonMode());
-  const [selectedFeatureIndex, setSelectedFeatureIndex] = React.useState(null);
+  const [featureIndex, setFeatureIndex] = React.useState(null);
   const editorRef = React.useRef(null);
 
-  const [grid, setGrid] = React.useState({
-    type: "FeatureCollection",
-    features: [],
-  });
+  const [cursorLocation, setCursorLocation] = React.useState([-200, -200]);
 
-  const [regions, setRegions] = React.useState({
-    type: "FeatureCollection",
-    features: [],
-  });
+  const editorRefToState = React.useCallback(async () => {
+    if (editorRef.current === null) return;
+    const features = await editorRef.current.getFeatures();
+    // Send polygons to state
+    const polygons = features.filter(
+      (feature) => feature.geometry.type === "Polygon"
+    );
+    if (polygons.length > 0) dispatch(actions.setFieldPolygons(polygons));
+    // Send points to state
+    const points = features.filter(
+      (feature) => feature.geometry.type === "Point"
+    );
+    if (points.length > 0) dispatch(actions.setFieldPoints(points));
+    // Send lines to state
+    const lines = features
+      .filter((feature) => feature.geometry.type === "LineString")
+      .map((feature) => feature.geometry.coordinates);
+    if (lines.length > 0)
+      dispatch(actions.setFieldPath(lines[0].concat(...lines.slice(1))));
+  }, [dispatch]);
 
-  React.useEffect(() => {
-    async function fetchGrid() {
-      const gridFeatures = [];
-      const regionFeatures = [];
-      for (const polygon of state.drawnPolygons) {
-        let grid = [];
-        let regions = [];
-        let response;
-        if (state.algo === "uniform") {
-          response = await uniformSample(
-            polygon.geometry.coordinates[0],
-            state.sampleArea
-          );
-          grid = response.points || [];
-        } else if (state.algo === "voronoi") {
-          response = await voronoiSample(
-            polygon.geometry.coordinates[0],
-            state.nPoints
-          );
-          grid = response.points || [];
-          regions = response.regions || [];
-        }
-        if (response.error) {
-          alert(response.error);
-        }
-        grid.forEach((point) => {
-          gridFeatures.push({
-            type: "Feature",
-            geometry: {
-              type: "Point",
-              coordinates: point,
-            },
-          });
-        });
-        regions.forEach((region) => {
-          regionFeatures.push({
-            type: "Feature",
-            geometry: {
-              type: "Polygon",
-              coordinates: [region],
-            },
-          });
-        });
+  const clearEditorRef = React.useCallback(async () => {
+    if (editorRef.current === null) return;
+    for (let i = 0; i < 10; i++) {
+      const indices = editorRef.current.getFeatures().map((_, i) => i);
+      if (indices.length === 0) {
+        break;
       }
-      setGrid({
-        type: "FeatureCollection",
-        features: gridFeatures,
-      });
-      setRegions({
-        type: "FeatureCollection",
-        features: regionFeatures,
-      });
+      await editorRef.current.deleteFeatures(indices);
     }
-    fetchGrid();
-  }, [
-    setGrid,
-    state.drawnPolygons,
-    state.algo,
-    state.sampleArea,
-    state.nPoints,
-  ]);
-
-  const onDrawMode = React.useCallback((event) => {
-    event.preventDefault();
-    setMode(new DrawPolygonMode());
   }, []);
 
-  const onSelect = React.useCallback((options) => {
-    setSelectedFeatureIndex(options && options.selectedFeatureIndex);
-  }, []);
-
-  const onDelete = React.useCallback(
-    (event) => {
-      event.preventDefault();
-      if (
-        selectedFeatureIndex !== null &&
-        selectedFeatureIndex >= 0 &&
-        editorRef
-      ) {
-        editorRef.current.deleteFeatures(selectedFeatureIndex);
-        dispatch({
-          type: actions.DELETE_DRAWN_POLYGON,
-          value: selectedFeatureIndex,
-        });
+  // On switch modes
+  React.useEffect(() => {
+    const switchModes = async () => {
+      if (editorRef.current === null) return;
+      await editorRefToState();
+      await clearEditorRef();
+      switch (state.mode) {
+        case "polygon":
+          editorRef.current.addFeatures(state.fieldPolygons);
+          dispatch(actions.setFieldPolygons([]));
+          break;
+        case "point":
+          editorRef.current.addFeatures(state.fieldPoints);
+          dispatch(actions.setFieldPoints([]));
+          break;
+        case "path":
+          editorRef.current.addFeatures([
+            {
+              type: "Feature",
+              geometry: { type: "LineString", coordinates: state.fieldPath },
+              properties: {},
+            },
+          ]);
+          dispatch(actions.setFieldPath([]));
+          break;
+        default:
+          break;
       }
-    },
-    [selectedFeatureIndex, dispatch]
-  );
+    };
+    switchModes();
+    // eslint-disable-next-line
+  }, [dispatch, state.mode, editorRefToState, clearEditorRef]);
 
+  const onSelect = React.useCallback(({ selectedFeatureIndex }) => {
+    setFeatureIndex(selectedFeatureIndex);
+  }, []);
+
+  let timeout = React.useRef(null);
   const onUpdate = React.useCallback(
     ({ editType }) => {
+      clearTimeout(timeout.current);
+      timeout.current = setTimeout(editorRefToState);
       if (editType === "addFeature") {
-        dispatch({
-          type: actions.SET_DRAWN_POLYGONS,
-          value: editorRef.current.getFeatures(),
-        });
-        setMode(new EditingMode());
+        dispatch(actions.setMapboxMode(new EditingMode()));
       }
     },
-    [dispatch]
+    [dispatch, editorRefToState]
   );
 
-  const drawTools = (
-    <div className="mapboxgl-ctrl-top-left">
-      <div className="mapboxgl-ctrl-group mapboxgl-ctrl">
-        <button
-          className="mapbox-gl-draw_ctrl-draw-btn mapbox-gl-draw_polygon"
-          title="Polygon tool (p)"
-          onClick={onDrawMode}
-        />
-        <button
-          className="mapbox-gl-draw_ctrl-draw-btn mapbox-gl-draw_trash"
-          title="Delete"
-          onClick={onDelete}
-        />
-      </div>
-    </div>
-  );
+  const deleteFeature = React.useCallback(async () => {
+    if (editorRef.current === null) return;
+    if (featureIndex !== null) {
+      await editorRef.current.deleteFeatures(featureIndex);
+    }
+  }, [featureIndex]);
+
+  React.useEffect(() => {
+    if (state.trigger === null) return;
+    switch (state.trigger) {
+      case "deleteFeature":
+        deleteFeature();
+        break;
+      case "clearEditor":
+        clearEditorRef();
+        break;
+      default:
+        throw new Error(`Unknown trigger: ${state.trigger}`);
+    }
+    dispatch(actions.setTrigger(null));
+  }, [state.trigger, deleteFeature, dispatch, clearEditorRef]);
+
+  let cursorTimeout = React.useRef(null);
+  const onCursorMove = React.useCallback((event) => {
+    clearTimeout(cursorTimeout.current);
+    cursorTimeout.current = setTimeout(() => {
+      setCursorLocation(event.lngLat);
+    }, 100);
+  }, []);
 
   return (
-    <>
+    <div id="map-container">
       <MapGL
         {...state.viewport}
+        getCursor={() => getCursor(state.mode, state.mapboxMode)}
         width={MAP_WIDTH}
         height={MAP_HEIGHT}
-        mapStyle="mapbox://styles/thesyneater/ckqwgecqe0eka17mri7ud5xt9"
-        onViewportChange={(viewport) =>
-          dispatch({ type: actions.SET_VIEWPORT, value: viewport })
-        }
+        mapStyle="mapbox://styles/mapbox/satellite-v9"
+        onViewportChange={(viewport) => dispatch(actions.setViewport(viewport))}
         mapboxApiAccessToken={TOKEN}
+        onMouseMove={onCursorMove}
       >
-        <Source type="geojson" data={grid}>
+        <Display point={cursorLocation} />
+        <Editor
+          ref={editorRef}
+          clickRadius={12}
+          mode={state.mapboxMode}
+          onSelect={onSelect}
+          onUpdate={onUpdate}
+          editHandleShape={"circle"}
+          featureStyle={getFeatureStyle}
+          editHandleStyle={getEditHandleStyle}
+        />
+        <Source
+          type="geojson"
+          data={{ type: "FeatureCollection", features: state.fieldPolygons }}
+        >
           <Layer
-            id="grid"
-            type="circle"
+            id="polygons"
+            type="line"
             paint={{
-              "circle-radius": 2.5,
-              "circle-color": "white",
+              "line-color": "#3cb2d0",
+              "line-width": 2,
+            }}
+            layout={{
+              visibility: state.mode !== "polygon" ? "visible" : "none",
             }}
           />
         </Source>
-        <Source type="geojson" data={regions}>
+        <Source
+          type="geojson"
+          data={{ type: "FeatureCollection", features: state.fieldPoints }}
+        >
+          <Layer
+            id="points"
+            type="circle"
+            paint={{
+              "circle-color": "white",
+              "circle-radius": 3,
+              "circle-opacity": 0.85,
+            }}
+            layout={{
+              visibility: state.mode !== "point" ? "visible" : "none",
+            }}
+          />
+        </Source>
+        <Source
+          type="geojson"
+          data={{ type: "FeatureCollection", features: state.fieldMukeys }}
+        >
           <Layer
             id="regions"
             type="line"
@@ -183,19 +217,34 @@ export default function Mapbox() {
             }}
           />
         </Source>
-        <Editor
-          ref={editorRef}
-          style={{ width: "100%", height: "100%" }}
-          clickRadius={12}
-          mode={mode}
-          onSelect={onSelect}
-          onUpdate={onUpdate}
-          editHandleShape={"circle"}
-          featureStyle={getFeatureStyle}
-          editHandleStyle={getEditHandleStyle}
-        />
-        {drawTools}
+        <Source
+          type="geojson"
+          data={{
+            type: "FeatureCollection",
+            features: [
+              {
+                type: "Feature",
+                geometry: { type: "LineString", coordinates: state.fieldPath },
+                properties: {},
+              },
+            ],
+          }}
+        >
+          <Layer
+            id="path"
+            type="line"
+            paint={{
+              "line-color": "#3cb2d0",
+              "line-width": 3,
+            }}
+            layout={{
+              // visibility: state.mode !== "path" ? "visible" : "none",
+              visibility: "none",
+            }}
+          />
+        </Source>
+        <Toolbox />
       </MapGL>
-    </>
+    </div>
   );
 }

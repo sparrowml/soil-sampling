@@ -1,3 +1,5 @@
+import time
+
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 import numpy as np
@@ -11,6 +13,7 @@ from sampling import (
     get_mukey_regions,
     fake_voronoi_sample,
     check_area,
+    order_points,
 )
 
 app = Flask(__name__)
@@ -30,16 +33,31 @@ def uniform():
         acre = body.get("acre", "1")
         proj = Proj(get_utm_string(polygon[0]))
         utm = np.stack(proj(polygon[:, 0], polygon[:, 1]), -1)
+    except:
+        return jsonify({"error": "Invalid request. Check your inputs and try again."})
+    try:
         check_area(utm)
-        grid = uniform_sample(utm, acre)
+    except:
+        return jsonify(
+            {"error": "Invalid polygon. The maximum area is 2 square miles."}
+        )
+    try:
+        grid = order_points(uniform_sample(utm, acre))
         grid = np.stack(proj(grid[:, 0], grid[:, 1], inverse=True), -1)
         return jsonify(
             {
                 "points": grid.tolist(),
             }
         )
-    except Exception as e:
-        return jsonify({"error": str(e)})
+    except:
+        return jsonify(
+            {
+                "error": (
+                    "Error running the sampling algorithm. "
+                    "You can wait a minute and try again."
+                )
+            }
+        )
 
 
 @app.route("/voronoi", methods=["POST"])
@@ -48,13 +66,47 @@ def voronoi():
         body = request.get_json()
         polygon = np.array(body.get("polygon"))
         n_points = body.get("nPoints", 10)
-        regions = get_mukey_regions(polygon)
         proj = Proj(get_utm_string(polygon[0]))
         utm = np.stack(proj(polygon[:, 0], polygon[:, 1]), -1)
+    except Exception as e:
+        print(e)
+        return (
+            jsonify({"error": "Invalid request. Check your inputs and try again."}),
+            400,
+        )
+    try:
         check_area(utm)
+    except:
+        return (
+            jsonify({"error": "Invalid polygon. The maximum area is 2 square miles."}),
+            400,
+        )
+    regions = []
+    for _ in range(3):
+        try:
+            regions, region_mukey_ids = get_mukey_regions(polygon)
+            assert len(regions) > 0, "Empty region list"
+            break
+        except Exception as e:
+            time.sleep(1)
+            print(e)
+    if len(regions) == 0:
+        return (
+            jsonify(
+                {
+                    "error": (
+                        "Error requesting the MUKEY regions. "
+                        "You can wait a minute and try again."
+                    )
+                }
+            ),
+            400,
+        )
+    try:
         shapely_utm = Polygon(utm)
         grid_points = []
-        for region in regions:
+        point_mukey_ids = []
+        for region, mukey_id in zip(regions, region_mukey_ids):
             utm_region = np.stack(proj(region[:, 0], region[:, 1]), -1)
             shapely_region = Polygon(utm_region)
             n_region_points = round(n_points * shapely_region.area / shapely_utm.area)
@@ -64,18 +116,34 @@ def voronoi():
                 points = fake_voronoi_sample(utm_region, n_region_points)
                 if points is not None:
                     grid_points.append(points)
+                    point_mukey_ids.extend([mukey_id] * len(points))
             else:
-                grid_points.append(voronoi_sample(utm_region, n_region_points))
-        grid = np.concatenate(grid_points)
+                points = voronoi_sample(utm_region, n_region_points)
+                grid_points.append(points)
+                point_mukey_ids.extend([mukey_id] * len(points))
+        grid = order_points(np.concatenate(grid_points))
         grid = np.stack(proj(grid[:, 0], grid[:, 1], inverse=True), -1)
         return jsonify(
             {
                 "points": grid.tolist(),
+                "mukey_ids": point_mukey_ids,
                 "regions": [region.tolist() for region in regions],
+                "region_mukey_ids": region_mukey_ids,
             }
         )
     except Exception as e:
-        return jsonify({"error": str(e)})
+        print(e)
+        return (
+            jsonify(
+                {
+                    "error": (
+                        "Error running the sampling algorithm. "
+                        "You can wait a minute and try again."
+                    )
+                }
+            ),
+            400,
+        )
 
 
 if __name__ == "__main__":

@@ -1,5 +1,5 @@
 from collections import defaultdict
-from typing import Generator, List
+from typing import Generator, List, Tuple
 
 from bs4 import BeautifulSoup
 import numpy as np
@@ -8,6 +8,20 @@ from scipy.spatial import Voronoi
 from shapely.geometry import MultiPolygon, Polygon
 
 from .uniform import uniform_sample
+
+
+def get_components(data: np.ndarray, n_components: int = 2) -> np.ndarray:
+    cov_mat = np.cov(data.T)  # <-- get the covariance matrix
+
+    ## calculate eigenvalues of the covariance matrix
+    eig_val, eig_vec = np.linalg.eig(cov_mat)
+
+    # sort components, largest to smallest
+    idx_sort = np.flip(
+        eig_val.argsort()
+    )  # <-- get ordering of eigenvectors: largest to smallest
+    components = eig_vec[:, idx_sort]
+    return data @ components[:, :n_components]
 
 
 def voronoi_sample(polygon: np.ndarray, n_points: int) -> np.ndarray:
@@ -29,13 +43,33 @@ def fake_voronoi_sample(polygon: np.ndarray, n_points: int) -> np.ndarray:
     ymin = polygon[:, 1].min()
     polygon[:, 0] -= xmin
     polygon[:, 1] -= ymin
-    points = np.random.permutation(uniform_sample(polygon))[:n_points]
-    if len(points) == 0:
+    points = uniform_sample(polygon)
+    if len(points) < 2:
         shapely_polygon = Polygon(polygon)
         point = shapely_polygon.centroid
         if not shapely_polygon.contains(point):
             return
         points = np.array(point)[None]
+    else:
+        rotated = get_components(points, 2)
+        meter_bin = 25
+
+        dim1_bins = np.floor((rotated[:, 0] - rotated[:, 0].min()) / meter_bin)
+        dim2_bins = np.floor((rotated[:, 1] - rotated[:, 1].min()) / meter_bin)
+        percentiles = [round(100 * (i + 1) / (n_points + 1)) for i in range(n_points)]
+
+        indices = np.arange(len(points))
+        picked_points = []
+
+        for _p in np.percentile(dim1_bins, percentiles):
+            p = dim1_bins[np.argmin(np.abs(_p - dim1_bins))]
+            mask = dim1_bins == p
+            masked_dim2 = dim2_bins[mask]
+            _m = np.median(masked_dim2)
+            median_i = np.argmin(np.abs(_m - masked_dim2))
+            picked_points.append(points[indices[mask][median_i]])
+
+        points = np.stack(picked_points, 0)
     points[:, 0] += xmin
     points[:, 1] += ymin
     return points
@@ -113,7 +147,7 @@ def voronoi_polygons(
         yield Polygon(np.concatenate((finite_part, extra_edge)))
 
 
-def get_mukey_regions(polygon: np.ndarray) -> List[np.ndarray]:
+def get_mukey_regions(polygon: np.ndarray) -> Tuple[List[np.ndarray], List[str]]:
     min_lon, min_lat = polygon.min(axis=0)
     max_lon, max_lat = polygon.max(axis=0)
     shapely_polygon = Polygon(polygon)
@@ -137,20 +171,46 @@ def get_mukey_regions(polygon: np.ndarray) -> List[np.ndarray]:
         FILTER=xml_filter,
     )
     response = requests.get(url, params=params)
-    soup = BeautifulSoup(response.content)
+    soup = BeautifulSoup(response.content, features="html.parser")
 
     shapely_regions = []
-    for polygon_member in soup.find_all("gml:polygonmember"):
-        points = polygon_member.find("gml:coordinates").text.split()
+    mukey_ids = []
+    for feature_member in soup.find_all("gml:featuremember"):
+        mukey_id = feature_member.find("ms:mukey").text
+        points = (
+            feature_member.find("gml:outerboundaryis")
+            .find("gml:coordinates")
+            .text.split()
+        )
         points = np.array([list(map(float, p.split(","))) for p in points])
         points = points[:, ::-1]
         shapely_mukey = Polygon(points)
         shapely_mukey = shapely_polygon.intersection(shapely_mukey)
         if isinstance(shapely_mukey, MultiPolygon):
-            shapely_regions += [
+            multi_regions = [
                 np.stack(mk.exterior.coords.xy, -1) for mk in shapely_mukey
             ]
+            shapely_regions += multi_regions
+            mukey_ids += [mukey_id] * len(multi_regions)
         else:
             if shapely_mukey.exterior.coords:
                 shapely_regions.append(np.stack(shapely_mukey.exterior.coords.xy, -1))
-    return shapely_regions
+                mukey_ids.append(mukey_id)
+    return shapely_regions, mukey_ids
+
+
+def munames_from_mukeys(mukeys):
+    """
+    Documentation:
+    https://sdmdataaccess.nrcs.usda.gov/WebServiceHelp.aspx
+    """
+    url = "https://SDMDataAccess.sc.egov.usda.gov/Tabular/post.rest"
+    query = f"""
+    SELECT mukey, muname
+    FROM mapunit
+    WHERE mukey IN {str(tuple(mukeys))};
+    """
+    data = dict(QUERY=query, FORMAT="JSON")
+    response = requests.post(url, data=data)
+    result = response.json().get("Table", [])
+    return dict(result)

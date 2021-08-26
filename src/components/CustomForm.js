@@ -5,29 +5,17 @@ import { Grid, Paper, InputLabel } from "@material-ui/core";
 import MenuItem from "@material-ui/core/MenuItem";
 import FormControl from "@material-ui/core/FormControl";
 import Select from "@material-ui/core/Select";
-import { makeStyles } from "@material-ui/core/styles";
 
 import Mapbox from "./Mapbox";
 import UniformForm from "./UniformForm";
 import VoronoiForm from "./VoronoiForm";
 import Instructions from "./Instructions";
+import ViewportForm from "./ViewportForm";
+import SubmitActions from "./SubmitActions";
 
 import { store } from "../store";
 import * as actions from "../actions";
-
-const useStyles = makeStyles((theme) => ({
-  root: {
-    flexGrow: 1,
-    marginTop: theme.spacing(10),
-  },
-  paper: {
-    color: theme.palette.text.secondary,
-  },
-  formControl: {
-    margin: theme.spacing(4),
-    minWidth: 200,
-  },
-}));
+import useStyles from "../styles";
 
 function Form() {
   const classes = useStyles();
@@ -53,7 +41,7 @@ function Form() {
   };
 
   return (
-    <div className={classes.root}>
+    <div className={classes.form}>
       <Grid container spacing={3}>
         <Grid item xs={6}>
           <Mapbox />
@@ -61,6 +49,7 @@ function Form() {
 
         <Grid item xs={6}>
           <Paper className={classes.paper}>
+            <ViewportForm className={classes.formControl} />
             <Grid container direction="column">
               <Grid item>
                 <FormControl className={classes.formControl}>
@@ -73,6 +62,9 @@ function Form() {
                 </FormControl>
               </Grid>
               <Grid item>{subForm()}</Grid>
+              <Grid item>
+                <SubmitActions className={classes.formControl} />
+              </Grid>
             </Grid>
             <Instructions />
           </Paper>
