@@ -25,6 +25,12 @@ export const setFieldMukeys = (fieldMukeys) => ({
   fieldMukeys,
 });
 
+export const SET_FIELD_MUNAMES = "SET_FIELD_MUNAMES";
+export const setFieldMunames = (fieldMunames) => ({
+  type: SET_FIELD_MUNAMES,
+  fieldMunames,
+});
+
 export const SET_FIELD_PATH = "SET_FIELD_PATH";
 export const setFieldPath = (fieldPath) => ({
   type: SET_FIELD_PATH,

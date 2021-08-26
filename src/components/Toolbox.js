@@ -66,6 +66,7 @@ const Button = styled.button`
 `;
 
 const MODES = [
+  { mode: "select", content: <Icon name="pointer" />, title: "Select" },
   { mode: "polygon", content: <Icon name="shape-polygon" />, title: "Polygon" },
   { mode: "point", content: <Icon name="map-pin" />, title: "Point" },
   { mode: "path", content: <Icon name="stats" />, title: "Path" },

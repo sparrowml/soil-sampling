@@ -7,6 +7,7 @@ import {
 } from "react-map-gl-draw";
 import MapGL, { Source, Layer } from "react-map-gl";
 
+import Display from "./Display";
 import Toolbox from "./Toolbox";
 import * as actions from "../actions";
 import { store } from "../store";
@@ -31,6 +32,8 @@ export default function Mapbox() {
   const { state, dispatch } = React.useContext(store);
   const [featureIndex, setFeatureIndex] = React.useState(null);
   const editorRef = React.useRef(null);
+
+  const [cursorLocation, setCursorLocation] = React.useState([-200, -200]);
 
   const editorRefToState = React.useCallback(async () => {
     if (editorRef.current === null) return;
@@ -145,7 +148,9 @@ export default function Mapbox() {
         mapStyle="mapbox://styles/mapbox/satellite-v9"
         onViewportChange={(viewport) => dispatch(actions.setViewport(viewport))}
         mapboxApiAccessToken={TOKEN}
+        onMouseMove={(e) => setCursorLocation(e.lngLat)}
       >
+        <Display point={cursorLocation} />
         <Editor
           ref={editorRef}
           clickRadius={12}

@@ -27,6 +27,20 @@ const useStyles = makeStyles((theme) => ({
     backgroundColor: theme.palette.background.paper,
     padding: theme.spacing(2, 4, 3),
   },
+  display: {
+    position: "absolute",
+    display: "flex",
+    backgroundColor: "rgba(255, 255, 255, 0.6)",
+    color: "#2c7fb8",
+    padding: theme.spacing(0.5),
+    fontSize: theme.typography.fontSize,
+    top: "10px",
+    left: "10px",
+  },
+  displayText: {
+    fontSize: "10px",
+    fontWeight: "bold",
+  },
   paper: {
     color: theme.palette.text.secondary,
   },

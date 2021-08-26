@@ -112,8 +112,10 @@ def voronoi():
         grid_points = []
         point_mukey_ids = []
         point_mukey_names = []
+        region_munames = []
         for region, mukey_id in zip(regions, region_mukey_ids):
             muname = munames.get(mukey_id, "")
+            region_munames.append(muname)
             utm_region = np.stack(proj(region[:, 0], region[:, 1]), -1)
             shapely_region = Polygon(utm_region)
             n_region_points = round(n_points * shapely_region.area / shapely_utm.area)
@@ -138,6 +140,7 @@ def voronoi():
                 "mukey_ids": point_mukey_ids,
                 "mukey_names": point_mukey_names,
                 "regions": [region.tolist() for region in regions],
+                "region_munames": region_munames,
             }
         )
     except Exception as e:

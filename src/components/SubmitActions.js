@@ -34,14 +34,16 @@ export default function SubmitActions({ className }) {
 
   const generatePoints = async (event) => {
     event.preventDefault();
-    dispatch(actions.setMode(null));
+    dispatch(actions.setMode("select"));
     dispatch(actions.setTrigger("clearEditor"));
     dispatch(actions.setFieldPoints([]));
     dispatch(actions.setFieldMukeys([]));
+    dispatch(actions.setFieldMunames([]));
     dispatch(actions.setFieldPath([]));
     const fieldPath = [];
     const fieldPoints = [];
     const fieldMukeys = [];
+    const fieldMunames = [];
     for (const feature of state.fieldPolygons) {
       const polygon = feature.geometry.coordinates[0];
       let response;
@@ -63,8 +65,10 @@ export default function SubmitActions({ className }) {
           );
           fieldPath.push(...response.points);
         }
-        if (response.regions)
+        if (response.regions) {
           fieldMukeys.push(...response.regions.map(polygonMap));
+          fieldMunames.push(...response.region_munames);
+        }
       }
       if (response.error) {
         alert(response.error);
@@ -73,6 +77,7 @@ export default function SubmitActions({ className }) {
     }
     dispatch(actions.setFieldPoints(fieldPoints));
     dispatch(actions.setFieldMukeys(fieldMukeys));
+    dispatch(actions.setFieldMunames(fieldMunames));
     dispatch(actions.setFieldPath(fieldPath));
   };
 

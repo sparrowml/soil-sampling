@@ -13,6 +13,7 @@ const initialState = {
   fieldPolygons: [],
   fieldPoints: [],
   fieldMukeys: [],
+  fieldMunames: [],
   fieldPathMode: false,
   fieldPath: [],
   viewport: {
@@ -49,6 +50,8 @@ const StateProvider = ({ children }) => {
         return { ...state, fieldPoints: action.fieldPoints };
       case actions.SET_FIELD_MUKEYS:
         return { ...state, fieldMukeys: action.fieldMukeys };
+      case actions.SET_FIELD_MUNAMES:
+        return { ...state, fieldMunames: action.fieldMunames };
       case actions.SET_FIELD_PATH:
         return { ...state, fieldPath: action.fieldPath };
       case actions.SET_VIEWPORT:
