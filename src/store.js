@@ -40,7 +40,6 @@ const StateProvider = ({ children }) => {
       case actions.SET_N_POINTS:
         return { ...state, nPoints: action.value };
       case actions.SET_FIELD_POLYGONS:
-        console.log(action.fieldPolygons);
         return { ...state, fieldPolygons: action.fieldPolygons };
       case actions.SET_FIELD_POINTS:
         return { ...state, fieldPoints: action.fieldPoints };

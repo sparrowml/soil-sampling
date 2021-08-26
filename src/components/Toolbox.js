@@ -1,5 +1,5 @@
 import * as React from "react";
-import { DrawPolygonMode, DrawPointMode } from "react-map-gl-draw";
+import { DrawPolygonMode, DrawPointMode, EditingMode } from "react-map-gl-draw";
 import styled from "styled-components";
 import "boxicons";
 
@@ -50,6 +50,15 @@ function Icon(props) {
 export default function Toolbox() {
   const { state, dispatch } = React.useContext(store);
 
+  const modeSwitch = (mode) => {
+    if (mode === "select") {
+      dispatch(actions.setMapboxMode(null));
+    } else {
+      dispatch(actions.setMapboxMode(new EditingMode()));
+    }
+    dispatch(actions.setMode(mode));
+  };
+
   const newClick = () => {
     switch (state.mode) {
       case "polygon":
@@ -70,7 +79,7 @@ export default function Toolbox() {
           <Button
             key={i}
             active={state.mode === modeConfig.mode}
-            onClick={() => dispatch(actions.setMode(modeConfig.mode))}
+            onClick={() => modeSwitch(modeConfig.mode)}
             title={modeConfig.title}
           >
             {modeConfig.content}
@@ -79,7 +88,11 @@ export default function Toolbox() {
 
         <br />
 
-        <Button onClick={newClick} title="New">
+        <Button
+          onClick={newClick}
+          title="New"
+          active={state.mapboxMode === DrawPolygonMode}
+        >
           <Icon name="plus" />
         </Button>
 

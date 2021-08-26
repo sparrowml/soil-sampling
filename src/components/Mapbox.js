@@ -21,20 +21,22 @@ export default function Mapbox() {
   const [featureIndex, setFeatureIndex] = React.useState(null);
   const editorRef = React.useRef(null);
 
-  const updateFeatureState = React.useCallback(() => {
+  const editorRefToState = React.useCallback(() => {
     if (editorRef.current === null) return;
     const features = editorRef.current.getFeatures();
+    // Send polygons to state
     const polygons = features.filter(
       (feature) => feature.geometry.type === "Polygon"
     );
+    if (polygons.length > 0) dispatch(actions.setFieldPolygons(polygons));
+    // Send points to state
     const points = features.filter(
       (feature) => feature.geometry.type === "Point"
     );
-    if (polygons.length > 0) dispatch(actions.setFieldPolygons(polygons));
     if (points.length > 0) dispatch(actions.setFieldPoints(points));
   }, [dispatch]);
 
-  const clearFeatures = React.useCallback(async () => {
+  const clearEditorRef = React.useCallback(async () => {
     if (editorRef.current === null) return;
     for (let i = 0; i < 10; i++) {
       const indices = editorRef.current.getFeatures().map((_, i) => i);
@@ -45,30 +47,28 @@ export default function Mapbox() {
     }
   }, []);
 
+  // On switch modes
   React.useEffect(() => {
     const switchModes = async () => {
       if (editorRef.current === null) return;
-      updateFeatureState();
-      await clearFeatures();
+      editorRefToState();
+      await clearEditorRef();
       switch (state.mode) {
         case "polygon":
           editorRef.current.addFeatures(state.fieldPolygons);
+          dispatch(actions.setFieldPolygons([]));
           break;
         case "point":
           editorRef.current.addFeatures(state.fieldPoints);
+          dispatch(actions.setFieldPoints([]));
           break;
         default:
           break;
       }
     };
     switchModes();
-  }, [
-    state.mode,
-    updateFeatureState,
-    clearFeatures,
-    state.fieldPolygons,
-    state.fieldPoints,
-  ]);
+    // eslint-disable-next-line
+  }, [dispatch, state.mode, editorRefToState, clearEditorRef]);
 
   const onSelect = React.useCallback(
     ({ selectedFeatureIndex }) => {
@@ -121,31 +121,31 @@ export default function Mapbox() {
     if (editorRef.current === null) return;
     if (featureIndex !== null) {
       await editorRef.current.deleteFeatures(featureIndex);
-      switch (state.mode) {
-        case "polygon":
-          const newPolygons = [
-            ...state.fieldPolygons.slice(0, featureIndex),
-            ...state.fieldPolygons.slice(featureIndex + 1),
-          ];
-          dispatch(actions.setFieldPolygons(newPolygons));
-          break;
-        case "point":
-          const newPoints = [
-            ...state.fieldPoints.slice(0, featureIndex),
-            ...state.fieldPoints.slice(featureIndex + 1),
-          ];
-          dispatch(actions.setFieldPoints(newPoints));
-          break;
-        default:
-          break;
-      }
+      // switch (state.mode) {
+      //   case "polygon":
+      //     const newPolygons = [
+      //       ...state.fieldPolygons.slice(0, featureIndex),
+      //       ...state.fieldPolygons.slice(featureIndex + 1),
+      //     ];
+      //     dispatch(actions.setFieldPolygons(newPolygons));
+      //     break;
+      //   case "point":
+      //     const newPoints = [
+      //       ...state.fieldPoints.slice(0, featureIndex),
+      //       ...state.fieldPoints.slice(featureIndex + 1),
+      //     ];
+      //     dispatch(actions.setFieldPoints(newPoints));
+      //     break;
+      //   default:
+      //     break;
+      // }
     }
   }, [
     featureIndex,
-    state.mode,
-    state.fieldPolygons,
-    state.fieldPoints,
-    dispatch,
+    // state.mode,
+    // state.fieldPolygons,
+    // state.fieldPoints,
+    // dispatch,
   ]);
 
   React.useEffect(() => {
@@ -154,9 +154,6 @@ export default function Mapbox() {
       case "refreshPoints":
         // refreshPoints();
         break;
-      case "clearFeatures":
-        clearFeatures();
-        break;
       case "deleteFeature":
         deleteFeature();
         break;
@@ -164,7 +161,7 @@ export default function Mapbox() {
         throw new Error(`Unknown trigger: ${state.trigger}`);
     }
     dispatch(actions.setTrigger(null));
-  }, [state.trigger, clearFeatures, deleteFeature, dispatch]);
+  }, [state.trigger, deleteFeature, dispatch]);
 
   return (
     <div id="map-container">
@@ -177,6 +174,16 @@ export default function Mapbox() {
         onViewportChange={(viewport) => dispatch(actions.setViewport(viewport))}
         mapboxApiAccessToken={TOKEN}
       >
+        <Editor
+          ref={editorRef}
+          clickRadius={12}
+          mode={state.mapboxMode}
+          onSelect={onSelect}
+          onUpdate={onUpdate}
+          editHandleShape={"circle"}
+          featureStyle={getFeatureStyle}
+          editHandleStyle={getEditHandleStyle}
+        />
         <Source
           type="geojson"
           data={{ type: "FeatureCollection", features: state.fieldPolygons }}
@@ -187,6 +194,23 @@ export default function Mapbox() {
             paint={{
               "line-color": "#3cb2d0",
               "line-width": 2,
+            }}
+            layout={{
+              visibility: "visible",
+            }}
+          />
+        </Source>
+        <Source
+          type="geojson"
+          data={{ type: "FeatureCollection", features: state.fieldPoints }}
+        >
+          <Layer
+            id="points"
+            type="circle"
+            paint={{
+              "circle-color": "white",
+              "circle-radius": 3,
+              "circle-opacity": 0.85,
             }}
             layout={{
               visibility: "visible",
@@ -233,16 +257,6 @@ export default function Mapbox() {
             }}
           />
         </Source>
-        <Editor
-          ref={editorRef}
-          clickRadius={12}
-          mode={state.mapboxMode}
-          onSelect={onSelect}
-          onUpdate={onUpdate}
-          editHandleShape={"circle"}
-          featureStyle={getFeatureStyle}
-          editHandleStyle={getEditHandleStyle}
-        />
         <Toolbox />
       </MapGL>
     </div>
