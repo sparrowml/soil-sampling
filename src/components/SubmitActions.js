@@ -6,7 +6,6 @@ import Button from "@material-ui/core/Button";
 import { store } from "../store";
 import * as actions from "../actions";
 import * as api from "../api";
-import SavePointsModal from "./SavePointsModal";
 
 const pointMap = (point, id, mukey, muname) => ({
   type: "Feature",
@@ -87,9 +86,6 @@ export default function SubmitActions({ className }) {
         >
           Generate Points
         </Button>
-      </Grid>
-      <Grid item>
-        <SavePointsModal />
       </Grid>
     </Grid>
   );

@@ -1,5 +1,10 @@
 import React from "react";
-import { Editor, EditingMode } from "react-map-gl-draw";
+import {
+  Editor,
+  EditingMode,
+  DrawPolygonMode,
+  DrawPointMode,
+} from "react-map-gl-draw";
 import MapGL, { Source, Layer } from "react-map-gl";
 
 import Toolbox from "./Toolbox";
@@ -12,8 +17,13 @@ const TOKEN =
 const MAP_HEIGHT = "600px";
 const MAP_WIDTH = "600px";
 
-function getCursor() {
-  return "crosshair";
+function getCursor(mapboxMode) {
+  if (
+    mapboxMode instanceof DrawPolygonMode ||
+    mapboxMode instanceof DrawPointMode
+  )
+    return "crosshair";
+  return "default";
 }
 
 export default function Mapbox() {
@@ -167,7 +177,7 @@ export default function Mapbox() {
     <div id="map-container">
       <MapGL
         {...state.viewport}
-        getCursor={getCursor}
+        getCursor={() => getCursor(state.mapboxMode)}
         width={MAP_WIDTH}
         height={MAP_HEIGHT}
         mapStyle="mapbox://styles/mapbox/satellite-v9"
