@@ -147,6 +147,7 @@ export default function Toolbox() {
         return;
       case "path":
         dispatch(actions.setMapboxMode(new DrawLineStringMode()));
+        return;
       default:
         return;
     }

@@ -110,7 +110,7 @@ export default function Mapbox() {
         dispatch(actions.setMapboxMode(new EditingMode()));
       }
     },
-    [dispatch, state.mode, editorRefToState]
+    [dispatch, editorRefToState]
   );
 
   const deleteFeature = React.useCallback(async () => {
@@ -133,7 +133,7 @@ export default function Mapbox() {
         throw new Error(`Unknown trigger: ${state.trigger}`);
     }
     dispatch(actions.setTrigger(null));
-  }, [state.trigger, deleteFeature, dispatch]);
+  }, [state.trigger, deleteFeature, dispatch, clearEditorRef]);
 
   return (
     <div id="map-container">
