@@ -90,7 +90,6 @@ export default function Toolbox() {
       state.fieldPath,
       state.fieldPoints
     );
-    console.log(path.toGeojson(orderedPoints, state.mukeyNameMap));
     if (fileType === "csv") {
       const output = path.toCsv(orderedPoints, state.mukeyNameMap);
       const blob = new Blob([output], { type: "text/csv;charset=utf-8;" });

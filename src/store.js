@@ -30,61 +30,81 @@ const { Provider } = store;
 
 const StateProvider = ({ children }) => {
   const [state, dispatch] = React.useReducer((state, action) => {
+    let newState;
     switch (action.type) {
       case actions.SET_MODE:
-        return {
+        newState = {
           ...state,
           mode: action.mode,
           mapboxMode: new EditingMode(),
         };
+        break;
       case actions.SET_MAPBOX_MODE:
-        return { ...state, mapboxMode: action.mode };
+        newState = { ...state, mapboxMode: action.mode };
+        break;
       case actions.SET_ALGO:
-        return { ...state, algo: action.value };
+        newState = { ...state, algo: action.value };
+        break;
       case actions.SET_SAMPLE_AREA:
-        return { ...state, sampleArea: action.value };
+        newState = { ...state, sampleArea: action.value };
+        break;
       case actions.SET_N_POINTS:
-        return { ...state, nPoints: action.value };
+        newState = { ...state, nPoints: action.value };
+        break;
       case actions.SET_FIELD_POLYGONS:
-        return { ...state, fieldPolygons: action.fieldPolygons };
+        newState = { ...state, fieldPolygons: action.fieldPolygons };
+        break;
       case actions.SET_FIELD_POINTS:
-        return { ...state, fieldPoints: action.fieldPoints };
+        newState = { ...state, fieldPoints: action.fieldPoints };
+        break;
       case actions.SET_FIELD_MUKEYS:
-        return { ...state, fieldMukeys: action.fieldMukeys };
+        newState = { ...state, fieldMukeys: action.fieldMukeys };
+        break;
       case actions.SET_FIELD_MUKEY_IDS:
-        return { ...state, fieldMukeyIds: action.fieldMukeyIds };
+        newState = { ...state, fieldMukeyIds: action.fieldMukeyIds };
+        break;
       case actions.SET_MUKEY_NAME_MAP:
-        return { ...state, mukeyNameMap: action.mukeyNameMap };
+        newState = { ...state, mukeyNameMap: action.mukeyNameMap };
+        break;
       case actions.SET_FIELD_PATH:
-        return { ...state, fieldPath: action.fieldPath };
+        newState = { ...state, fieldPath: action.fieldPath };
+        break;
       case actions.SET_VIEWPORT:
-        return { ...state, viewport: action.viewport };
+        newState = { ...state, viewport: action.viewport };
+        break;
       case actions.SET_LONGITUDE:
-        return {
+        newState = {
           ...state,
           viewport: { ...state.viewport, longitude: action.longitude },
         };
+        break;
       case actions.SET_LATITUDE:
-        return {
+        newState = {
           ...state,
           viewport: { ...state.viewport, latitude: action.latitude },
         };
+        break;
       case actions.SET_TRIGGER:
-        return { ...state, trigger: action.trigger };
+        newState = { ...state, trigger: action.trigger };
+        break;
       case actions.ADD_FIELD_PATH_POINT:
-        return { ...state, fieldPath: [...state.fieldPath, action.point] };
+        newState = { ...state, fieldPath: [...state.fieldPath, action.point] };
+        break;
       case actions.TOGGLE_FIELD_PATH_MODE:
         if (state.fieldPathMode)
-          return { ...state, fieldPathMode: !state.fieldPathMode };
+          newState = { ...state, fieldPathMode: !state.fieldPathMode };
         else
-          return {
+          newState = {
             ...state,
             fieldPathMode: !state.fieldPathMode,
             fieldPath: [],
           };
+        break;
       default:
         throw new Error();
     }
+    console.log(JSON.stringify(newState));
+    return newState;
   }, initialState);
 
   return <Provider value={{ state, dispatch }}>{children}</Provider>;
