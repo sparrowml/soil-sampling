@@ -11,9 +11,9 @@ from sampling import (
     get_utm_string,
     voronoi_sample,
     get_mukey_regions,
-    munames_from_mukeys,
     fake_voronoi_sample,
     check_area,
+    order_points,
 )
 
 app = Flask(__name__)
@@ -42,7 +42,7 @@ def uniform():
             {"error": "Invalid polygon. The maximum area is 2 square miles."}
         )
     try:
-        grid = uniform_sample(utm, acre)
+        grid = order_points(uniform_sample(utm, acre))
         grid = np.stack(proj(grid[:, 0], grid[:, 1], inverse=True), -1)
         return jsonify(
             {
@@ -121,7 +121,7 @@ def voronoi():
                 points = voronoi_sample(utm_region, n_region_points)
                 grid_points.append(points)
                 point_mukey_ids.extend([mukey_id] * len(points))
-        grid = np.concatenate(grid_points)
+        grid = order_points(np.concatenate(grid_points))
         grid = np.stack(proj(grid[:, 0], grid[:, 1], inverse=True), -1)
         return jsonify(
             {
