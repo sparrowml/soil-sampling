@@ -4,5 +4,6 @@ flask-cors
 numpy
 pyproj
 requests
+scikit-learn
 scipy
 shapely
