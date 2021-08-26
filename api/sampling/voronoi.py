@@ -6,9 +6,22 @@ import numpy as np
 import requests
 from scipy.spatial import Voronoi
 from shapely.geometry import MultiPolygon, Polygon
-from sklearn.decomposition import PCA
 
 from .uniform import uniform_sample
+
+
+def get_components(data: np.ndarray, n_components: int = 2) -> np.ndarray:
+    cov_mat = np.cov(data.T)  # <-- get the covariance matrix
+
+    ## calculate eigenvalues of the covariance matrix
+    eig_val, eig_vec = np.linalg.eig(cov_mat)
+
+    # sort components, largest to smallest
+    idx_sort = np.flip(
+        eig_val.argsort()
+    )  # <-- get ordering of eigenvectors: largest to smallest
+    components = eig_vec[:, idx_sort]
+    return data @ components[:, :n_components]
 
 
 def voronoi_sample(polygon: np.ndarray, n_points: int) -> np.ndarray:
@@ -38,8 +51,7 @@ def fake_voronoi_sample(polygon: np.ndarray, n_points: int) -> np.ndarray:
             return
         points = np.array(point)[None]
     else:
-        pca = PCA(2)
-        rotated = pca.fit_transform(points)
+        rotated = get_components(points, 2)
         meter_bin = 25
 
         dim1_bins = np.floor((rotated[:, 0] - rotated[:, 0].min()) / meter_bin)
