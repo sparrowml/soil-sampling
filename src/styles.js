@@ -82,6 +82,31 @@ export function getFeatureStyle({ feature, index, state }) {
           r: 3,
         };
     }
+  } else if (feature.geometry.type === "LineString") {
+    switch (state) {
+      case RENDER_STATE.SELECTED:
+      case RENDER_STATE.UNCOMMITTED:
+      case RENDER_STATE.CLOSING:
+        return {
+          stroke: "rgb(60, 178, 208)",
+          strokeWidth: 2,
+          fillOpacity: 0,
+          strokeDasharray: "4,2",
+        };
+      case RENDER_STATE.HOVERED:
+        return {
+          stroke: "rgb(60, 178, 208)",
+          strokeWidth: 2,
+          fillOpacity: 0,
+          strokeDasharray: "4,2",
+        };
+      default:
+        return {
+          stroke: "rgb(60, 178, 208)",
+          strokeWidth: 2,
+          fillOpacity: 0,
+        };
+    }
   } else {
     switch (state) {
       case RENDER_STATE.SELECTED:

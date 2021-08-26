@@ -1,5 +1,9 @@
 import * as React from "react";
-import { DrawPolygonMode, DrawPointMode } from "react-map-gl-draw";
+import {
+  DrawPolygonMode,
+  DrawPointMode,
+  DrawLineStringMode,
+} from "react-map-gl-draw";
 import styled from "styled-components";
 import FileSaver from "file-saver";
 import shpwrite from "shp-write";
@@ -100,6 +104,7 @@ export default function Toolbox() {
       const output = path.toGeojson(orderedPoints);
       shpwrite.download(output);
     }
+    setOpen(false);
   };
 
   const fileNameInput = () => {
@@ -141,6 +146,8 @@ export default function Toolbox() {
       case "point":
         dispatch(actions.setMapboxMode(new DrawPointMode()));
         return;
+      case "path":
+        dispatch(actions.setMapboxMode(new DrawLineStringMode()));
       default:
         return;
     }
@@ -149,7 +156,8 @@ export default function Toolbox() {
   const newActive = () => {
     return (
       state.mapboxMode instanceof DrawPolygonMode ||
-      state.mapboxMode instanceof DrawPointMode
+      state.mapboxMode instanceof DrawPointMode ||
+      state.mapboxMode instanceof DrawLineStringMode
     );
   };
 

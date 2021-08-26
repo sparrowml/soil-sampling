@@ -17,10 +17,11 @@ const TOKEN =
 const MAP_HEIGHT = "600px";
 const MAP_WIDTH = "600px";
 
-function getCursor(mapboxMode) {
+function getCursor(mode, mapboxMode) {
   if (
     mapboxMode instanceof DrawPolygonMode ||
-    mapboxMode instanceof DrawPointMode
+    mapboxMode instanceof DrawPointMode ||
+    mode === "path"
   )
     return "crosshair";
   return "default";
@@ -44,6 +45,12 @@ export default function Mapbox() {
       (feature) => feature.geometry.type === "Point"
     );
     if (points.length > 0) dispatch(actions.setFieldPoints(points));
+    // Send lines to state
+    const lines = features
+      .filter((feature) => feature.geometry.type === "LineString")
+      .map((feature) => feature.geometry.coordinates);
+    if (lines.length > 0)
+      dispatch(actions.setFieldPath(lines[0].concat(...lines.slice(1))));
   }, [dispatch]);
 
   const clearEditorRef = React.useCallback(async () => {
@@ -72,6 +79,16 @@ export default function Mapbox() {
           editorRef.current.addFeatures(state.fieldPoints);
           dispatch(actions.setFieldPoints([]));
           break;
+        case "path":
+          editorRef.current.addFeatures([
+            {
+              type: "Feature",
+              geometry: { type: "LineString", coordinates: state.fieldPath },
+              properties: {},
+            },
+          ]);
+          dispatch(actions.setFieldPath([]));
+          break;
         default:
           break;
       }
@@ -80,24 +97,9 @@ export default function Mapbox() {
     // eslint-disable-next-line
   }, [dispatch, state.mode, editorRefToState, clearEditorRef]);
 
-  const onSelect = React.useCallback(
-    ({ selectedFeatureIndex }) => {
-      setFeatureIndex(selectedFeatureIndex);
-      //   if (
-      //     !state.fieldPathMode ||
-      //     editorRef.current === null ||
-      //     selectedFeatureIndex === null ||
-      //     selectedFeatureIndex < 0
-      //   )
-      //     return;
-      //   const feature = editorRef.current.getFeatures()[selectedFeatureIndex];
-      //   if (feature.geometry.type === "Point") {
-      //     dispatch(actions.addFieldPathPoint(feature.geometry.coordinates));
-      //   }
-    },
-    []
-    // [dispatch, state.fieldPathMode]
-  );
+  const onSelect = React.useCallback(({ selectedFeatureIndex }) => {
+    setFeatureIndex(selectedFeatureIndex);
+  }, []);
 
   let timeout = React.useRef(null);
   const onUpdate = React.useCallback(
@@ -109,39 +111,15 @@ export default function Mapbox() {
         dispatch(actions.setMapboxMode(new EditingMode()));
       }
     },
-    [dispatch, state.mode]
+    [dispatch, state.mode, editorRefToState]
   );
 
   const deleteFeature = React.useCallback(async () => {
     if (editorRef.current === null) return;
     if (featureIndex !== null) {
       await editorRef.current.deleteFeatures(featureIndex);
-      // switch (state.mode) {
-      //   case "polygon":
-      //     const newPolygons = [
-      //       ...state.fieldPolygons.slice(0, featureIndex),
-      //       ...state.fieldPolygons.slice(featureIndex + 1),
-      //     ];
-      //     dispatch(actions.setFieldPolygons(newPolygons));
-      //     break;
-      //   case "point":
-      //     const newPoints = [
-      //       ...state.fieldPoints.slice(0, featureIndex),
-      //       ...state.fieldPoints.slice(featureIndex + 1),
-      //     ];
-      //     dispatch(actions.setFieldPoints(newPoints));
-      //     break;
-      //   default:
-      //     break;
-      // }
     }
-  }, [
-    featureIndex,
-    // state.mode,
-    // state.fieldPolygons,
-    // state.fieldPoints,
-    // dispatch,
-  ]);
+  }, [featureIndex]);
 
   React.useEffect(() => {
     if (state.trigger === null) return;
@@ -159,7 +137,7 @@ export default function Mapbox() {
     <div id="map-container">
       <MapGL
         {...state.viewport}
-        getCursor={() => getCursor(state.mapboxMode)}
+        getCursor={() => getCursor(state.mode, state.mapboxMode)}
         width={MAP_WIDTH}
         height={MAP_HEIGHT}
         mapStyle="mapbox://styles/mapbox/satellite-v9"
@@ -241,8 +219,8 @@ export default function Mapbox() {
             id="path"
             type="line"
             paint={{
-              "line-color": "black",
-              "line-width": 2,
+              "line-color": "#3cb2d0",
+              "line-width": 3,
             }}
             layout={{
               visibility: "visible",
