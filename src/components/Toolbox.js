@@ -3,6 +3,7 @@ import {
   DrawPolygonMode,
   DrawPointMode,
   DrawLineStringMode,
+  EditingMode,
 } from "react-map-gl-draw";
 import styled from "styled-components";
 import FileSaver from "file-saver";
@@ -139,6 +140,10 @@ export default function Toolbox() {
   };
 
   const newClick = () => {
+    if (newActive()) {
+      dispatch(actions.setMapboxMode(new EditingMode()));
+      return;
+    }
     switch (state.mode) {
       case "polygon":
         dispatch(actions.setMapboxMode(new DrawPolygonMode()));
