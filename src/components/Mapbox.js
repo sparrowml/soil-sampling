@@ -120,6 +120,21 @@ export default function Mapbox() {
     if (editorRef.current === null) return;
     if (featureIndex !== null) {
       await editorRef.current.deleteFeatures(featureIndex);
+      switch (state.mode) {
+        case "polygon":
+          const polygons = state.fieldPolygons.filter(
+            (_, i) => i !== featureIndex
+          );
+          dispatch(actions.setFieldPolygons(polygons));
+          break;
+        case "point":
+          const points = state.fieldPoints.filter((_, i) => i !== featureIndex);
+          dispatch(actions.setFieldPoints(points));
+          break;
+        case "path":
+          dispatch(actions.setFieldPath([]));
+          break;
+      }
     }
   }, [featureIndex]);
 

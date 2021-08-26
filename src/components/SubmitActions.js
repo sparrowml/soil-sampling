@@ -43,6 +43,7 @@ export default function SubmitActions({ className }) {
     const fieldPoints = [];
     const fieldMukeys = [];
     const fieldMukeyIds = [];
+    await api.warmup();
     for (const feature of state.fieldPolygons) {
       const polygon = feature.geometry.coordinates[0];
       let response;
