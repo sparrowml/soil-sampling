@@ -189,9 +189,9 @@ export default function Toolbox() {
 
         <Button
           onClick={() => dispatch(actions.setTrigger("deleteFeature"))}
-          title="Delete"
+          title="Cut"
         >
-          <Icon name="trash" />
+          <Icon name="cut" />
         </Button>
 
         <br />
@@ -199,6 +199,12 @@ export default function Toolbox() {
         <Button onClick={() => setOpen(true)} title="Export">
           <Icon name="export" />
         </Button>
+        {/* <Button
+          onClick={() => dispatch(actions.setTrigger("clearAll"))}
+          title="Delete"
+        >
+          <Icon name="trash" />
+        </Button> */}
       </Tools>
       <Modal open={open} onClose={() => setOpen(false)}>
         <div style={getModalStyle()} className={classes.modalPaper}>
