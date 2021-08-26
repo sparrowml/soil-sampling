@@ -33,7 +33,7 @@ const StateProvider = ({ children }) => {
         return {
           ...state,
           mode: action.mode,
-          mapboxMode: action.mode === "select" ? null : new EditingMode(),
+          mapboxMode: new EditingMode(),
         };
       case actions.SET_MAPBOX_MODE:
         return { ...state, mapboxMode: action.mode };

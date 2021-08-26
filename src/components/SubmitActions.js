@@ -34,7 +34,8 @@ export default function SubmitActions({ className }) {
 
   const generatePoints = async (event) => {
     event.preventDefault();
-    dispatch(actions.setMode("select"));
+    dispatch(actions.setMode(null));
+    dispatch(actions.setTrigger("clearEditor"));
     dispatch(actions.setFieldPoints([]));
     dispatch(actions.setFieldMukeys([]));
     dispatch(actions.setFieldPath([]));
@@ -47,12 +48,13 @@ export default function SubmitActions({ className }) {
       if (state.algo === "uniform") {
         response = await api.uniformSample(polygon, state.sampleArea);
         if (response.points) {
-          fieldPoints.push(...response.points.map(pointMap));
+          fieldPoints.push(
+            ...response.points.map((point, i) => pointMap(point, i, "", ""))
+          );
           fieldPath.push(...response.points);
         }
       } else if (state.algo === "voronoi") {
         response = await api.voronoiSample(polygon, state.nPoints);
-        console.log(response);
         if (response.points) {
           fieldPoints.push(
             ...response.points.map((point, i) =>

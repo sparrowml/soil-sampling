@@ -105,8 +105,7 @@ export default function Mapbox() {
   const onUpdate = React.useCallback(
     ({ editType }) => {
       clearTimeout(timeout.current);
-      if (state.mode === "polygon")
-        timeout.current = setTimeout(editorRefToState);
+      timeout.current = setTimeout(editorRefToState);
       if (editType === "addFeature") {
         dispatch(actions.setMapboxMode(new EditingMode()));
       }
@@ -126,6 +125,9 @@ export default function Mapbox() {
     switch (state.trigger) {
       case "deleteFeature":
         deleteFeature();
+        break;
+      case "clearEditor":
+        clearEditorRef();
         break;
       default:
         throw new Error(`Unknown trigger: ${state.trigger}`);
@@ -166,7 +168,7 @@ export default function Mapbox() {
               "line-width": 2,
             }}
             layout={{
-              visibility: "visible",
+              visibility: state.mode !== "polygon" ? "visible" : "none",
             }}
           />
         </Source>
@@ -183,7 +185,7 @@ export default function Mapbox() {
               "circle-opacity": 0.85,
             }}
             layout={{
-              visibility: "visible",
+              visibility: state.mode !== "point" ? "visible" : "none",
             }}
           />
         </Source>
@@ -223,7 +225,7 @@ export default function Mapbox() {
               "line-width": 3,
             }}
             layout={{
-              visibility: "visible",
+              visibility: state.mode !== "path" ? "visible" : "none",
             }}
           />
         </Source>
