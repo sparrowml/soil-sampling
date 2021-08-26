@@ -33,6 +33,7 @@ export default function SubmitActions({ className }) {
 
   const generatePoints = async (event) => {
     event.preventDefault();
+    dispatch(actions.setLoading(true));
     dispatch(actions.setMode("select"));
     dispatch(actions.setTrigger("clearEditor"));
     dispatch(actions.setFieldPoints([]));
@@ -82,14 +83,21 @@ export default function SubmitActions({ className }) {
         });
       }
       if (response.error) {
+        dispatch(actions.setLoading(false));
         alert(response.error);
         return;
       }
+    }
+    if (fieldPoints.length === 0) {
+      dispatch(actions.setLoading(false));
+      alert("An error occurred with the API");
+      return;
     }
     dispatch(actions.setFieldPoints(fieldPoints));
     dispatch(actions.setFieldMukeys(fieldMukeys));
     dispatch(actions.setFieldMukeyIds(fieldMukeyIds));
     dispatch(actions.setFieldPath(fieldPath));
+    dispatch(actions.setLoading(false));
   };
 
   return (

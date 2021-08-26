@@ -5,6 +5,7 @@ import Container from "@material-ui/core/Container";
 
 import Form from "./components/CustomForm";
 import Navbar from "./components/Navbar";
+import Loading from "./components/Loading";
 
 import useStyles from "./styles";
 import "./App.css";
@@ -21,6 +22,7 @@ export default function App() {
             <Form />
           </section>
         </div>
+        <Loading />
       </Container>
     </main>
   );

@@ -10,6 +10,7 @@ const initialState = {
   trigger: null,
   sampleArea: "5",
   nPoints: 15,
+  loading: false,
   fieldPolygons: [],
   fieldPoints: [],
   fieldMukeys: [],
@@ -38,6 +39,9 @@ const StateProvider = ({ children }) => {
           mode: action.mode,
           mapboxMode: new EditingMode(),
         };
+        break;
+      case actions.SET_LOADING:
+        newState = { ...state, loading: action.loading };
         break;
       case actions.SET_MAPBOX_MODE:
         newState = { ...state, mapboxMode: action.mode };

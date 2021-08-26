@@ -134,8 +134,11 @@ export default function Mapbox() {
         case "path":
           dispatch(actions.setFieldPath([]));
           break;
+        default:
+          break;
       }
     }
+    // eslint-disable-next-line
   }, [featureIndex]);
 
   React.useEffect(() => {
