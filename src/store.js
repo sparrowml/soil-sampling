@@ -1,5 +1,5 @@
 import React from "react";
-import { DrawPolygonMode } from "react-map-gl-draw";
+import { DrawPolygonMode, EditingMode } from "react-map-gl-draw";
 
 import * as actions from "./actions";
 
@@ -30,7 +30,11 @@ const StateProvider = ({ children }) => {
   const [state, dispatch] = React.useReducer((state, action) => {
     switch (action.type) {
       case actions.SET_MODE:
-        return { ...state, mode: action.mode };
+        return {
+          ...state,
+          mode: action.mode,
+          mapboxMode: action.mode === "select" ? null : new EditingMode(),
+        };
       case actions.SET_MAPBOX_MODE:
         return { ...state, mapboxMode: action.mode };
       case actions.SET_ALGO:

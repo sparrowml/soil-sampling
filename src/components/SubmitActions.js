@@ -34,10 +34,10 @@ export default function SubmitActions({ className }) {
 
   const generatePoints = async (event) => {
     event.preventDefault();
+    dispatch(actions.setMode("select"));
     dispatch(actions.setFieldPoints([]));
     dispatch(actions.setFieldMukeys([]));
     dispatch(actions.setFieldPath([]));
-    dispatch(actions.setTrigger("refreshPoints"));
     const fieldPath = [];
     const fieldPoints = [];
     const fieldMukeys = [];
@@ -72,7 +72,6 @@ export default function SubmitActions({ className }) {
     dispatch(actions.setFieldPoints(fieldPoints));
     dispatch(actions.setFieldMukeys(fieldMukeys));
     dispatch(actions.setFieldPath(fieldPath));
-    dispatch(actions.setTrigger("refreshPoints"));
   };
 
   return (

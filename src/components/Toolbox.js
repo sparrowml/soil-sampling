@@ -1,5 +1,5 @@
 import * as React from "react";
-import { DrawPolygonMode, DrawPointMode, EditingMode } from "react-map-gl-draw";
+import { DrawPolygonMode, DrawPointMode } from "react-map-gl-draw";
 import styled from "styled-components";
 import FileSaver from "file-saver";
 import shpwrite from "shp-write";
@@ -133,15 +133,6 @@ export default function Toolbox() {
     }
   };
 
-  const modeSwitch = (mode) => {
-    if (mode === "select") {
-      dispatch(actions.setMapboxMode(null));
-    } else {
-      dispatch(actions.setMapboxMode(new EditingMode()));
-    }
-    dispatch(actions.setMode(mode));
-  };
-
   const newClick = () => {
     switch (state.mode) {
       case "polygon":
@@ -169,7 +160,7 @@ export default function Toolbox() {
           <Button
             key={i}
             active={state.mode === modeConfig.mode}
-            onClick={() => modeSwitch(modeConfig.mode)}
+            onClick={() => dispatch(actions.setMode(modeConfig.mode))}
             title={modeConfig.title}
           >
             {modeConfig.content}

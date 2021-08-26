@@ -31,9 +31,9 @@ export default function Mapbox() {
   const [featureIndex, setFeatureIndex] = React.useState(null);
   const editorRef = React.useRef(null);
 
-  const editorRefToState = React.useCallback(() => {
+  const editorRefToState = React.useCallback(async () => {
     if (editorRef.current === null) return;
-    const features = editorRef.current.getFeatures();
+    const features = await editorRef.current.getFeatures();
     // Send polygons to state
     const polygons = features.filter(
       (feature) => feature.geometry.type === "Polygon"
@@ -61,7 +61,7 @@ export default function Mapbox() {
   React.useEffect(() => {
     const switchModes = async () => {
       if (editorRef.current === null) return;
-      editorRefToState();
+      await editorRefToState();
       await clearEditorRef();
       switch (state.mode) {
         case "polygon":
@@ -99,33 +99,18 @@ export default function Mapbox() {
     // [dispatch, state.fieldPathMode]
   );
 
-  // let timeout = React.useRef(null);
+  let timeout = React.useRef(null);
   const onUpdate = React.useCallback(
     ({ editType }) => {
-      // clearTimeout(timeout.current);
-      // timeout.current = setTimeout(updateFeatureState);
+      clearTimeout(timeout.current);
+      if (state.mode === "polygon")
+        timeout.current = setTimeout(editorRefToState);
       if (editType === "addFeature") {
         dispatch(actions.setMapboxMode(new EditingMode()));
       }
     },
-    [dispatch]
-    // [updateFeatureState, dispatch]
+    [dispatch, state.mode]
   );
-
-  // const refreshPoints = React.useCallback(async () => {
-  //   if (editorRef.current === null) return;
-  //   for (let i = 0; i < 10; i++) {
-  //     const deleteIndices = editorRef.current
-  //       .getFeatures()
-  //       .map((feature, i) => (feature.geometry.type === "Point" ? i : null))
-  //       .filter((i) => i !== null);
-  //     if (deleteIndices.length === 0) {
-  //       break;
-  //     }
-  //     await editorRef.current.deleteFeatures(deleteIndices);
-  //   }
-  //   editorRef.current.addFeatures(state.fieldPoints);
-  // }, [state.fieldPoints]);
 
   const deleteFeature = React.useCallback(async () => {
     if (editorRef.current === null) return;
@@ -161,9 +146,6 @@ export default function Mapbox() {
   React.useEffect(() => {
     if (state.trigger === null) return;
     switch (state.trigger) {
-      case "refreshPoints":
-        // refreshPoints();
-        break;
       case "deleteFeature":
         deleteFeature();
         break;

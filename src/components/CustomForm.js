@@ -4,7 +4,6 @@ import { Grid, Paper, InputLabel } from "@material-ui/core";
 
 import MenuItem from "@material-ui/core/MenuItem";
 import FormControl from "@material-ui/core/FormControl";
-import Button from "@material-ui/core/Button";
 import Select from "@material-ui/core/Select";
 
 import Mapbox from "./Mapbox";
@@ -51,58 +50,6 @@ function Form() {
         <Grid item xs={6}>
           <Paper className={classes.paper}>
             <ViewportForm className={classes.formControl} />
-            <Grid container direction="row">
-              <Grid item>
-                <Button
-                  className={classes.gridButtons}
-                  variant="contained"
-                  color={"primary"}
-                  onClick={() => dispatch(actions.setTrigger("deleteFeature"))}
-                >
-                  Delete Selection
-                </Button>
-              </Grid>
-              <Grid item>
-                <Button
-                  className={classes.gridButtons}
-                  variant="contained"
-                  color={"primary"}
-                  onClick={() => dispatch(actions.setTrigger("clearFeatures"))}
-                >
-                  Clear Features
-                </Button>
-              </Grid>
-              <Grid item>
-                <Button
-                  className={classes.gridButtons}
-                  variant="contained"
-                  color={"primary"}
-                  onClick={() => dispatch(actions.setTrigger("newPolygon"))}
-                >
-                  New Polygon
-                </Button>
-              </Grid>
-              <Grid item>
-                <Button
-                  className={classes.gridButtons}
-                  variant="contained"
-                  color={"primary"}
-                  onClick={() => dispatch(actions.setTrigger("newPoint"))}
-                >
-                  New Point
-                </Button>
-              </Grid>
-              <Grid item>
-                <Button
-                  className={classes.gridButtons}
-                  variant="contained"
-                  color={state.fieldPathMode ? "secondary" : "primary"}
-                  onClick={() => dispatch(actions.toggleFieldPathMode())}
-                >
-                  Path Mode
-                </Button>
-              </Grid>
-            </Grid>
             <Grid container direction="column">
               <Grid item>
                 <FormControl className={classes.formControl}>
