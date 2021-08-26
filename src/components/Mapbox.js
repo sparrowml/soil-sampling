@@ -138,6 +138,14 @@ export default function Mapbox() {
     dispatch(actions.setTrigger(null));
   }, [state.trigger, deleteFeature, dispatch, clearEditorRef]);
 
+  let cursorTimeout = React.useRef(null);
+  const onCursorMove = React.useCallback((event) => {
+    clearTimeout(cursorTimeout.current);
+    cursorTimeout.current = setTimeout(() => {
+      setCursorLocation(event.lngLat);
+    }, 100);
+  }, []);
+
   return (
     <div id="map-container">
       <MapGL
@@ -148,7 +156,7 @@ export default function Mapbox() {
         mapStyle="mapbox://styles/mapbox/satellite-v9"
         onViewportChange={(viewport) => dispatch(actions.setViewport(viewport))}
         mapboxApiAccessToken={TOKEN}
-        onMouseMove={(e) => setCursorLocation(e.lngLat)}
+        onMouseMove={onCursorMove}
       >
         <Display point={cursorLocation} />
         <Editor
