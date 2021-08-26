@@ -1,6 +1,26 @@
 // const BASE_URL = "https://eaci7u8499.execute-api.us-east-1.amazonaws.com/dev";
 const BASE_URL = "http://localhost:5000";
 
+export async function getMunames(mukeys) {
+  const url = "https://SDMDataAccess.sc.egov.usda.gov/Tabular/post.rest";
+  const uniqueMukeys = Array.from(new Set(mukeys));
+  const query = `
+  SELECT mukey, muname
+  FROM mapunit
+  WHERE mukey IN ('${uniqueMukeys.join("', '")}');
+  `;
+  return window
+    .fetch(url, {
+      method: "POST",
+      body: JSON.stringify({
+        QUERY: query,
+        FORMAT: "JSON",
+      }),
+    })
+    .then((response) => response.json())
+    .catch(console.error);
+}
+
 export async function uniformSample(polygon, acre) {
   return window
     .fetch(`${BASE_URL}/uniform`, {

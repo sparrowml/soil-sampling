@@ -238,7 +238,8 @@ export default function Mapbox() {
               "line-width": 3,
             }}
             layout={{
-              visibility: state.mode !== "path" ? "visible" : "none",
+              // visibility: state.mode !== "path" ? "visible" : "none",
+              visibility: "none",
             }}
           />
         </Source>

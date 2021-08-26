@@ -102,20 +102,11 @@ def voronoi():
             ),
             400,
         )
-    munames = {}
-    try:
-        munames = munames_from_mukeys(set(region_mukey_ids))
-    except Exception as e:
-        print(e)
     try:
         shapely_utm = Polygon(utm)
         grid_points = []
         point_mukey_ids = []
-        point_mukey_names = []
-        region_munames = []
         for region, mukey_id in zip(regions, region_mukey_ids):
-            muname = munames.get(mukey_id, "")
-            region_munames.append(muname)
             utm_region = np.stack(proj(region[:, 0], region[:, 1]), -1)
             shapely_region = Polygon(utm_region)
             n_region_points = round(n_points * shapely_region.area / shapely_utm.area)
@@ -126,21 +117,18 @@ def voronoi():
                 if points is not None:
                     grid_points.append(points)
                     point_mukey_ids.extend([mukey_id] * len(points))
-                    point_mukey_names.extend([muname] * len(points))
             else:
                 points = voronoi_sample(utm_region, n_region_points)
                 grid_points.append(points)
                 point_mukey_ids.extend([mukey_id] * len(points))
-                point_mukey_names.extend([muname] * len(points))
         grid = np.concatenate(grid_points)
         grid = np.stack(proj(grid[:, 0], grid[:, 1], inverse=True), -1)
         return jsonify(
             {
                 "points": grid.tolist(),
                 "mukey_ids": point_mukey_ids,
-                "mukey_names": point_mukey_names,
                 "regions": [region.tolist() for region in regions],
-                "region_munames": region_munames,
+                "region_mukey_ids": region_mukey_ids,
             }
         )
     except Exception as e:

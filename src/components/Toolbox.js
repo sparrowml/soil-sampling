@@ -90,18 +90,19 @@ export default function Toolbox() {
       state.fieldPath,
       state.fieldPoints
     );
+    console.log(path.toGeojson(orderedPoints, state.mukeyNameMap));
     if (fileType === "csv") {
-      const output = path.toCsv(orderedPoints);
+      const output = path.toCsv(orderedPoints, state.mukeyNameMap);
       const blob = new Blob([output], { type: "text/csv;charset=utf-8;" });
-      FileSaver.saveAs(blob, fileName);
+      FileSaver.saveAs(blob, fileName || "download.csv");
     } else if (fileType === "kml") {
-      const output = path.toKml(orderedPoints);
+      const output = path.toKml(orderedPoints, state.mukeyNameMap);
       const blob = new Blob([output], {
         type: "application/vnd.google-earth.kml+xml;charset=utf-8",
       });
-      FileSaver.saveAs(blob, fileName);
+      FileSaver.saveAs(blob, fileName || "download.kml");
     } else if (fileType === "shp") {
-      const output = path.toGeojson(orderedPoints);
+      const output = path.toGeojson(orderedPoints, state.mukeyNameMap);
       shpwrite.download(output);
     }
     setOpen(false);
@@ -114,7 +115,7 @@ export default function Toolbox() {
           <Grid item>
             <TextField
               value={fileName}
-              placeholder="filename.csv"
+              placeholder="download.csv"
               helperText="File name"
               className={classes.modalFormControl}
               onChange={(e) => setFileName(e.target.value)}
@@ -126,7 +127,7 @@ export default function Toolbox() {
           <Grid item>
             <TextField
               value={fileName}
-              placeholder="filename.kml"
+              placeholder="download.kml"
               helperText="File name"
               className={classes.modalFormControl}
               onChange={(e) => setFileName(e.target.value)}

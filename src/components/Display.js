@@ -30,7 +30,9 @@ export default function Display({ point }) {
   for (let i = 0; i < state.fieldMukeys.length; i++) {
     const mukeyPolygon = state.fieldMukeys[i].geometry.coordinates[0];
     if (inside(point, mukeyPolygon)) {
-      const muname = state.fieldMunames[i];
+      const mukeyId = state.fieldMukeyIds[i];
+      const muname = state.mukeyNameMap[mukeyId];
+      if (!muname) return null;
       return (
         <div className={classes.display}>
           <p className={classes.displayText}>{muname}</p>

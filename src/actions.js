@@ -25,10 +25,16 @@ export const setFieldMukeys = (fieldMukeys) => ({
   fieldMukeys,
 });
 
-export const SET_FIELD_MUNAMES = "SET_FIELD_MUNAMES";
-export const setFieldMunames = (fieldMunames) => ({
-  type: SET_FIELD_MUNAMES,
-  fieldMunames,
+export const SET_FIELD_MUKEY_IDS = "SET_FIELD_MUKEY_IDS";
+export const setFieldMukeyIds = (fieldMukeyIds) => ({
+  type: SET_FIELD_MUKEY_IDS,
+  fieldMukeyIds,
+});
+
+export const SET_MUKEY_NAME_MAP = "SET_MUKEY_NAME_MAP";
+export const setMukeyNameMap = (mukeyNameMap) => ({
+  type: SET_MUKEY_NAME_MAP,
+  mukeyNameMap,
 });
 
 export const SET_FIELD_PATH = "SET_FIELD_PATH";

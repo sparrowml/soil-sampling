@@ -7,7 +7,7 @@ import { store } from "../store";
 import * as actions from "../actions";
 import * as api from "../api";
 
-const pointMap = (point, id, mukey, muname) => ({
+const pointMap = (point, id, mukey) => ({
   type: "Feature",
   geometry: {
     type: "Point",
@@ -16,7 +16,6 @@ const pointMap = (point, id, mukey, muname) => ({
   properties: {
     id,
     mukey,
-    muname,
   },
 });
 
@@ -38,12 +37,12 @@ export default function SubmitActions({ className }) {
     dispatch(actions.setTrigger("clearEditor"));
     dispatch(actions.setFieldPoints([]));
     dispatch(actions.setFieldMukeys([]));
-    dispatch(actions.setFieldMunames([]));
+    dispatch(actions.setFieldMukeyIds([]));
     dispatch(actions.setFieldPath([]));
     const fieldPath = [];
     const fieldPoints = [];
     const fieldMukeys = [];
-    const fieldMunames = [];
+    const fieldMukeyIds = [];
     for (const feature of state.fieldPolygons) {
       const polygon = feature.geometry.coordinates[0];
       let response;
@@ -60,15 +59,23 @@ export default function SubmitActions({ className }) {
         if (response.points) {
           fieldPoints.push(
             ...response.points.map((point, i) =>
-              pointMap(point, i, response.mukey_ids[i], response.mukey_names[i])
+              pointMap(point, i, response.mukey_ids[i])
             )
           );
           fieldPath.push(...response.points);
         }
         if (response.regions) {
           fieldMukeys.push(...response.regions.map(polygonMap));
-          fieldMunames.push(...response.region_munames);
+          fieldMukeyIds.push(...response.region_mukey_ids);
         }
+        api.getMunames(response.region_mukey_ids).then((result) => {
+          const mukeyNameMap = {};
+          result.Table.forEach((row) => {
+            const [id, name] = row;
+            mukeyNameMap[id] = name;
+          });
+          dispatch(actions.setMukeyNameMap(mukeyNameMap));
+        });
       }
       if (response.error) {
         alert(response.error);
@@ -77,7 +84,7 @@ export default function SubmitActions({ className }) {
     }
     dispatch(actions.setFieldPoints(fieldPoints));
     dispatch(actions.setFieldMukeys(fieldMukeys));
-    dispatch(actions.setFieldMunames(fieldMunames));
+    dispatch(actions.setFieldMukeyIds(fieldMukeyIds));
     dispatch(actions.setFieldPath(fieldPath));
   };
 
