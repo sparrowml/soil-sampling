@@ -79,9 +79,10 @@ function Icon(props) {
 
 export default function Toolbox() {
   const { state, dispatch } = React.useContext(store);
-
-  const [open, setOpen] = React.useState(false);
   const classes = useStyles();
+
+  const [saveOpen, setSaveOpen] = React.useState(false);
+  const [trashOpen, setTrashOpen] = React.useState(false);
 
   const [fileName, setFileName] = React.useState("");
   const [fileType, setFileType] = React.useState("csv");
@@ -105,7 +106,17 @@ export default function Toolbox() {
       const output = path.toGeojson(orderedPoints, state.mukeyNameMap);
       shpwrite.download(output);
     }
-    setOpen(false);
+    setSaveOpen(false);
+  };
+
+  const trashPoints = () => {
+    dispatch(actions.setTrigger("clearEditor"));
+    dispatch(actions.setFieldPolygons([]));
+    dispatch(actions.setFieldPoints([]));
+    dispatch(actions.setFieldMukeys([]));
+    dispatch(actions.setFieldMukeyIds([]));
+    dispatch(actions.setFieldPath([]));
+    setTrashOpen(false);
   };
 
   const fileNameInput = () => {
@@ -196,17 +207,14 @@ export default function Toolbox() {
 
         <br />
 
-        <Button onClick={() => setOpen(true)} title="Export">
+        <Button onClick={() => setSaveOpen(true)} title="Export">
           <Icon name="export" />
         </Button>
-        {/* <Button
-          onClick={() => dispatch(actions.setTrigger("clearAll"))}
-          title="Delete"
-        >
+        <Button onClick={() => setTrashOpen(true)} title="Delete">
           <Icon name="trash" />
-        </Button> */}
+        </Button>
       </Tools>
-      <Modal open={open} onClose={() => setOpen(false)}>
+      <Modal open={saveOpen} onClose={() => setSaveOpen(false)}>
         <div style={getModalStyle()} className={classes.modalPaper}>
           <h2 id="simple-modal-title">Save Points</h2>
           <Grid item>
@@ -232,6 +240,35 @@ export default function Toolbox() {
                 onClick={savePoints}
               >
                 Save
+              </MUIButton>
+            </Grid>
+          </Grid>
+        </div>
+      </Modal>
+      <Modal open={trashOpen} onClose={() => setTrashOpen(false)}>
+        <div style={getModalStyle()} className={classes.modalPaper}>
+          <h2 id="simple-modal-title">
+            Are you sure you want to clear all features?
+          </h2>
+          <Grid container direction="row">
+            <Grid item>
+              <MUIButton
+                variant="contained"
+                color="secondary"
+                className={classes.modalFormControl}
+                onClick={trashPoints}
+              >
+                Clear All
+              </MUIButton>
+            </Grid>
+            <Grid item>
+              <MUIButton
+                variant="contained"
+                color="primary"
+                className={classes.modalFormControl}
+                onClick={() => setTrashOpen(false)}
+              >
+                Cancel
               </MUIButton>
             </Grid>
           </Grid>

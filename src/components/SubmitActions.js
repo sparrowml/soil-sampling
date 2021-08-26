@@ -48,6 +48,7 @@ export default function SubmitActions({ className }) {
       let response;
       if (state.algo === "uniform") {
         response = await api.uniformSample(polygon, state.sampleArea);
+        if (!response) return;
         if (response.points) {
           fieldPoints.push(
             ...response.points.map((point, i) => pointMap(point, i, "", ""))
@@ -56,6 +57,7 @@ export default function SubmitActions({ className }) {
         }
       } else if (state.algo === "voronoi") {
         response = await api.voronoiSample(polygon, state.nPoints);
+        if (!response) return;
         if (response.points) {
           fieldPoints.push(
             ...response.points.map((point, i) =>
@@ -69,6 +71,7 @@ export default function SubmitActions({ className }) {
           fieldMukeyIds.push(...response.region_mukey_ids);
         }
         api.getMunames(response.region_mukey_ids).then((result) => {
+          if (!result.Table) return;
           const mukeyNameMap = {};
           result.Table.forEach((row) => {
             const [id, name] = row;
