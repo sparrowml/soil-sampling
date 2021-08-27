@@ -95,13 +95,21 @@ export default function Toolbox() {
     if (fileType === "csv") {
       const output = path.toCsv(orderedPoints, state.mukeyNameMap);
       const blob = new Blob([output], { type: "text/csv;charset=utf-8;" });
-      FileSaver.saveAs(blob, fileName || "download.csv");
+      let safeFileName = fileName || "download.csv";
+      safeFileName = safeFileName.endsWith(".csv")
+        ? safeFileName
+        : `${safeFileName}.csv`;
+      FileSaver.saveAs(blob, safeFileName);
     } else if (fileType === "kml") {
       const output = path.toKml(orderedPoints, state.mukeyNameMap);
       const blob = new Blob([output], {
         type: "application/vnd.google-earth.kml+xml;charset=utf-8",
       });
-      FileSaver.saveAs(blob, fileName || "download.kml");
+      let safeFileName = fileName || "download.kml";
+      safeFileName = safeFileName.endsWith(".kml")
+        ? safeFileName
+        : `${safeFileName}.kml`;
+      FileSaver.saveAs(blob, safeFileName);
     } else if (fileType === "shp") {
       const output = path.toGeojson(orderedPoints, state.mukeyNameMap);
       shpwrite.download(output);
