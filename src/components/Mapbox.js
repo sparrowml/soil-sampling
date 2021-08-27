@@ -171,7 +171,7 @@ export default function Mapbox() {
         getCursor={() => getCursor(state.mode, state.mapboxMode)}
         width={MAP_WIDTH}
         height={MAP_HEIGHT}
-        mapStyle="mapbox://styles/mapbox/satellite-v9"
+        mapStyle="mapbox://styles/mapbox/satellite-streets-v11"
         onViewportChange={(viewport) => dispatch(actions.setViewport(viewport))}
         mapboxApiAccessToken={TOKEN}
         onMouseMove={onCursorMove}
