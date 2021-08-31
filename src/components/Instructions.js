@@ -68,6 +68,11 @@ export default function Instructions() {
         ></CardHeader>
         <Collapse in={instructions} unmountOnExit>
           <CardContent className={classes.cardContent}>
+            <p>
+              Take a look at a video demo of the app{" "}
+              <a href="https://www.youtube.com/watch?v=jI1N_G_u0Zw">here</a>.
+            </p>
+            <p>Basic instructions:</p>
             <ol>
               <li>Zoom to region</li>
               <li>Use the drawing tool to define a field boundary</li>
