@@ -31,6 +31,7 @@ def uniform():
         body = request.get_json()
         polygon = np.array(body.get("polygon"))
         acre = body.get("acre", "1")
+        triangle_offset = body.get("triangleOffset", True)
         proj = Proj(get_utm_string(polygon[0]))
         utm = np.stack(proj(polygon[:, 0], polygon[:, 1]), -1)
     except:
@@ -42,7 +43,7 @@ def uniform():
             {"error": "Invalid polygon. The maximum area is 2 square miles."}
         )
     try:
-        grid = order_points(uniform_sample(utm, acre))
+        grid = order_points(uniform_sample(utm, acre, triangle_offset))
         grid = np.stack(proj(grid[:, 0], grid[:, 1], inverse=True), -1)
         return jsonify(
             {

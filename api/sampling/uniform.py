@@ -31,7 +31,9 @@ def boundary_distance_filter(
     return np.array(keepers)
 
 
-def uniform_sample(polygon: np.ndarray, acre: str = "1") -> np.ndarray:
+def uniform_sample(
+    polygon: np.ndarray, acre: str = "1", triangle_offset: bool = False
+) -> np.ndarray:
     """Generate a uniform grid that covers an entire polygon."""
     x_min = polygon[:, 0].min()
     x_max = polygon[:, 0].max()
@@ -42,10 +44,15 @@ def uniform_sample(polygon: np.ndarray, acre: str = "1") -> np.ndarray:
     grid = []
     while x_min + i * SQUARE_SIDE[acre] / 2 < x_max:
         j = 1
+        offset = SQUARE_SIDE[acre] / 4 if triangle_offset else 0
         while y_min + j * SQUARE_SIDE[acre] / 2 < y_max:
+            if j % 2 == 0 and triangle_offset:
+                offset = SQUARE_SIDE[acre] / 4
+            else:
+                offset = 0
             grid.append(
                 [
-                    x_min + i * SQUARE_SIDE[acre] / 2,
+                    x_min + i * SQUARE_SIDE[acre] / 2 + offset,
                     y_min + j * SQUARE_SIDE[acre] / 2,
                 ]
             )
