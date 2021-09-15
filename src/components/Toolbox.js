@@ -159,10 +159,6 @@ export default function Toolbox() {
   };
 
   const newClick = () => {
-    if (newActive()) {
-      dispatch(actions.setMapboxMode(new EditingMode()));
-      return;
-    }
     switch (state.mode) {
       case "polygon":
         dispatch(actions.setMapboxMode(new DrawPolygonMode()));
@@ -178,6 +174,22 @@ export default function Toolbox() {
     }
   };
 
+  const editClick = () => {
+    switch (state.mode) {
+      case "polygon":
+        dispatch(actions.setMapboxMode(new EditingMode()));
+        return;
+      case "point":
+        dispatch(actions.setMapboxMode(new EditingMode()));
+        return;
+      case "path":
+        dispatch(actions.setMapboxMode(new EditingMode()));
+        return;
+      default:
+        return;
+    }
+  };
+
   const newActive = () => {
     return (
       state.mapboxMode instanceof DrawPolygonMode ||
@@ -185,6 +197,8 @@ export default function Toolbox() {
       state.mapboxMode instanceof DrawLineStringMode
     );
   };
+
+  const editActive = () => state.mapboxMode instanceof EditingMode;
 
   return (
     <>
@@ -204,6 +218,10 @@ export default function Toolbox() {
 
         <Button onClick={newClick} title="New" active={newActive()}>
           <Icon name="plus" />
+        </Button>
+
+        <Button onClick={editClick} title="Edit" active={editActive()}>
+          <Icon name="pencil" />
         </Button>
 
         <Button

@@ -38,7 +38,7 @@ const StateProvider = ({ children }) => {
         newState = {
           ...state,
           mode: action.mode,
-          mapboxMode: new EditingMode(),
+          mapboxMode: action.mode !== "select" ? new EditingMode() : null,
         };
         break;
       case actions.SET_LOADING:
