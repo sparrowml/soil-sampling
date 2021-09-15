@@ -49,7 +49,11 @@ export default function SubmitActions({ className }) {
       const polygon = feature.geometry.coordinates[0];
       let response;
       if (state.algo === "uniform") {
-        response = await api.uniformSample(polygon, state.sampleArea);
+        response = await api.uniformSample(
+          polygon,
+          state.sampleArea,
+          state.triangleOffset
+        );
         if (!response) return;
         if (response.points) {
           fieldPoints.push(

@@ -25,7 +25,7 @@ export async function getMunames(mukeys) {
     .catch(console.error);
 }
 
-export async function uniformSample(polygon, acre) {
+export async function uniformSample(polygon, acre, triangleOffset) {
   return window
     .fetch(`${BASE_URL}/uniform`, {
       method: "POST",
@@ -35,6 +35,7 @@ export async function uniformSample(polygon, acre) {
       body: JSON.stringify({
         polygon,
         acre,
+        triangleOffset,
       }),
     })
     .then((response) => response.json())

@@ -6,9 +6,10 @@ import * as actions from "./actions";
 const initialState = {
   mode: "polygon",
   mapboxMode: new DrawPolygonMode(),
-  algo: "voronoi",
+  algo: "uniform",
   trigger: null,
   sampleArea: "5",
+  triangleOffset: false,
   nPoints: 15,
   loading: false,
   fieldPolygons: [],
@@ -50,7 +51,10 @@ const StateProvider = ({ children }) => {
         newState = { ...state, algo: action.value };
         break;
       case actions.SET_SAMPLE_AREA:
-        newState = { ...state, sampleArea: action.value };
+        newState = { ...state, sampleArea: action.sampleArea };
+        break;
+      case actions.TOGGLE_TRIANGLE_OFFSET:
+        newState = { ...state, triangleOffset: !state.triangleOffset };
         break;
       case actions.SET_N_POINTS:
         newState = { ...state, nPoints: action.value };

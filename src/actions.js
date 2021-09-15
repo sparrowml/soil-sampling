@@ -6,6 +6,17 @@ export const setMapboxMode = (mode) => ({ type: SET_MAPBOX_MODE, mode });
 
 export const SET_ALGO = "SET_ALGO";
 export const SET_SAMPLE_AREA = "SET_SAMPLE_AREA";
+export const setSampleArea = (sampleArea) => ({
+  type: SET_SAMPLE_AREA,
+  sampleArea,
+});
+
+export const TOGGLE_TRIANGLE_OFFSET = "TOGGLE_TRIANGLE_OFFSET";
+export const toggleTriangleOffset = (triangleOffset) => ({
+  type: TOGGLE_TRIANGLE_OFFSET,
+  triangleOffset,
+});
+
 export const SET_N_POINTS = "SET_N_POINTS";
 export const SET_FIELD_POLYGONS = "SET_FIELD_POLYGONS";
 export const setFieldPolygons = (fieldPolygons) => ({
