@@ -14,6 +14,9 @@ from sampling import (
     fake_voronoi_sample,
     check_area,
     order_points,
+    read_file,
+    cluster_regions,
+    DATA,
 )
 
 app = Flask(__name__)
@@ -145,6 +148,65 @@ def voronoi():
             ),
             400,
         )
+
+
+@app.route("/clustering", methods=["POST"])
+def clustering():
+    try:
+        body = request.get_json()
+        polygon = np.array(body.get("polygon"))
+        n_points = body.get("nPoints", 10)
+        data = read_file(body.get("data", DATA))
+        proj = Proj(get_utm_string(polygon[0]))
+        data[:, 1:3] = np.stack(proj(data[:, 2], data[:, 1]), -1)
+        utm = np.stack(proj(polygon[:, 0], polygon[:, 1]), -1)
+    except Exception as e:
+        print(e)
+        return (
+            jsonify({"error": "Invalid request. Check your inputs and try again."}),
+            400,
+        )
+    try:
+        check_area(utm)
+    except:
+        return (
+            jsonify({"error": "Invalid polygon. The maximum area is 2 square miles."}),
+            400,
+        )
+    regions, region_descriptions = cluster_regions(utm, data)
+    shapely_utm = Polygon(utm)
+    grid_points = []
+    point_descriptions = []
+    lng_lat_regions = []
+    for region, description in zip(regions, region_descriptions):
+        shapely_region = Polygon(region)
+        lng_lat_regions.append(
+            np.stack(proj(region[:, 0], region[:, 1], inverse=True), -1)
+        )
+        # print(np.array(shapely_region.exterior), np.array(shapely_utm.exterior))
+        # print(shapely_region.area, shapely_utm.area)
+        n_region_points = round(n_points * shapely_region.area / shapely_utm.area)
+        if n_region_points == 0:
+            continue
+        elif n_region_points < 4:
+            points = fake_voronoi_sample(region, n_region_points)
+            if points is not None:
+                grid_points.append(points)
+                point_descriptions.extend([description] * len(points))
+        else:
+            points = voronoi_sample(region, n_region_points)
+            grid_points.append(points)
+            point_descriptions.extend([description] * len(points))
+    grid = order_points(np.concatenate(grid_points))
+    grid = np.stack(proj(grid[:, 0], grid[:, 1], inverse=True), -1)
+    return jsonify(
+        {
+            "points": grid.tolist(),
+            "point_descriptions": point_descriptions,
+            "regions": [region.tolist() for region in lng_lat_regions],
+            "region_descriptions": region_descriptions,
+        }
+    )
 
 
 if __name__ == "__main__":

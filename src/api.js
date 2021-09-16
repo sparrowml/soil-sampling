@@ -1,5 +1,5 @@
-const BASE_URL = "https://eaci7u8499.execute-api.us-east-1.amazonaws.com/dev";
-// const BASE_URL = "http://localhost:5000";
+// const BASE_URL = "https://eaci7u8499.execute-api.us-east-1.amazonaws.com/dev";
+const BASE_URL = "http://localhost:5000";
 
 export async function warmup() {
   await window.fetch(`${BASE_URL}`);
@@ -45,6 +45,22 @@ export async function uniformSample(polygon, acre, triangleOffset) {
 export async function voronoiSample(polygon, nPoints) {
   return window
     .fetch(`${BASE_URL}/voronoi`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        polygon,
+        nPoints,
+      }),
+    })
+    .then((response) => response.json())
+    .catch(console.error);
+}
+
+export async function clusteringSample(polygon, nPoints) {
+  return window
+    .fetch(`${BASE_URL}/clustering`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

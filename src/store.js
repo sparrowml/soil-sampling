@@ -6,7 +6,7 @@ import * as actions from "./actions";
 const initialState = {
   mode: "polygon",
   mapboxMode: new DrawPolygonMode(),
-  algo: "uniform",
+  algo: "clustering",
   trigger: null,
   sampleArea: "5",
   triangleOffset: false,
@@ -14,14 +14,14 @@ const initialState = {
   loading: false,
   fieldPolygons: [],
   fieldPoints: [],
-  fieldMukeys: [],
-  fieldMukeyIds: [],
-  mukeyNameMap: {},
+  fieldRegions: [],
+  fieldRegionIds: [],
+  regionNameMap: {},
   fieldPathMode: false,
   fieldPath: [],
   viewport: {
-    latitude: 40.7,
-    longitude: -96.5,
+    latitude: 46.27276278,
+    longitude: -97.89774976,
     zoom: 13.81594170898739,
     bearing: 0,
     pitch: 0,
@@ -65,14 +65,14 @@ const StateProvider = ({ children }) => {
       case actions.SET_FIELD_POINTS:
         newState = { ...state, fieldPoints: action.fieldPoints };
         break;
-      case actions.SET_FIELD_MUKEYS:
-        newState = { ...state, fieldMukeys: action.fieldMukeys };
+      case actions.SET_FIELD_REGIONS:
+        newState = { ...state, fieldRegions: action.fieldRegions };
         break;
-      case actions.SET_FIELD_MUKEY_IDS:
-        newState = { ...state, fieldMukeyIds: action.fieldMukeyIds };
+      case actions.SET_FIELD_REGION_IDS:
+        newState = { ...state, fieldRegionIds: action.fieldRegionIds };
         break;
-      case actions.SET_MUKEY_NAME_MAP:
-        newState = { ...state, mukeyNameMap: action.mukeyNameMap };
+      case actions.SET_REGION_NAME_MAP:
+        newState = { ...state, regionNameMap: action.regionNameMap };
         break;
       case actions.SET_FIELD_PATH:
         newState = { ...state, fieldPath: action.fieldPath };

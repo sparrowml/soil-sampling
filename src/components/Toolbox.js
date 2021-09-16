@@ -93,7 +93,7 @@ export default function Toolbox() {
       state.fieldPoints
     );
     if (fileType === "csv") {
-      const output = path.toCsv(orderedPoints, state.mukeyNameMap);
+      const output = path.toCsv(orderedPoints, state.regionNameMap);
       const blob = new Blob([output], { type: "text/csv;charset=utf-8;" });
       let safeFileName = fileName || "download.csv";
       safeFileName = safeFileName.endsWith(".csv")
@@ -101,7 +101,7 @@ export default function Toolbox() {
         : `${safeFileName}.csv`;
       FileSaver.saveAs(blob, safeFileName);
     } else if (fileType === "kml") {
-      const output = path.toKml(orderedPoints, state.mukeyNameMap);
+      const output = path.toKml(orderedPoints, state.regionNameMap);
       const blob = new Blob([output], {
         type: "application/vnd.google-earth.kml+xml;charset=utf-8",
       });
@@ -111,7 +111,7 @@ export default function Toolbox() {
         : `${safeFileName}.kml`;
       FileSaver.saveAs(blob, safeFileName);
     } else if (fileType === "shp") {
-      const output = path.toGeojson(orderedPoints, state.mukeyNameMap);
+      const output = path.toGeojson(orderedPoints, state.regionNameMap);
       shpwrite.download(output);
     }
     setSaveOpen(false);
@@ -121,8 +121,8 @@ export default function Toolbox() {
     dispatch(actions.setTrigger("clearEditor"));
     dispatch(actions.setFieldPolygons([]));
     dispatch(actions.setFieldPoints([]));
-    dispatch(actions.setFieldMukeys([]));
-    dispatch(actions.setFieldMukeyIds([]));
+    dispatch(actions.setFieldRegions([]));
+    dispatch(actions.setFieldRegionIds([]));
     dispatch(actions.setFieldPath([]));
     setTrashOpen(false);
   };

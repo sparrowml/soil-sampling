@@ -32,8 +32,6 @@ function Form() {
       case "voronoi":
         return <VoronoiForm className={classes.formControl} />;
       case "clustering":
-        alert("This algorithm is not currently implemented.");
-        dispatch({ type: actions.SET_ALGO, value: "uniform" });
         return null;
       default:
         return null;

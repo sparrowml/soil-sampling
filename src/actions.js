@@ -30,22 +30,22 @@ export const setFieldPoints = (fieldPoints) => ({
   fieldPoints,
 });
 
-export const SET_FIELD_MUKEYS = "SET_FIELD_MUKEYS";
-export const setFieldMukeys = (fieldMukeys) => ({
-  type: SET_FIELD_MUKEYS,
-  fieldMukeys,
+export const SET_FIELD_REGIONS = "SET_FIELD_REGIONS";
+export const setFieldRegions = (fieldRegions) => ({
+  type: SET_FIELD_REGIONS,
+  fieldRegions,
 });
 
-export const SET_FIELD_MUKEY_IDS = "SET_FIELD_MUKEY_IDS";
-export const setFieldMukeyIds = (fieldMukeyIds) => ({
-  type: SET_FIELD_MUKEY_IDS,
-  fieldMukeyIds,
+export const SET_FIELD_REGION_IDS = "SET_FIELD_REGION_IDS";
+export const setFieldRegionIds = (fieldRegionIds) => ({
+  type: SET_FIELD_REGION_IDS,
+  fieldRegionIds,
 });
 
-export const SET_MUKEY_NAME_MAP = "SET_MUKEY_NAME_MAP";
-export const setMukeyNameMap = (mukeyNameMap) => ({
-  type: SET_MUKEY_NAME_MAP,
-  mukeyNameMap,
+export const SET_REGION_NAME_MAP = "SET_REGION_NAME_MAP";
+export const setRegionNameMap = (regionNameMap) => ({
+  type: SET_REGION_NAME_MAP,
+  regionNameMap,
 });
 
 export const SET_FIELD_PATH = "SET_FIELD_PATH";
