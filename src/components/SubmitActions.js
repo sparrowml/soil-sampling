@@ -57,7 +57,7 @@ export default function SubmitActions({ className }) {
         if (!response) return;
         if (response.points) {
           fieldPoints.push(
-            ...response.points.map((point, i) => pointMap(point, i, "", ""))
+            ...response.points.map((point, i) => pointMap(point, i + 1, "", ""))
           );
           fieldPath.push(...response.points);
         }
@@ -67,7 +67,7 @@ export default function SubmitActions({ className }) {
         if (response.points) {
           fieldPoints.push(
             ...response.points.map((point, i) =>
-              pointMap(point, i, response.mukey_ids[i])
+              pointMap(point, i + 1, response.mukey_ids[i])
             )
           );
           fieldPath.push(...response.points);
