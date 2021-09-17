@@ -10,7 +10,7 @@ import * as api from "../api";
 const clusterId = (description) =>
   description.split("Cluster: ")[1].split(";")[0];
 
-const pointMap = (point, id, regionId) => ({
+const pointMap = (point, id, regionId, pointData = null) => ({
   type: "Feature",
   geometry: {
     type: "Point",
@@ -19,6 +19,7 @@ const pointMap = (point, id, regionId) => ({
   properties: {
     id,
     regionId,
+    pointData,
   },
 });
 
@@ -89,12 +90,21 @@ export default function SubmitActions({ className }) {
           dispatch(actions.setRegionNameMap(mukeyNameMap));
         });
       } else if (state.algo === "clustering") {
-        response = await api.clusteringSample(polygon, state.nPoints);
+        response = await api.clusteringSample(
+          polygon,
+          state.nPoints,
+          state.inputData
+        );
         if (!response) return;
         if (response.points) {
           fieldPoints.push(
             ...response.points.map((point, i) =>
-              pointMap(point, i + 1, clusterId(response.point_descriptions[i]))
+              pointMap(
+                point,
+                i + 1,
+                clusterId(response.point_descriptions[i]),
+                response.point_enrichments[i]
+              )
             )
           );
           fieldPath.push(...response.points);
@@ -104,17 +114,17 @@ export default function SubmitActions({ className }) {
           fieldRegionIds.push(...response.region_descriptions.map(clusterId));
         }
       }
+      if (response.error) {
+        dispatch(actions.setLoading(false));
+        alert(response.error);
+        return;
+      }
       const regionNameMap = {};
       response.region_descriptions.forEach((description) => {
         const id = clusterId(description);
         regionNameMap[id] = description;
       });
       dispatch(actions.setRegionNameMap(regionNameMap));
-      if (response.error) {
-        dispatch(actions.setLoading(false));
-        alert(response.error);
-        return;
-      }
     }
     if (fieldPoints.length === 0) {
       dispatch(actions.setLoading(false));

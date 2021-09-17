@@ -21,6 +21,9 @@ const useStyles = makeStyles((theme) => ({
   checkboxLabel: {
     minWidth: 150,
   },
+  input: {
+    display: "none",
+  },
   modalFormControl: {
     margin: theme.spacing(2),
     minWidth: 250,

@@ -58,7 +58,7 @@ export async function voronoiSample(polygon, nPoints) {
     .catch(console.error);
 }
 
-export async function clusteringSample(polygon, nPoints) {
+export async function clusteringSample(polygon, nPoints, data) {
   return window
     .fetch(`${BASE_URL}/clustering`, {
       method: "POST",
@@ -68,6 +68,7 @@ export async function clusteringSample(polygon, nPoints) {
       body: JSON.stringify({
         polygon,
         nPoints,
+        data,
       }),
     })
     .then((response) => response.json())

@@ -39,8 +39,8 @@ export const toCsv = (points, regionNameMap) => {
   const csv = [
     "id,longitude,latitude,regionId,description",
     ...points.map((point) => {
-      const { id, regionId } = point.properties;
-      const description = regionNameMap[regionId] || "";
+      const { id, regionId, pointData } = point.properties;
+      const description = pointData || regionNameMap[regionId] || "";
       const [x, y] = point.geometry.coordinates;
       return `${id},${x},${y},${regionId},${description}`;
     }),

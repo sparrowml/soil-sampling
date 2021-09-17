@@ -24,6 +24,12 @@ export const setFieldPolygons = (fieldPolygons) => ({
   fieldPolygons,
 });
 
+export const SET_INPUT_DATA = "SET_INPUT_DATA";
+export const setInputData = (inputData) => ({
+  type: SET_INPUT_DATA,
+  inputData,
+});
+
 export const SET_FIELD_POINTS = "SET_FIELD_POINTS";
 export const setFieldPoints = (fieldPoints) => ({
   type: SET_FIELD_POINTS,

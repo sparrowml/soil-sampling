@@ -10,7 +10,8 @@ const initialState = {
   trigger: null,
   sampleArea: "5",
   triangleOffset: false,
-  nPoints: 15,
+  nPoints: 50,
+  inputData: null,
   loading: false,
   fieldPolygons: [],
   fieldPoints: [],
@@ -20,8 +21,8 @@ const initialState = {
   fieldPathMode: false,
   fieldPath: [],
   viewport: {
-    latitude: 46.27276278,
-    longitude: -97.89774976,
+    latitude: 41.16521758,
+    longitude: -96.47793786,
     zoom: 13.81594170898739,
     bearing: 0,
     pitch: 0,
@@ -58,6 +59,9 @@ const StateProvider = ({ children }) => {
         break;
       case actions.SET_N_POINTS:
         newState = { ...state, nPoints: action.value };
+        break;
+      case actions.SET_INPUT_DATA:
+        newState = { ...state, inputData: action.inputData };
         break;
       case actions.SET_FIELD_POLYGONS:
         newState = { ...state, fieldPolygons: action.fieldPolygons };

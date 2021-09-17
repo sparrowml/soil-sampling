@@ -17,7 +17,7 @@ export default function VoronoiForm({ className }) {
     let value = event.target.value;
     setNPoints(value);
     value = parseFloat(value);
-    if (isNaN(value) || value < 4 || value % 1 !== 0) {
+    if (isNaN(value) || value < 4 || value % 1 !== 0 || value > 99) {
       setErrorMessage("Value must be a positive integer between 4 and 99");
       return;
     }

@@ -6,14 +6,46 @@ from scipy.interpolate import griddata
 from shapely.geometry import Point, Polygon
 
 
+def enrich_points(points: np.ndarray, data: np.ndarray) -> List[str]:
+    ecad = data[:, 3]
+    ecad_mask = ~np.isnan(ecad)
+    ecad_grid = griddata(
+        data[ecad_mask, 1:3],
+        ecad[ecad_mask],
+        points,
+        method="nearest",
+    )
+
+    has_elevation = data.shape[1] > 4
+    if has_elevation:
+        elevation = data[:, 4]
+
+        elevation_mask = ~np.isnan(elevation)
+        elevation_grid = griddata(
+            data[elevation_mask, 1:3],
+            elevation[elevation_mask],
+            points,
+            method="nearest",
+        )
+    point_enrichments = []
+    for i in range(len(points)):
+        if has_elevation:
+            description = (
+                f"ECaD: {ecad_grid[i]:.12f}; Elevation: {elevation_grid[i]:.2f}"
+            )
+        else:
+            description = f"ECaD: {ecad_grid[i]:.12f}"
+        point_enrichments.append(description)
+    return point_enrichments
+
+
 def cluster_regions(
     polygon: np.ndarray, data: np.ndarray
 ) -> Tuple[List[np.ndarray], List[str]]:
-    x_min, y_min = data[:, 1:3].min(0)
-    x_max, y_max = data[:, 1:3].max(0)
+    x_min, y_min = polygon.min(0)
+    x_max, y_max = polygon.max(0)
     # 5-meter grid
     xx, yy = np.meshgrid(np.arange(x_min, x_max, 5), np.arange(y_min, y_max, 5))
-    shape = xx.shape
     xx = xx.ravel()
     yy = yy.ravel()
     grid = np.stack((xx, yy), -1)
@@ -45,6 +77,9 @@ def cluster_regions(
     for i, p in enumerate(map(Point, grid)):
         if poly.contains(p):
             grid_mask[i] = True
+
+    if grid_mask.sum() == 0:
+        return
 
     if has_elevation:
         cluster_points = np.stack((ecad_grid[grid_mask], elevation_grid[grid_mask]), -1)
@@ -133,7 +168,7 @@ def move_centroids(
 def kmeans(points: np.ndarray, k: int = 3) -> Tuple[np.ndarray, np.ndarray]:
     prev_score = np.inf
     centroids = initialize_centroids(points, k)
-    for i in range(300):
+    for _ in range(300):
         classes, score = closest_centroid(points, centroids)
         if np.abs(score - prev_score) < 0.0001:
             break

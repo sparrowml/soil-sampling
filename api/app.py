@@ -17,6 +17,7 @@ from sampling import (
     read_file,
     cluster_regions,
     DATA,
+    enrich_points,
 )
 
 app = Flask(__name__)
@@ -173,40 +174,54 @@ def clustering():
             jsonify({"error": "Invalid polygon. The maximum area is 2 square miles."}),
             400,
         )
-    regions, region_descriptions = cluster_regions(utm, data)
-    shapely_utm = Polygon(utm)
-    grid_points = []
-    point_descriptions = []
-    lng_lat_regions = []
-    for region, description in zip(regions, region_descriptions):
-        shapely_region = Polygon(region)
-        lng_lat_regions.append(
-            np.stack(proj(region[:, 0], region[:, 1], inverse=True), -1)
-        )
-        # print(np.array(shapely_region.exterior), np.array(shapely_utm.exterior))
-        # print(shapely_region.area, shapely_utm.area)
-        n_region_points = round(n_points * shapely_region.area / shapely_utm.area)
-        if n_region_points == 0:
-            continue
-        elif n_region_points < 4:
-            points = fake_voronoi_sample(region, n_region_points)
-            if points is not None:
+    try:
+        regions, region_descriptions = cluster_regions(utm, data)
+        shapely_utm = Polygon(utm)
+        grid_points = []
+        point_descriptions = []
+        lng_lat_regions = []
+        for region, description in zip(regions, region_descriptions):
+            shapely_region = Polygon(region)
+            lng_lat_regions.append(
+                np.stack(proj(region[:, 0], region[:, 1], inverse=True), -1)
+            )
+            n_region_points = round(n_points * shapely_region.area / shapely_utm.area)
+            if n_region_points == 0:
+                continue
+            elif n_region_points < 4:
+                points = fake_voronoi_sample(region, n_region_points)
+                if points is not None:
+                    grid_points.append(points)
+                    point_descriptions.extend([description] * len(points))
+            else:
+                points = voronoi_sample(region, n_region_points)
                 grid_points.append(points)
                 point_descriptions.extend([description] * len(points))
-        else:
-            points = voronoi_sample(region, n_region_points)
-            grid_points.append(points)
-            point_descriptions.extend([description] * len(points))
-    grid = order_points(np.concatenate(grid_points))
-    grid = np.stack(proj(grid[:, 0], grid[:, 1], inverse=True), -1)
-    return jsonify(
-        {
-            "points": grid.tolist(),
-            "point_descriptions": point_descriptions,
-            "regions": [region.tolist() for region in lng_lat_regions],
-            "region_descriptions": region_descriptions,
-        }
-    )
+        grid = order_points(np.concatenate(grid_points))
+        point_enrichments = enrich_points(grid, data)
+        grid = np.stack(proj(grid[:, 0], grid[:, 1], inverse=True), -1)
+        return jsonify(
+            {
+                "points": grid.tolist(),
+                "point_enrichments": point_enrichments,
+                "point_descriptions": point_descriptions,
+                "regions": [region.tolist() for region in lng_lat_regions],
+                "region_descriptions": region_descriptions,
+            }
+        )
+    except Exception as e:
+        print(e)
+        return (
+            jsonify(
+                {
+                    "error": (
+                        "Error running the clustering algorithm. "
+                        "You can wait a minute and try again."
+                    )
+                }
+            ),
+            400,
+        )
 
 
 if __name__ == "__main__":
