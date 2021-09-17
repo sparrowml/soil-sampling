@@ -74,7 +74,7 @@ export default function ClusteringForm() {
             className={classes.input}
             onChange={onUpload}
           />
-          Upload Input CSV
+          Upload
         </Button>
       </Grid>
     </Grid>
