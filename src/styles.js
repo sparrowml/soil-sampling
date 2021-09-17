@@ -23,6 +23,7 @@ const useStyles = makeStyles((theme) => ({
   },
   input: {
     display: "none",
+    minWidth: 200,
   },
   modalFormControl: {
     margin: theme.spacing(2),
