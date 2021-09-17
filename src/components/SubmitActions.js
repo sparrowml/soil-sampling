@@ -10,7 +10,7 @@ import * as api from "../api";
 const clusterId = (description) =>
   description.split("Cluster: ")[1].split(";")[0];
 
-const pointMap = (point, id, region_id) => ({
+const pointMap = (point, id, regionId) => ({
   type: "Feature",
   geometry: {
     type: "Point",
@@ -18,7 +18,7 @@ const pointMap = (point, id, region_id) => ({
   },
   properties: {
     id,
-    region_id,
+    regionId,
   },
 });
 

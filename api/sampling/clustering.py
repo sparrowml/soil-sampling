@@ -3,9 +3,7 @@ from typing import List, Tuple
 import alphashape
 import numpy as np
 from scipy.interpolate import griddata
-from shapely.geometry import Point, Polygon, MultiPolygon
-from sklearn import cluster
-from sklearn.cluster import KMeans
+from shapely.geometry import Point, Polygon
 
 
 def cluster_regions(
@@ -52,8 +50,7 @@ def cluster_regions(
         cluster_points = np.stack((ecad_grid[grid_mask], elevation_grid[grid_mask]), -1)
     else:
         cluster_points = ecad_grid[grid_mask][:, None]
-    model = KMeans(3).fit(cluster_points)
-    classes = model.predict(cluster_points)
+    classes, centroids = kmeans(cluster_points)
 
     all_pixels = np.zeros(xx.shape) * np.nan
     all_pixels[grid_mask] = classes
@@ -93,12 +90,12 @@ def cluster_regions(
     region_descriptions = []
     for i in range(len(multips)):
         if has_elevation:
-            _ecad, _elevation = model.cluster_centers_[i]
+            _ecad, _elevation = centroids[i]
             description = (
                 f"Cluster: {i+1}; ECaD: {_ecad:.12f}; Elevation: {_elevation:.2f}"
             )
         else:
-            (_ecad,) = model.cluster_centers_[i]
+            (_ecad,) = centroids[i]
             description = f"Cluster: {i+1}; ECaD: {_ecad:.12f}"
         if isinstance(multips[i], Polygon):
             regions.append(np.array(multips[i].exterior))
@@ -109,3 +106,37 @@ def cluster_regions(
             region_descriptions.append(description)
 
     return regions, region_descriptions
+
+
+def initialize_centroids(points: np.ndarray, k: int = 3) -> np.ndarray:
+    """Returns k centroids from the initial points"""
+    centroids = points.copy()
+    np.random.shuffle(centroids)
+    return centroids[:k]
+
+
+def closest_centroid(points: np.ndarray, centroids: np.ndarray) -> np.ndarray:
+    deltas = points - centroids[:, None]
+    indices = np.argmin(np.linalg.norm(deltas, axis=-1), axis=0)
+    score = np.linalg.norm(deltas)
+    return indices, score
+
+
+def move_centroids(
+    points: np.ndarray, closest: np.ndarray, centroids: np.ndarray
+) -> np.ndarray:
+    return np.array(
+        [points[closest == k].mean(axis=0) for k in range(centroids.shape[0])]
+    )
+
+
+def kmeans(points: np.ndarray, k: int = 3) -> Tuple[np.ndarray, np.ndarray]:
+    prev_score = np.inf
+    centroids = initialize_centroids(points, k)
+    for i in range(300):
+        classes, score = closest_centroid(points, centroids)
+        if np.abs(score - prev_score) < 0.0001:
+            break
+        prev_score = score
+        centroids = move_centroids(points, classes, centroids)
+    return classes, centroids
