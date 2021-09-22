@@ -68,16 +68,18 @@ export default function Instructions() {
         ></CardHeader>
         <Collapse in={instructions} unmountOnExit>
           <CardContent className={classes.cardContent}>
+            <p>Basic instructions:</p>
+            <ol>
+              <li>Zoom to the region of interest by typing a longitude and latitude or by manipulating the map.</li>
+              <li>Use the drawing tool to define a field boundary polygon.</li>
+              <li>Select an algorithm for sampling locations and set input parameters.</li>
+              <li>Edit points that are returned by the algorithm if necessary.</li>
+              <li>Click the export icon to download the result.</li>
+            </ol>
             <p>
               Take a look at a video demo of the app{" "}
               <a href="https://www.youtube.com/watch?v=jI1N_G_u0Zw">here</a>.
-            </p>
-            <p>Basic instructions:</p>
-            <ol>
-              <li>Zoom to region</li>
-              <li>Use the drawing tool to define a field boundary</li>
-              <li>Select an algorithm for sampling locations</li>
-            </ol>
+            </p>            
           </CardContent>
         </Collapse>
         <CardHeader
@@ -88,8 +90,13 @@ export default function Instructions() {
           <CardContent className={classes.cardContent}>
             <ul>
               <li>
-                A place for contact information, disclaimer, funding source,
-                author credits, and commercial use rights.
+                Public Domain Notice: This software/database is a "United States Government Work" under the terms of the United States Copyright Act. It was written as part of the author's official duties as a United States Government employee and thus cannot be copyrighted. This software/database is freely available to the public for use. The Agricultural Research Service (ARS) and the U.S. Government have not placed any restriction on its use or reproduction. Although all reasonable efforts have been taken to ensure the accuracy and reliability of the software and data, the ARS and the U.S. Government do not and cannot warrant the performance or results that may be obtained by using this software or data. The ARS and the U.S. Government disclaim all warranties, express or implied, including warranties of performance, merchant ability or fitness for any particular purpose.
+              </li>
+              <li>
+                Mention of trade names or commercial products in this publication is solely for the purpose of providing specific information and does not imply recommendation or endorsement by the U.S. Department of Agriculture (USDA). USDA is an equal opportunity provider and employer.
+              </li>
+              <li>
+                This research included collaborative contributions from the USDA Agricultural Research Service (ARS) Partnerships in Data Innovations (PDI). PDI is supported by the United States Department of Agriculture.
               </li>
             </ul>
           </CardContent>
