@@ -68,17 +68,18 @@ export default function Instructions() {
         ></CardHeader>
         <Collapse in={instructions} unmountOnExit>
           <CardContent className={classes.cardContent}>
-            <p>Basic instructions:</p>
+            <p>Instructions:</p>
             <ol>
               <li>Zoom to the region of interest by typing a longitude and latitude or by manipulating the map.</li>
               <li>Use the drawing tool to define a field boundary polygon.</li>
               <li>Select an algorithm for sampling locations and set input parameters.</li>
+              <li>If you select the clustering algorithm, you need to upload a single CSV file with the following columns. ID,Latitude,Longitude,ECaD,Elevation. The units of ECaD and Elevation can be anything and Elevation is optional.</li>
               <li>Edit points that are returned by the algorithm if necessary.</li>
               <li>Click the export icon to download the result.</li>
             </ol>
             <p>
               Take a look at a video demo of the app{" "}
-              <a href="https://www.youtube.com/watch?v=jI1N_G_u0Zw">here</a>.
+              <a href="https://www.youtube.com/watch?v=jI1N_G_u0Zw">here</a>. The clustering algorithm is explained{" "}<a href="https://youtu.be/OSqz_fujg4E">here</a>.
             </p>            
           </CardContent>
         </Collapse>
