@@ -21,8 +21,8 @@ const initialState = {
   fieldPathMode: false,
   fieldPath: [],
   viewport: {
-    latitude: 41.16521758,
-    longitude: -96.47793786,
+    latitude: 41.16510772,
+    longitude: -96.47332242,
     zoom: 13.81594170898739,
     bearing: 0,
     pitch: 0,
