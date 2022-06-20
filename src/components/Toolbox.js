@@ -233,6 +233,9 @@ export default function Toolbox() {
 
         <br />
 
+        <Button onClick={() => console.log("foo bar")} title="Upload Boundary">
+          <Icon name="cloud-upload" />
+        </Button>
         <Button onClick={() => setSaveOpen(true)} title="Export">
           <Icon name="export" />
         </Button>
