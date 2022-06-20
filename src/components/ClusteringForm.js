@@ -1,7 +1,6 @@
 import React from "react";
 
 import CheckIcon from "@material-ui/icons/Check";
-import HourglassEmptyIcon from "@material-ui/icons/HourglassEmpty";
 import Grid from "@material-ui/core/Grid";
 import Input from "@material-ui/core/Input";
 import Button from "@material-ui/core/Button";
@@ -65,7 +64,7 @@ export default function ClusteringForm() {
           color={inputIsSet ? "primary" : "secondary"}
           className={classes.formControl}
           component="label"
-          startIcon={inputIsSet ? <CheckIcon /> : <HourglassEmptyIcon />}
+          startIcon={inputIsSet ? <CheckIcon /> : null}
         >
           <Input
             accept="text/csv"
