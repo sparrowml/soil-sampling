@@ -113,18 +113,20 @@ export default function SubmitActions({ className }) {
           fieldRegions.push(...response.regions.map(polygonMap));
           fieldRegionIds.push(...response.region_descriptions.map(clusterId));
         }
+        if (response.region_descriptions) {
+          const regionNameMap = {};
+          response.region_descriptions.forEach((description) => {
+            const id = clusterId(description);
+            regionNameMap[id] = description;
+          });
+          dispatch(actions.setRegionNameMap(regionNameMap));    
+        }
       }
       if (response.error) {
         dispatch(actions.setLoading(false));
         alert(response.error);
         return;
       }
-      const regionNameMap = {};
-      response.region_descriptions.forEach((description) => {
-        const id = clusterId(description);
-        regionNameMap[id] = description;
-      });
-      dispatch(actions.setRegionNameMap(regionNameMap));
     }
     if (fieldPoints.length === 0) {
       dispatch(actions.setLoading(false));
