@@ -96,16 +96,20 @@ export default function Toolbox() {
       try {
         const geojson = await shp(event.target.result);
         const [lon1, lat1, lon2, lat2] = geojson.features[0].geometry.bbox;
+        dispatch(actions.setFieldPolygons(geojson.features));
         dispatch(actions.setLatitude((lat1 + lat2) / 2));
         dispatch(actions.setLongitude((lon1 + lon2) / 2));
-        dispatch(actions.setFieldPolygons(geojson.features));
+        dispatch(actions.setMode("select"));
       } catch (e) {
         console.error(e, e.stack);
         alert("Error reading shapefile. Make sure to upload a zip archive of the component files.");
       }
     };
-    const file = event.target.files[0];
-    if (file) reader.readAsArrayBuffer(file);
+    if (event.target.files) {
+      const file = event.target.files[0];
+      if (file) reader.readAsArrayBuffer(file);
+    }
+    inputRef.current.value = "";
   };
 
   const savePoints = () => {

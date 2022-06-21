@@ -9,35 +9,31 @@ import * as actions from "../actions";
 
 export default function ViewportForm({ className }) {
   const { state, dispatch } = React.useContext(store);
-  const [longitude, setLongitude] = React.useState(state.viewport.longitude);
+  const [longitude, setLongitude] = React.useState(`${state.viewport.longitude}`);
   const [lonError, setLonError] = React.useState("");
-  const [latitude, setLatitude] = React.useState(state.viewport.latitude);
+  const [latitude, setLatitude] = React.useState(`${state.viewport.latitude}`);
   const [latError, setLatError] = React.useState("");
 
-  let lonTimeout;
   const onLonChange = (event) => {
-    setLongitude(event.target.value);
-    clearTimeout(lonTimeout);
+    setLongitude(event.target.value);    
     const value = parseFloat(event.target.value);
     if (isNaN(value) || value < -180 || value > 180) {
       setLonError("Longitude must be in the range [-180, 180]");
       return;
     }
     setLonError("");
-    lonTimeout = setTimeout(() => dispatch(actions.setLongitude(value)), 1000);
+    dispatch(actions.setLongitude(value));
   };
 
-  let latTimeout;
   const onLatChange = (event) => {
     setLatitude(event.target.value);
-    clearTimeout(latTimeout);
     const value = parseFloat(event.target.value);
     if (isNaN(value) || value < -90 || value > 90) {
       setLatError("Latitude must be in the range [-90, 90]");
       return;
     }
     setLatError("");
-    latTimeout = setTimeout(() => dispatch(actions.setLatitude(value)), 1000);
+    dispatch(actions.setLatitude(value));
   };
 
   return (
@@ -46,7 +42,7 @@ export default function ViewportForm({ className }) {
         <FormControl className={className}>
           <TextField
             error={lonError !== ""}
-            value={longitude}
+            value={parseFloat(longitude) === state.viewport.longitude ? longitude : state.viewport.longitude}
             onChange={onLonChange}
             helperText={lonError || "Longitude"}
           />
@@ -56,7 +52,7 @@ export default function ViewportForm({ className }) {
         <FormControl className={className}>
           <TextField
             error={latError !== ""}
-            value={latitude}
+            value={parseFloat(latitude) === state.viewport.latitude ? latitude : state.viewport.latitude}
             onChange={onLatChange}
             helperText={latError || "Latitude"}
           />
