@@ -8,6 +8,7 @@ import {
 import styled from "styled-components";
 import FileSaver from "file-saver";
 import shpwrite from "shp-write";
+import shp from "shpjs";
 import Grid from "@material-ui/core/Grid";
 import TextField from "@material-ui/core/TextField";
 import Modal from "@material-ui/core/Modal";
@@ -86,6 +87,26 @@ export default function Toolbox() {
 
   const [fileName, setFileName] = React.useState("");
   const [fileType, setFileType] = React.useState("csv");
+
+  const inputRef = React.createRef();
+
+  const onUpload = (event) => {
+    const reader = new FileReader();
+    reader.onload = async (event) => {
+      try {
+        const geojson = await shp(event.target.result);
+        const [lon1, lat1, lon2, lat2] = geojson.features[0].geometry.bbox;
+        dispatch(actions.setLatitude((lat1 + lat2) / 2));
+        dispatch(actions.setLongitude((lon1 + lon2) / 2));
+        dispatch(actions.setFieldPolygons(geojson.features));
+      } catch (e) {
+        console.error(e, e.stack);
+        alert("Error reading shapefile. Make sure to upload a zip archive of the component files.");
+      }
+    };
+    const file = event.target.files[0];
+    if (file) reader.readAsArrayBuffer(file);
+  };
 
   const savePoints = () => {
     const orderedPoints = path.orderedPoints(
@@ -232,8 +253,14 @@ export default function Toolbox() {
         </Button>
 
         <br />
-
-        <Button onClick={() => console.log("foo bar")} title="Upload Boundary">
+        <input
+            type="file"
+            hidden
+            className={classes.input}
+            onChange={onUpload}
+            ref={inputRef}
+          />
+        <Button title="Upload Boundary" onClick={() => inputRef.current && inputRef.current.click()}>
           <Icon name="cloud-upload" />
         </Button>
         <Button onClick={() => setSaveOpen(true)} title="Export">
@@ -242,7 +269,7 @@ export default function Toolbox() {
         <Button onClick={() => setTrashOpen(true)} title="Delete">
           <Icon name="trash" />
         </Button>
-      </Tools>
+      </Tools> 
       <Modal open={saveOpen} onClose={() => setSaveOpen(false)}>
         <div style={getModalStyle()} className={classes.modalPaper}>
           <h2 id="simple-modal-title">Save Points</h2>

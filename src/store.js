@@ -115,7 +115,6 @@ const StateProvider = ({ children }) => {
       default:
         throw new Error();
     }
-    console.log(JSON.stringify(newState));
     return newState;
   }, initialState);
 
