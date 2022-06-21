@@ -6,7 +6,7 @@ import * as actions from "./actions";
 const initialState = {
   mode: "polygon",
   mapboxMode: new DrawPolygonMode(),
-  algo: "clustering",
+  algo: "uniform",
   trigger: null,
   sampleArea: "5",
   triangleOffset: false,
