@@ -27,15 +27,15 @@ export default function Display({ point }) {
 
   if (state.mode !== "select") return null;
 
-  for (let i = 0; i < state.fieldMukeys.length; i++) {
-    const mukeyPolygon = state.fieldMukeys[i].geometry.coordinates[0];
-    if (inside(point, mukeyPolygon)) {
-      const mukeyId = state.fieldMukeyIds[i];
-      const muname = state.mukeyNameMap[mukeyId];
-      if (!muname) return null;
+  for (let i = 0; i < state.fieldRegions.length; i++) {
+    const regionPolygon = state.fieldRegions[i].geometry.coordinates[0];
+    if (inside(point, regionPolygon)) {
+      const regionId = state.fieldRegionIds[i];
+      const description = state.regionNameMap[regionId];
+      if (!description) return null;
       return (
         <div className={classes.display}>
-          <p className={classes.displayText}>{muname}</p>
+          <p className={classes.displayText}>{description}</p>
         </div>
       );
     }

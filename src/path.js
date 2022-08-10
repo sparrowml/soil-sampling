@@ -35,30 +35,30 @@ export const orderedPoints = (fieldPath, points) => {
   return [...ordered, ...remaining];
 };
 
-export const toCsv = (points, mukeyNameMap) => {
+export const toCsv = (points, regionNameMap) => {
   const csv = [
-    "id,longitude,latitude,mukey,muname",
+    "id,longitude,latitude,regionId,description",
     ...points.map((point) => {
-      const { id, mukey } = point.properties;
-      const muname = mukeyNameMap[mukey] || "";
+      const { id, regionId, pointData } = point.properties;
+      const description = pointData || regionNameMap[regionId] || "";
       const [x, y] = point.geometry.coordinates;
-      return `${id},${x},${y},${mukey},${muname}`;
+      return `${id},${x},${y},${regionId},${description}`;
     }),
   ];
   return csv.join("\n");
 };
 
-export const toKml = (points, mukeyNameMap) => {
-  const data = toGeojson(points, mukeyNameMap);
+export const toKml = (points, regionNameMap) => {
+  const data = toGeojson(points, regionNameMap);
   return tokml(data);
 };
 
-export const toGeojson = (points, mukeyNameMap) => {
+export const toGeojson = (points, regionNameMap) => {
   return {
     type: "FeatureCollection",
     features: points.map((point) => {
-      const muname = mukeyNameMap[point.properties.mukey] || "";
-      const properties = { ...point.properties, muname };
+      const description = regionNameMap[point.properties.regionId] || "";
+      const properties = { ...point.properties, description };
       return {
         ...point,
         properties,

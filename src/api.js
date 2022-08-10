@@ -57,3 +57,20 @@ export async function voronoiSample(polygon, nPoints) {
     .then((response) => response.json())
     .catch(console.error);
 }
+
+export async function clusteringSample(polygon, nPoints, data) {
+  const body = { polygon, nPoints };
+  if (data) {
+    body["data"] = data;
+  }
+  return window
+    .fetch(`${BASE_URL}/clustering`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(body),
+    })
+    .then((response) => response.json())
+    .catch(console.error);
+}

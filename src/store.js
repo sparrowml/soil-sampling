@@ -10,18 +10,19 @@ const initialState = {
   trigger: null,
   sampleArea: "5",
   triangleOffset: false,
-  nPoints: 15,
+  nPoints: 50,
+  inputData: null,
   loading: false,
   fieldPolygons: [],
   fieldPoints: [],
-  fieldMukeys: [],
-  fieldMukeyIds: [],
-  mukeyNameMap: {},
+  fieldRegions: [],
+  fieldRegionIds: [],
+  regionNameMap: {},
   fieldPathMode: false,
   fieldPath: [],
   viewport: {
-    latitude: 40.7,
-    longitude: -96.5,
+    latitude: 41.16510772,
+    longitude: -96.47332242,
     zoom: 13.81594170898739,
     bearing: 0,
     pitch: 0,
@@ -59,20 +60,23 @@ const StateProvider = ({ children }) => {
       case actions.SET_N_POINTS:
         newState = { ...state, nPoints: action.value };
         break;
+      case actions.SET_INPUT_DATA:
+        newState = { ...state, inputData: action.inputData };
+        break;
       case actions.SET_FIELD_POLYGONS:
         newState = { ...state, fieldPolygons: action.fieldPolygons };
         break;
       case actions.SET_FIELD_POINTS:
         newState = { ...state, fieldPoints: action.fieldPoints };
         break;
-      case actions.SET_FIELD_MUKEYS:
-        newState = { ...state, fieldMukeys: action.fieldMukeys };
+      case actions.SET_FIELD_REGIONS:
+        newState = { ...state, fieldRegions: action.fieldRegions };
         break;
-      case actions.SET_FIELD_MUKEY_IDS:
-        newState = { ...state, fieldMukeyIds: action.fieldMukeyIds };
+      case actions.SET_FIELD_REGION_IDS:
+        newState = { ...state, fieldRegionIds: action.fieldRegionIds };
         break;
-      case actions.SET_MUKEY_NAME_MAP:
-        newState = { ...state, mukeyNameMap: action.mukeyNameMap };
+      case actions.SET_REGION_NAME_MAP:
+        newState = { ...state, regionNameMap: action.regionNameMap };
         break;
       case actions.SET_FIELD_PATH:
         newState = { ...state, fieldPath: action.fieldPath };
@@ -111,7 +115,6 @@ const StateProvider = ({ children }) => {
       default:
         throw new Error();
     }
-    console.log(JSON.stringify(newState));
     return newState;
   }, initialState);
 

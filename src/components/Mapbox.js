@@ -223,7 +223,7 @@ export default function Mapbox() {
         </Source>
         <Source
           type="geojson"
-          data={{ type: "FeatureCollection", features: state.fieldMukeys }}
+          data={{ type: "FeatureCollection", features: state.fieldRegions }}
         >
           <Layer
             id="regions"

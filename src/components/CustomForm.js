@@ -7,6 +7,7 @@ import FormControl from "@material-ui/core/FormControl";
 import Select from "@material-ui/core/Select";
 
 import Mapbox from "./Mapbox";
+import ClusteringForm from "./ClusteringForm";
 import UniformForm from "./UniformForm";
 import VoronoiForm from "./VoronoiForm";
 import Instructions from "./Instructions";
@@ -32,9 +33,7 @@ function Form() {
       case "voronoi":
         return <VoronoiForm className={classes.formControl} />;
       case "clustering":
-        alert("This algorithm is not currently implemented.");
-        dispatch({ type: actions.SET_ALGO, value: "uniform" });
-        return null;
+        return <ClusteringForm className={classes.formControl} />;
       default:
         return null;
     }

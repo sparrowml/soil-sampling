@@ -1,3 +1,5 @@
+import io
+
 import numpy as np
 from shapely.geometry import Polygon
 
@@ -33,3 +35,12 @@ def get_utm_string(point: np.ndarray) -> str:
 def check_area(polygon: np.ndarray) -> None:
     if Polygon(polygon).area > 10359900:
         raise ValueError("Polygon too large")
+
+
+def read_file(data: str) -> np.ndarray:
+    for i in range(3):
+        try:
+            return np.loadtxt(io.StringIO(data), delimiter=",", skiprows=i)
+        except ValueError:
+            continue
+    return np.loadtxt(io.StringIO(data), delimiter=",", skiprows=i + 1)

@@ -7,7 +7,10 @@ import { store } from "../store";
 import * as actions from "../actions";
 import * as api from "../api";
 
-const pointMap = (point, id, mukey) => ({
+const clusterId = (description) =>
+  description.split("Cluster: ")[1].split(";")[0];
+
+const pointMap = (point, id, regionId, pointData = null) => ({
   type: "Feature",
   geometry: {
     type: "Point",
@@ -15,7 +18,8 @@ const pointMap = (point, id, mukey) => ({
   },
   properties: {
     id,
-    mukey,
+    regionId,
+    pointData,
   },
 });
 
@@ -37,13 +41,13 @@ export default function SubmitActions({ className }) {
     dispatch(actions.setMode("select"));
     dispatch(actions.setTrigger("clearEditor"));
     dispatch(actions.setFieldPoints([]));
-    dispatch(actions.setFieldMukeys([]));
-    dispatch(actions.setFieldMukeyIds([]));
+    dispatch(actions.setFieldRegions([]));
+    dispatch(actions.setFieldRegionIds([]));
     dispatch(actions.setFieldPath([]));
     const fieldPath = [];
     const fieldPoints = [];
-    const fieldMukeys = [];
-    const fieldMukeyIds = [];
+    const fieldRegions = [];
+    const fieldRegionIds = [];
     await api.warmup();
     for (const feature of state.fieldPolygons) {
       const polygon = feature.geometry.coordinates[0];
@@ -57,7 +61,7 @@ export default function SubmitActions({ className }) {
         if (!response) return;
         if (response.points) {
           fieldPoints.push(
-            ...response.points.map((point, i) => pointMap(point, i, "", ""))
+            ...response.points.map((point, i) => pointMap(point, i + 1, "", ""))
           );
           fieldPath.push(...response.points);
         }
@@ -67,14 +71,14 @@ export default function SubmitActions({ className }) {
         if (response.points) {
           fieldPoints.push(
             ...response.points.map((point, i) =>
-              pointMap(point, i, response.mukey_ids[i])
+              pointMap(point, i + 1, response.mukey_ids[i])
             )
           );
           fieldPath.push(...response.points);
         }
         if (response.regions) {
-          fieldMukeys.push(...response.regions.map(polygonMap));
-          fieldMukeyIds.push(...response.region_mukey_ids);
+          fieldRegions.push(...response.regions.map(polygonMap));
+          fieldRegionIds.push(...response.region_mukey_ids);
         }
         api.getMunames(response.region_mukey_ids).then((result) => {
           if (!result.Table) return;
@@ -83,8 +87,40 @@ export default function SubmitActions({ className }) {
             const [id, name] = row;
             mukeyNameMap[id] = name;
           });
-          dispatch(actions.setMukeyNameMap(mukeyNameMap));
+          dispatch(actions.setRegionNameMap(mukeyNameMap));
         });
+      } else if (state.algo === "clustering") {
+        response = await api.clusteringSample(
+          polygon,
+          state.nPoints,
+          state.inputData
+        );
+        if (!response) return;
+        if (response.points) {
+          fieldPoints.push(
+            ...response.points.map((point, i) =>
+              pointMap(
+                point,
+                i + 1,
+                clusterId(response.point_descriptions[i]),
+                response.point_enrichments[i]
+              )
+            )
+          );
+          fieldPath.push(...response.points);
+        }
+        if (response.regions) {
+          fieldRegions.push(...response.regions.map(polygonMap));
+          fieldRegionIds.push(...response.region_descriptions.map(clusterId));
+        }
+        if (response.region_descriptions) {
+          const regionNameMap = {};
+          response.region_descriptions.forEach((description) => {
+            const id = clusterId(description);
+            regionNameMap[id] = description;
+          });
+          dispatch(actions.setRegionNameMap(regionNameMap));    
+        }
       }
       if (response.error) {
         dispatch(actions.setLoading(false));
@@ -98,8 +134,8 @@ export default function SubmitActions({ className }) {
       return;
     }
     dispatch(actions.setFieldPoints(fieldPoints));
-    dispatch(actions.setFieldMukeys(fieldMukeys));
-    dispatch(actions.setFieldMukeyIds(fieldMukeyIds));
+    dispatch(actions.setFieldRegions(fieldRegions));
+    dispatch(actions.setFieldRegionIds(fieldRegionIds));
     dispatch(actions.setFieldPath(fieldPath));
     dispatch(actions.setLoading(false));
   };
