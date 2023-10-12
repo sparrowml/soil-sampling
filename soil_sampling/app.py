@@ -39,13 +39,11 @@ def uniform():
         proj = Proj(get_utm_string(polygon[0]))
         utm = np.stack(proj(polygon[:, 0], polygon[:, 1]), -1)
     except:
-        return jsonify({"error": "Invalid request. Check your inputs and try again."})
+        return "Invalid request. Check your inputs and try again.", 400
     try:
         check_area(utm)
     except:
-        return jsonify(
-            {"error": "Invalid polygon. The maximum area is 2 square miles."}
-        )
+        return "Invalid polygon. The maximum area is 2 square miles.", 400
     try:
         grid = order_points(uniform_sample(utm, acre, triangle_offset))
         grid = np.stack(proj(grid[:, 0], grid[:, 1], inverse=True), -1)
@@ -55,14 +53,10 @@ def uniform():
             }
         )
     except:
-        return jsonify(
-            {
-                "error": (
-                    "Error running the sampling algorithm. "
-                    "You can wait a minute and try again."
-                )
-            }
-        )
+        return (
+            "Error running the sampling algorithm. "
+            "You can wait a minute and try again."
+        ), 400
 
 
 @app.route("/voronoi", methods=["POST"])
@@ -163,17 +157,11 @@ def clustering():
         utm = np.stack(proj(polygon[:, 0], polygon[:, 1]), -1)
     except Exception as e:
         print(e)
-        return (
-            jsonify({"error": "Invalid request. Check your inputs and try again."}),
-            400,
-        )
+        return "Invalid request. Check your inputs and try again.", 400
     try:
         check_area(utm)
     except:
-        return (
-            jsonify({"error": "Invalid polygon. The maximum area is 2 square miles."}),
-            400,
-        )
+        return "Invalid polygon. The maximum area is 2 square miles.", 400
     try:
         regions, region_descriptions = cluster_regions(utm, data)
         shapely_utm = Polygon(utm)
@@ -212,16 +200,9 @@ def clustering():
     except Exception as e:
         print(e)
         return (
-            jsonify(
-                {
-                    "error": (
-                        "Error running the clustering algorithm. "
-                        "You can wait a minute and try again."
-                    )
-                }
-            ),
-            400,
-        )
+            "Error running the clustering algorithm. "
+            "You can wait a minute and try again."
+        ), 400
 
 
 if __name__ == "__main__":
