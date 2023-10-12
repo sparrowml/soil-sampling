@@ -1,9 +1,0 @@
-alphashape
-beautifulsoup4
-flask
-flask-cors
-numpy
-pyproj
-requests
-scipy
-shapely
