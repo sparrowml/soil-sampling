@@ -1,23 +1,23 @@
 import time
 
-from flask import Flask, request, jsonify
-from flask_cors import CORS
 import numpy as np
+from flask import Flask, jsonify, request
+from flask_cors import CORS
 from pyproj import Proj
 from shapely.geometry.polygon import Polygon
 
-from sampling import (
-    uniform_sample,
-    get_utm_string,
-    voronoi_sample,
-    get_mukey_regions,
-    fake_voronoi_sample,
+from soil_sampling import (
+    DATA,
     check_area,
+    cluster_regions,
+    enrich_points,
+    fake_voronoi_sample,
+    get_mukey_regions,
+    get_utm_string,
     order_points,
     read_file,
-    cluster_regions,
-    DATA,
-    enrich_points,
+    uniform_sample,
+    voronoi_sample,
 )
 
 app = Flask(__name__)
