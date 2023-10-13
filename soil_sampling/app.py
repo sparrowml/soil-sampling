@@ -1,6 +1,8 @@
 import time
+from typing import Optional
 
 import numpy as np
+import pandas as pd
 import utm
 from flask import Flask, jsonify, request
 from flask_cors import CORS
@@ -9,6 +11,7 @@ from shapely.geometry.polygon import Polygon
 from soil_sampling import (
     check_area,
     cluster_regions,
+    download_shapefile,
     enrich_points,
     fake_voronoi_sample,
     get_mukey_regions,
@@ -161,6 +164,9 @@ def clustering():
             polygon[:, 1], polygon[:, 0]
         )
         utm_polygon = np.stack([polygon_x, polygon_y], -1)
+        point_data: Optional[pd.DataFrame] = None
+        if "pointDataShapefile" in body:
+            point_data = download_shapefile(body["pointDataShapefile"])
     except Exception as e:
         print(e)
         return "Invalid request. Check your inputs and try again.", 400
@@ -170,7 +176,7 @@ def clustering():
         return "Invalid polygon. The maximum area is 2 square miles.", 400
     try:
         utm_regions, region_descriptions = cluster_regions(
-            utm_polygon, z_number, z_letter
+            utm_polygon, z_number, z_letter, point_data
         )
         shapely_utm = Polygon(utm_polygon)
         all_utm_sample_points = []

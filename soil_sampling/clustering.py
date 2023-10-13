@@ -1,7 +1,8 @@
-from typing import List, Tuple
+from typing import List, Optional, Tuple
 
 import alphashape
 import numpy as np
+import pandas as pd
 import py3dep
 import utm
 from scipy.interpolate import griddata
@@ -23,7 +24,10 @@ def enrich_points(
 
 
 def cluster_regions(
-    utm_polygon: np.ndarray, z_number: int, z_letter: str
+    utm_polygon: np.ndarray,
+    z_number: int,
+    z_letter: str,
+    point_data: Optional[pd.DataFrame] = None,
 ) -> Tuple[List[np.ndarray], List[str]]:
     x_min, y_min = utm_polygon.min(0)
     x_max, y_max = utm_polygon.max(0)
@@ -37,14 +41,26 @@ def cluster_regions(
 
     data = elevation[:, None]
 
-    # ecad = data[:, 3]
-    # ecad_mask = ~np.isnan(ecad)
-    # ecad_grid = griddata(
-    #     data[ecad_mask, 1:3],
-    #     ecad[ecad_mask],
-    #     grid,
-    #     method="nearest",
-    # )
+    if point_data is not None:
+        p_x, p_y, _, __ = utm.from_latlon(
+            point_data.lat.values, point_data.lon.values, z_number, z_letter
+        )
+        point_grid = np.stack([p_x, p_y], -1)
+        point_columns = []
+        for c in point_data.columns:
+            if c in ("lat", "lon"):
+                continue
+            values = point_data[c].values
+            mask = ~np.isnan(values)
+            point_column = griddata(
+                point_grid[mask],
+                values[mask],
+                grid,
+                method="nearest",
+            )
+            point_columns.append(point_column)
+        point_data = np.stack(point_columns, -1)
+        data = np.concatenate([data, point_data], -1)
 
     grid_mask = np.zeros(len(grid)).astype(bool)
     poly = Polygon(utm_polygon)
