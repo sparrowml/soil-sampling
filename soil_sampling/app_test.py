@@ -91,6 +91,7 @@ def test_voronoi(client: FlaskClient):
     request = {"polygon": POLYGON, "nPoints": 50}
     response = client.post("/voronoi", json=request)
     # TODO: Get off flakey external service
+    body = response.json
     assert response.status_code in (200, 400)
 
 

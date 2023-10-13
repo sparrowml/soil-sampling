@@ -2,78 +2,52 @@ from typing import List, Tuple
 
 import alphashape
 import numpy as np
+import py3dep
+import utm
 from scipy.interpolate import griddata
 from shapely.geometry import Point, Polygon
 
 
-def enrich_points(points: np.ndarray, data: np.ndarray) -> List[str]:
-    ecad = data[:, 3]
-    ecad_mask = ~np.isnan(ecad)
-    ecad_grid = griddata(
-        data[ecad_mask, 1:3],
-        ecad[ecad_mask],
-        points,
-        method="nearest",
+def enrich_points(
+    utm_sample_points: np.ndarray, z_number: int, z_letter: str
+) -> List[str]:
+    lat, lon = utm.to_latlon(
+        utm_sample_points[:, 0], utm_sample_points[:, 1], z_number, z_letter
     )
-
-    has_elevation = data.shape[1] > 4
-    if has_elevation:
-        elevation = data[:, 4]
-
-        elevation_mask = ~np.isnan(elevation)
-        elevation_grid = griddata(
-            data[elevation_mask, 1:3],
-            elevation[elevation_mask],
-            points,
-            method="nearest",
-        )
+    elevation = np.array(py3dep.elevation_bycoords(np.stack([lon, lat], -1)))
     point_enrichments = []
-    for i in range(len(points)):
-        if has_elevation:
-            description = (
-                f"ECaD: {ecad_grid[i]:.12f}; Elevation: {elevation_grid[i]:.2f}"
-            )
-        else:
-            description = f"ECaD: {ecad_grid[i]:.12f}"
+    for i in range(len(utm_sample_points)):
+        description = f"Elevation: {elevation[i]:.2f}"
         point_enrichments.append(description)
     return point_enrichments
 
 
 def cluster_regions(
-    polygon: np.ndarray, data: np.ndarray
+    utm_polygon: np.ndarray, z_number: int, z_letter: str
 ) -> Tuple[List[np.ndarray], List[str]]:
-    x_min, y_min = polygon.min(0)
-    x_max, y_max = polygon.max(0)
+    x_min, y_min = utm_polygon.min(0)
+    x_max, y_max = utm_polygon.max(0)
     # 5-meter grid
     xx, yy = np.meshgrid(np.arange(x_min, x_max, 5), np.arange(y_min, y_max, 5))
     xx = xx.ravel()
     yy = yy.ravel()
     grid = np.stack((xx, yy), -1)
+    lat, lon = utm.to_latlon(grid[:, 0], grid[:, 1], z_number, z_letter)
+    elevation = np.array(py3dep.elevation_bycoords(np.stack([lon, lat], -1)))
 
-    ecad = data[:, 3]
-    ecad_mask = ~np.isnan(ecad)
-    ecad_grid = griddata(
-        data[ecad_mask, 1:3],
-        ecad[ecad_mask],
-        grid,
-        method="nearest",
-    )
+    data = elevation[:, None]
 
-    has_elevation = data.shape[1] > 4
-
-    if has_elevation:
-        elevation = data[:, 4]
-
-        elevation_mask = ~np.isnan(elevation)
-        elevation_grid = griddata(
-            data[elevation_mask, 1:3],
-            elevation[elevation_mask],
-            grid,
-            method="nearest",
-        )
+    # ecad = data[:, 3]
+    # ecad_mask = ~np.isnan(ecad)
+    # ecad_grid = griddata(
+    #     data[ecad_mask, 1:3],
+    #     ecad[ecad_mask],
+    #     grid,
+    #     method="nearest",
+    # )
 
     grid_mask = np.zeros(len(grid)).astype(bool)
-    poly = Polygon(polygon)
+    poly = Polygon(utm_polygon)
     for i, p in enumerate(map(Point, grid)):
         if poly.contains(p):
             grid_mask[i] = True
@@ -81,11 +55,8 @@ def cluster_regions(
     if grid_mask.sum() == 0:
         return
 
-    if has_elevation:
-        cluster_points = np.stack((ecad_grid[grid_mask], elevation_grid[grid_mask]), -1)
-    else:
-        cluster_points = ecad_grid[grid_mask][:, None]
-    classes, centroids = kmeans(cluster_points)
+    cluster_points = data[grid_mask]
+    classes, _ = kmeans(cluster_points)
 
     all_pixels = np.zeros(xx.shape) * np.nan
     all_pixels[grid_mask] = classes
@@ -124,14 +95,7 @@ def cluster_regions(
     regions = []
     region_descriptions = []
     for i in range(len(multips)):
-        if has_elevation:
-            _ecad, _elevation = centroids[i]
-            description = (
-                f"Cluster: {i+1}; ECaD: {_ecad:.12f}; Elevation: {_elevation:.2f}"
-            )
-        else:
-            (_ecad,) = centroids[i]
-            description = f"Cluster: {i+1}; ECaD: {_ecad:.12f}"
+        description = f"Cluster: {i+1}"
         if isinstance(multips[i], Polygon):
             regions.append(np.array(multips[i].exterior))
             region_descriptions.append(description)

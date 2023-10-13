@@ -1,6 +1,8 @@
 /cache
 /node_modules
 
+/notebooks/cache
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]

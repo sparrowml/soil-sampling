@@ -1,21 +1,18 @@
 import time
 
 import numpy as np
+import utm
 from flask import Flask, jsonify, request
 from flask_cors import CORS
-from pyproj import Proj
 from shapely.geometry.polygon import Polygon
 
 from soil_sampling import (
-    DATA,
     check_area,
     cluster_regions,
     enrich_points,
     fake_voronoi_sample,
     get_mukey_regions,
-    get_utm_string,
     order_points,
-    read_file,
     uniform_sample,
     voronoi_sample,
 )
@@ -36,26 +33,29 @@ def uniform():
         polygon = np.array(body.get("polygon"))
         acre = body.get("acre", "1")
         triangle_offset = body.get("triangleOffset", True)
-        proj = Proj(get_utm_string(polygon[0]))
-        utm = np.stack(proj(polygon[:, 0], polygon[:, 1]), -1)
+        polygon_x, polygon_y, z_number, z_letter = utm.from_latlon(
+            polygon[:, 1], polygon[:, 0]
+        )
+        utm_polygon = np.stack([polygon_x, polygon_y], -1)
     except:
         return "Invalid request. Check your inputs and try again.", 400
     try:
-        check_area(utm)
+        check_area(utm_polygon)
     except:
         return "Invalid polygon. The maximum area is 2 square miles.", 400
     try:
-        grid = order_points(uniform_sample(utm, acre, triangle_offset))
-        grid = np.stack(proj(grid[:, 0], grid[:, 1], inverse=True), -1)
+        grid = order_points(uniform_sample(utm_polygon, acre, triangle_offset))
+        lat, lon = utm.to_latlon(grid[:, 0], grid[:, 1], z_number, z_letter)
+        grid = np.stack([lon, lat], -1)
         return jsonify(
             {
                 "points": grid.tolist(),
             }
         )
-    except:
+    except Exception as e:
+        print(e)
         return (
-            "Error running the sampling algorithm. "
-            "You can wait a minute and try again."
+            "Error running the sampling algorithm. You can wait a minute and try again."
         ), 400
 
 
@@ -65,8 +65,10 @@ def voronoi():
         body = request.get_json()
         polygon = np.array(body.get("polygon"))
         n_points = body.get("nPoints", 10)
-        proj = Proj(get_utm_string(polygon[0]))
-        utm = np.stack(proj(polygon[:, 0], polygon[:, 1]), -1)
+        polygon_x, polygon_y, z_number, z_letter = utm.from_latlon(
+            polygon[:, 1], polygon[:, 0]
+        )
+        utm_polygon = np.stack([polygon_x, polygon_y], -1)
     except Exception as e:
         print(e)
         return (
@@ -74,7 +76,7 @@ def voronoi():
             400,
         )
     try:
-        check_area(utm)
+        check_area(utm_polygon)
     except:
         return (
             jsonify({"error": "Invalid polygon. The maximum area is 2 square miles."}),
@@ -102,11 +104,14 @@ def voronoi():
             400,
         )
     try:
-        shapely_utm = Polygon(utm)
+        shapely_utm = Polygon(utm_polygon)
         grid_points = []
         point_mukey_ids = []
         for region, mukey_id in zip(regions, region_mukey_ids):
-            utm_region = np.stack(proj(region[:, 0], region[:, 1]), -1)
+            x, y, _, __ = utm.from_latlon(
+                region[:, 1], region[:, 0], z_number, z_letter
+            )
+            utm_region = np.stack([x, y], -1)
             shapely_region = Polygon(utm_region)
             n_region_points = round(n_points * shapely_region.area / shapely_utm.area)
             if n_region_points == 0:
@@ -121,7 +126,8 @@ def voronoi():
                 grid_points.append(points)
                 point_mukey_ids.extend([mukey_id] * len(points))
         grid = order_points(np.concatenate(grid_points))
-        grid = np.stack(proj(grid[:, 0], grid[:, 1], inverse=True), -1)
+        lat, lon = utm.to_latlon(grid[:, 0], grid[:, 1], z_number, z_letter)
+        grid = np.stack([lon, lat], -1)
         return jsonify(
             {
                 "points": grid.tolist(),
@@ -151,46 +157,54 @@ def clustering():
         body = request.get_json()
         polygon = np.array(body.get("polygon"))
         n_points = body.get("nPoints", 10)
-        data = read_file(body.get("data", DATA))
-        proj = Proj(get_utm_string(polygon[0]))
-        data[:, 1:3] = np.stack(proj(data[:, 2], data[:, 1]), -1)
-        utm = np.stack(proj(polygon[:, 0], polygon[:, 1]), -1)
+        polygon_x, polygon_y, z_number, z_letter = utm.from_latlon(
+            polygon[:, 1], polygon[:, 0]
+        )
+        utm_polygon = np.stack([polygon_x, polygon_y], -1)
     except Exception as e:
         print(e)
         return "Invalid request. Check your inputs and try again.", 400
     try:
-        check_area(utm)
+        check_area(utm_polygon)
     except:
         return "Invalid polygon. The maximum area is 2 square miles.", 400
     try:
-        regions, region_descriptions = cluster_regions(utm, data)
-        shapely_utm = Polygon(utm)
-        grid_points = []
+        utm_regions, region_descriptions = cluster_regions(
+            utm_polygon, z_number, z_letter
+        )
+        shapely_utm = Polygon(utm_polygon)
+        all_utm_sample_points = []
         point_descriptions = []
         lng_lat_regions = []
-        for region, description in zip(regions, region_descriptions):
-            shapely_region = Polygon(region)
-            lng_lat_regions.append(
-                np.stack(proj(region[:, 0], region[:, 1], inverse=True), -1)
+        for utm_region, description in zip(utm_regions, region_descriptions):
+            lat, lon = utm.to_latlon(
+                utm_region[:, 0], utm_region[:, 1], z_number, z_letter
             )
-            n_region_points = round(n_points * shapely_region.area / shapely_utm.area)
+            shapely_utm_region = Polygon(utm_region)
+            lng_lat_regions.append(np.stack([lon, lat], -1))
+            n_region_points = round(
+                n_points * shapely_utm_region.area / shapely_utm.area
+            )
             if n_region_points == 0:
                 continue
             elif n_region_points < 4:
-                points = fake_voronoi_sample(region, n_region_points)
-                if points is not None:
-                    grid_points.append(points)
-                    point_descriptions.extend([description] * len(points))
+                utm_sample_points = fake_voronoi_sample(utm_region, n_region_points)
+                if utm_sample_points is not None:
+                    all_utm_sample_points.append(utm_sample_points)
+                    point_descriptions.extend([description] * len(utm_sample_points))
             else:
-                points = voronoi_sample(region, n_region_points)
-                grid_points.append(points)
-                point_descriptions.extend([description] * len(points))
-        grid = order_points(np.concatenate(grid_points))
-        point_enrichments = enrich_points(grid, data)
-        grid = np.stack(proj(grid[:, 0], grid[:, 1], inverse=True), -1)
+                utm_sample_points = voronoi_sample(utm_region, n_region_points)
+                all_utm_sample_points.append(utm_sample_points)
+                point_descriptions.extend([description] * len(utm_sample_points))
+        utm_sample_points = order_points(np.concatenate(all_utm_sample_points))
+        point_enrichments = enrich_points(utm_sample_points, z_number, z_letter)
+        lat, lon = utm.to_latlon(
+            utm_sample_points[:, 0], utm_sample_points[:, 1], z_number, z_letter
+        )
+        sample_points = np.stack([lon, lat], -1)
         return jsonify(
             {
-                "points": grid.tolist(),
+                "points": sample_points.tolist(),
                 "point_enrichments": point_enrichments,
                 "point_descriptions": point_descriptions,
                 "regions": [region.tolist() for region in lng_lat_regions],
