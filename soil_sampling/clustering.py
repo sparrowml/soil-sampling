@@ -39,6 +39,7 @@ def cluster_regions(
     lat, lon = utm.to_latlon(grid[:, 0], grid[:, 1], z_number, z_letter)
     elevation = np.array(py3dep.elevation_bycoords(np.stack([lon, lat], -1)))
 
+    # TODO: limit to 3 total data points
     data = elevation[:, None]
 
     if point_data is not None:
@@ -89,6 +90,9 @@ def cluster_regions(
         if isinstance(multips[i], Polygon):
             continue
         for p in multips[i]:
+            # TODO: make 10% region size configurable
+            # Sum up ignored sub-regions, if > 50%, throw an error
+            # % value should be configurable
             if p.area / multips[i].area < 0.1:
                 multips[i] -= p
 

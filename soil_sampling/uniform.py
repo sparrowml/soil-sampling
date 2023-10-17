@@ -1,6 +1,7 @@
 import numpy as np
-from shapely.geometry import Polygon, Point
+from shapely.geometry import Point, Polygon
 
+# TODO: make this programmatic so it can be any value
 SQUARE_SIDE = {
     "1": 63.615,
     "2.5": 100.584,

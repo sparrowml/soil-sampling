@@ -131,6 +131,7 @@ def voronoi():
         grid = order_points(np.concatenate(grid_points))
         lat, lon = utm.to_latlon(grid[:, 0], grid[:, 1], z_number, z_letter)
         grid = np.stack([lon, lat], -1)
+        # TODO: should return the voronoi regions as well
         return jsonify(
             {
                 "points": grid.tolist(),
@@ -164,6 +165,7 @@ def clustering():
             polygon[:, 1], polygon[:, 0]
         )
         utm_polygon = np.stack([polygon_x, polygon_y], -1)
+        # TODO: pull boolean for whether to include elevation
         point_data: Optional[pd.DataFrame] = None
         if "pointDataShapefile" in body:
             point_data = download_shapefile(body["pointDataShapefile"])
@@ -194,6 +196,10 @@ def clustering():
             if n_region_points == 0:
                 continue
             elif n_region_points < 4:
+                # TODO: return a warning message
+                # Warning: one of the sampling sub-regions is too small for the number of points you picked
+                # Indicate what percentage of the area is in this sub-region
+                # If 50% or more of total area is in a failed sub-region, throw an error
                 utm_sample_points = fake_voronoi_sample(utm_region, n_region_points)
                 if utm_sample_points is not None:
                     all_utm_sample_points.append(utm_sample_points)
@@ -208,6 +214,7 @@ def clustering():
             utm_sample_points[:, 0], utm_sample_points[:, 1], z_number, z_letter
         )
         sample_points = np.stack([lon, lat], -1)
+        # TODO: should return the voronoi regions as well
         return jsonify(
             {
                 "points": sample_points.tolist(),
