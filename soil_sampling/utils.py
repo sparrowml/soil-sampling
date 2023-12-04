@@ -35,8 +35,7 @@ def order_points(points: np.ndarray) -> np.ndarray:
 
 
 def check_area(polygon: np.ndarray) -> None:
-    # TODO: update to 10 mi x 10 mi
-    if Polygon(polygon).area > 10359900:
+    if Polygon(polygon).area > 2.59e7:
         raise ValueError("Polygon too large")
 
 
