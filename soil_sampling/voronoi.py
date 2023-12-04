@@ -1,9 +1,9 @@
 from collections import defaultdict
 from typing import Generator, List, Tuple
 
-from bs4 import BeautifulSoup
 import numpy as np
 import requests
+from bs4 import BeautifulSoup
 from scipy.spatial import Voronoi
 from shapely.geometry import MultiPolygon, Polygon
 
@@ -197,20 +197,3 @@ def get_mukey_regions(polygon: np.ndarray) -> Tuple[List[np.ndarray], List[str]]
                 shapely_regions.append(np.stack(shapely_mukey.exterior.coords.xy, -1))
                 mukey_ids.append(mukey_id)
     return shapely_regions, mukey_ids
-
-
-def munames_from_mukeys(mukeys):
-    """
-    Documentation:
-    https://sdmdataaccess.nrcs.usda.gov/WebServiceHelp.aspx
-    """
-    url = "https://SDMDataAccess.sc.egov.usda.gov/Tabular/post.rest"
-    query = f"""
-    SELECT mukey, muname
-    FROM mapunit
-    WHERE mukey IN {str(tuple(mukeys))};
-    """
-    data = dict(QUERY=query, FORMAT="JSON")
-    response = requests.post(url, data=data)
-    result = response.json().get("Table", [])
-    return dict(result)

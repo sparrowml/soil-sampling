@@ -85,9 +85,7 @@ def test_uniform(client: FlaskClient):
 def test_voronoi(client: FlaskClient):
     request = {"polygon": POLYGON, "nPoints": 50}
     response = client.post("/voronoi", json=request)
-    # TODO: Get off flakey external service
-    body = response.json
-    assert response.status_code in (200, 400)
+    assert response.status_code == 200
 
 
 def test_clustering(client: FlaskClient):
