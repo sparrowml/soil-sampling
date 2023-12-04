@@ -6,7 +6,8 @@ import pandas as pd
 import utm
 from flask import Flask, jsonify, request
 from flask_cors import CORS
-from shapely.geometry.polygon import Polygon
+from shapely.geometry import Polygon
+from shapely.geometry import mapping as shapely_mapping
 
 from soil_sampling import (
     DimensionException,
@@ -111,6 +112,7 @@ def voronoi():
         shapely_utm = Polygon(utm_polygon)
         grid_points = []
         point_mukey_ids = []
+        all_voronoi_regions: list[Polygon] = []
         for region, mukey_id in zip(regions, region_mukey_ids):
             x, y, _, __ = utm.from_latlon(
                 region[:, 1], region[:, 0], z_number, z_letter
@@ -126,19 +128,24 @@ def voronoi():
                     grid_points.append(points)
                     point_mukey_ids.extend([mukey_id] * len(points))
             else:
-                points = voronoi_sample(utm_region, n_region_points)
+                points, voronoi_regions = voronoi_sample(utm_region, n_region_points)
                 grid_points.append(points)
                 point_mukey_ids.extend([mukey_id] * len(points))
+                all_voronoi_regions += voronoi_regions
         grid = order_points(np.concatenate(grid_points))
         lat, lon = utm.to_latlon(grid[:, 0], grid[:, 1], z_number, z_letter)
         grid = np.stack([lon, lat], -1)
-        # TODO: should return the voronoi regions as well
+        updated_voronoi_regions = []
+        for region in all_voronoi_regions:
+            lat, lon = utm.to_latlon(region[:, 0], region[:, 1], z_number, z_letter)
+            updated_voronoi_regions.append(np.stack([lon, lat], -1).tolist())
         return jsonify(
             {
                 "points": grid.tolist(),
                 "mukey_ids": point_mukey_ids,
                 "regions": [region.tolist() for region in regions],
                 "region_mukey_ids": region_mukey_ids,
+                "voronoi_regions": updated_voronoi_regions,
             }
         )
     except Exception as e:
@@ -193,6 +200,7 @@ def clustering():
         all_utm_sample_points = []
         point_descriptions = []
         lng_lat_regions = []
+        all_voronoi_regions = []
         for utm_region, description in zip(utm_regions, region_descriptions):
             lat, lon = utm.to_latlon(
                 utm_region[:, 0], utm_region[:, 1], z_number, z_letter
@@ -214,16 +222,22 @@ def clustering():
                     all_utm_sample_points.append(utm_sample_points)
                     point_descriptions.extend([description] * len(utm_sample_points))
             else:
-                utm_sample_points = voronoi_sample(utm_region, n_region_points)
+                utm_sample_points, voronoi_regions = voronoi_sample(
+                    utm_region, n_region_points
+                )
                 all_utm_sample_points.append(utm_sample_points)
                 point_descriptions.extend([description] * len(utm_sample_points))
+                all_voronoi_regions += voronoi_regions
         utm_sample_points = order_points(np.concatenate(all_utm_sample_points))
         point_enrichments = enrich_points(utm_sample_points, z_number, z_letter)
         lat, lon = utm.to_latlon(
             utm_sample_points[:, 0], utm_sample_points[:, 1], z_number, z_letter
         )
         sample_points = np.stack([lon, lat], -1)
-        # TODO: should return the voronoi regions as well
+        updated_voronoi_regions = []
+        for region in all_voronoi_regions:
+            lat, lon = utm.to_latlon(region[:, 0], region[:, 1], z_number, z_letter)
+            updated_voronoi_regions.append(np.stack([lon, lat], -1).tolist())
         return jsonify(
             {
                 "points": sample_points.tolist(),
@@ -231,6 +245,7 @@ def clustering():
                 "point_descriptions": point_descriptions,
                 "regions": [region.tolist() for region in lng_lat_regions],
                 "region_descriptions": region_descriptions,
+                "voronoi_regions": updated_voronoi_regions,
             }
         )
     except Exception as e:

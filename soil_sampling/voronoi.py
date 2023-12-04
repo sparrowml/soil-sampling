@@ -6,6 +6,7 @@ import requests
 from bs4 import BeautifulSoup
 from scipy.spatial import Voronoi
 from shapely.geometry import MultiPolygon, Polygon
+from shapely.geometry import mapping as shapely_mapping
 
 from .uniform import uniform_sample
 
@@ -24,17 +25,27 @@ def get_components(data: np.ndarray, n_components: int = 2) -> np.ndarray:
     return data @ components[:, :n_components]
 
 
-def voronoi_sample(polygon: np.ndarray, n_points: int) -> np.ndarray:
+def voronoi_sample(
+    polygon: np.ndarray, n_points: int
+) -> tuple[np.ndarray, list[np.ndarray]]:
     """Select n points with Lloyds algorithm inside a polygon"""
     polygon_min = polygon.min(axis=0)
     normalized_polygon = polygon - polygon_min
     starters = np.random.permutation(uniform_sample(normalized_polygon))[:n_points]
     try:
-        points = lloyds_algorithm(starters, normalized_polygon)
+        points, regions = lloyds_algorithm(starters, normalized_polygon)
     except:
-        return fake_voronoi_sample(polygon, n_points)
+        return fake_voronoi_sample(polygon, n_points), []
     points += polygon_min
-    return points
+    updated_regions = []
+    for region in regions:
+        region += polygon_min
+        if region.ndim == 2:
+            updated_regions.append(region)
+        else:
+            for subregion in region:
+                updated_regions.append(subregion)
+    return points, updated_regions
 
 
 def fake_voronoi_sample(polygon: np.ndarray, n_points: int) -> np.ndarray:
@@ -75,7 +86,9 @@ def fake_voronoi_sample(polygon: np.ndarray, n_points: int) -> np.ndarray:
     return points
 
 
-def lloyds_algorithm(starters: np.ndarray, boundary: np.ndarray) -> np.ndarray:
+def lloyds_algorithm(
+    starters: np.ndarray, boundary: np.ndarray
+) -> tuple[np.ndarray, list[np.ndarray]]:
     """Get the optimally spaced points inside a boundary polygon"""
     shapely_boundary = Polygon(boundary)
     diameter = np.linalg.norm(boundary.ptp(axis=0))
@@ -85,13 +98,14 @@ def lloyds_algorithm(starters: np.ndarray, boundary: np.ndarray) -> np.ndarray:
         new_points = []
         for unbounded_region in voronoi_polygons(Voronoi(points), diameter):
             region = unbounded_region.intersection(shapely_boundary)
-            regions.append(region)
+            for _polygon in shapely_mapping(region)["coordinates"]:
+                regions.append(np.array(_polygon))
             centroid = np.array(region.centroid)
             if centroid.shape == (2,):
                 new_points.append(centroid)
         new_points = np.stack(new_points)
         points = new_points
-    return points
+    return points, regions
 
 
 def voronoi_polygons(
@@ -196,4 +210,5 @@ def get_mukey_regions(polygon: np.ndarray) -> Tuple[List[np.ndarray], List[str]]
             if shapely_mukey.exterior.coords:
                 shapely_regions.append(np.stack(shapely_mukey.exterior.coords.xy, -1))
                 mukey_ids.append(mukey_id)
+    return shapely_regions, mukey_ids
     return shapely_regions, mukey_ids
