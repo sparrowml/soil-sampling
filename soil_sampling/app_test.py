@@ -93,6 +93,11 @@ def test_clustering(client: FlaskClient):
         "polygon": CLUSTERING_POLYGON,
         "nPoints": 25,
         "pointDataShapefile": "https://sparrowcomputing.s3.amazonaws.com/soil-sampling-test.zip",
+        "includeElevation": True,
     }
+    response = client.post("/clustering", json=request)
+    assert response.status_code == 200
+
+    request["includeElevation"] = False
     response = client.post("/clustering", json=request)
     assert response.status_code == 200

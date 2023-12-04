@@ -8,6 +8,8 @@ import utm
 from scipy.interpolate import griddata
 from shapely.geometry import Point, Polygon
 
+from .exceptions import DimensionException
+
 
 def enrich_points(
     utm_sample_points: np.ndarray, z_number: int, z_letter: str
@@ -27,6 +29,7 @@ def cluster_regions(
     utm_polygon: np.ndarray,
     z_number: int,
     z_letter: str,
+    include_elevation: bool,
     point_data: Optional[pd.DataFrame] = None,
 ) -> Tuple[List[np.ndarray], List[str]]:
     x_min, y_min = utm_polygon.min(0)
@@ -37,10 +40,11 @@ def cluster_regions(
     yy = yy.ravel()
     grid = np.stack((xx, yy), -1)
     lat, lon = utm.to_latlon(grid[:, 0], grid[:, 1], z_number, z_letter)
-    elevation = np.array(py3dep.elevation_bycoords(np.stack([lon, lat], -1)))
 
-    # TODO: limit to 3 total data points
-    data = elevation[:, None]
+    dimensions = []
+    if include_elevation:
+        elevation = np.array(py3dep.elevation_bycoords(np.stack([lon, lat], -1)))
+        dimensions.append(elevation[:, None])
 
     if point_data is not None:
         p_x, p_y, _, __ = utm.from_latlon(
@@ -48,9 +52,11 @@ def cluster_regions(
         )
         point_grid = np.stack([p_x, p_y], -1)
         point_columns = []
+        n_columns = 0
         for c in point_data.columns:
             if c in ("lat", "lon"):
                 continue
+            n_columns += 1
             values = point_data[c].values
             mask = ~np.isnan(values)
             point_column = griddata(
@@ -61,8 +67,10 @@ def cluster_regions(
             )
             point_columns.append(point_column)
         point_data = np.stack(point_columns, -1)
-        data = np.concatenate([data, point_data], -1)
-
+        dimensions.append(point_data)
+    data = np.concatenate(dimensions, -1)
+    if data.shape[1] > 3:
+        raise DimensionException("Too many dimensions for clustering")
     grid_mask = np.zeros(len(grid)).astype(bool)
     poly = Polygon(utm_polygon)
     for i, p in enumerate(map(Point, grid)):

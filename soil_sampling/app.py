@@ -9,6 +9,7 @@ from flask_cors import CORS
 from shapely.geometry.polygon import Polygon
 
 from soil_sampling import (
+    DimensionException,
     check_area,
     cluster_regions,
     download_shapefile,
@@ -165,10 +166,12 @@ def clustering():
             polygon[:, 1], polygon[:, 0]
         )
         utm_polygon = np.stack([polygon_x, polygon_y], -1)
-        # TODO: pull boolean for whether to include elevation
+        include_elevation = body.get("includeElevation", False)
         point_data: Optional[pd.DataFrame] = None
         if "pointDataShapefile" in body:
             point_data = download_shapefile(body["pointDataShapefile"])
+        if not include_elevation and point_data is None:
+            return "You must include elevation or provide point data.", 400
     except Exception as e:
         print(e)
         return "Invalid request. Check your inputs and try again.", 400
@@ -177,9 +180,15 @@ def clustering():
     except:
         return "Invalid polygon. The maximum area is 2 square miles.", 400
     try:
-        utm_regions, region_descriptions = cluster_regions(
-            utm_polygon, z_number, z_letter, point_data
-        )
+        try:
+            utm_regions, region_descriptions = cluster_regions(
+                utm_polygon, z_number, z_letter, include_elevation, point_data
+            )
+        except DimensionException:
+            return (
+                "Too many dimensions for clustering. A maximum of 3 (including elevation) is supported.",
+                400,
+            )
         shapely_utm = Polygon(utm_polygon)
         all_utm_sample_points = []
         point_descriptions = []
