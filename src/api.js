@@ -59,7 +59,7 @@ export async function voronoiSample(polygon, nPoints) {
 }
 
 export async function clusteringSample(polygon, nPoints, data) {
-  const body = { polygon, nPoints };
+  const body = { polygon, nPoints, includeElevation: true };
   if (data) {
     body["data"] = data;
   }
