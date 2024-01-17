@@ -119,7 +119,7 @@ export default function SubmitActions({ className }) {
             const id = clusterId(description);
             regionNameMap[id] = description;
           });
-          dispatch(actions.setRegionNameMap(regionNameMap));    
+          dispatch(actions.setRegionNameMap(regionNameMap));
         }
       }
       if (response.error) {

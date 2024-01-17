@@ -2,6 +2,7 @@ import React from "react";
 import { DrawPolygonMode, EditingMode } from "react-map-gl-draw";
 
 import * as actions from "./actions";
+import getArea from "./area";
 
 const initialState = {
   mode: "polygon",
@@ -13,6 +14,7 @@ const initialState = {
   nPoints: 50,
   inputData: null,
   loading: false,
+  aoi: null,
   fieldPolygons: [],
   fieldPoints: [],
   fieldRegions: [],
@@ -64,7 +66,17 @@ const StateProvider = ({ children }) => {
         newState = { ...state, inputData: action.inputData };
         break;
       case actions.SET_FIELD_POLYGONS:
-        newState = { ...state, fieldPolygons: action.fieldPolygons };
+        let aoi = 0;
+        for (const feature of action.fieldPolygons) {
+          const polygon = feature.geometry.coordinates[0];
+          aoi += getArea(polygon);
+        }
+        aoi *= 0.000247105;
+        aoi = Math.round(aoi * 100) / 100;
+        if (aoi === 0) {
+          aoi = null;
+        }
+        newState = { ...state, fieldPolygons: action.fieldPolygons, aoi: aoi };
         break;
       case actions.SET_FIELD_POINTS:
         newState = { ...state, fieldPoints: action.fieldPoints };

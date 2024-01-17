@@ -9,13 +9,15 @@ import * as actions from "../actions";
 
 export default function ViewportForm({ className }) {
   const { state, dispatch } = React.useContext(store);
-  const [longitude, setLongitude] = React.useState(`${state.viewport.longitude}`);
+  const [longitude, setLongitude] = React.useState(
+    `${state.viewport.longitude}`
+  );
   const [lonError, setLonError] = React.useState("");
   const [latitude, setLatitude] = React.useState(`${state.viewport.latitude}`);
   const [latError, setLatError] = React.useState("");
 
   const onLonChange = (event) => {
-    setLongitude(event.target.value);    
+    setLongitude(event.target.value);
     const value = parseFloat(event.target.value);
     if (isNaN(value) || value < -180 || value > 180) {
       setLonError("Longitude must be in the range [-180, 180]");
@@ -37,24 +39,42 @@ export default function ViewportForm({ className }) {
   };
 
   return (
-    <Grid container direction="row">
-      <Grid item>
-        <FormControl className={className}>
-          <TextField
-            error={lonError !== ""}
-            value={parseFloat(longitude) === state.viewport.longitude ? longitude : state.viewport.longitude}
-            onChange={onLonChange}
-            helperText={lonError || "Longitude"}
-          />
-        </FormControl>
+    <Grid container direction="column">
+      <Grid container direction="row">
+        <Grid item>
+          <FormControl className={className}>
+            <TextField
+              error={lonError !== ""}
+              value={
+                parseFloat(longitude) === state.viewport.longitude
+                  ? longitude
+                  : state.viewport.longitude
+              }
+              onChange={onLonChange}
+              helperText={lonError || "Longitude"}
+            />
+          </FormControl>
+        </Grid>
+        <Grid item>
+          <FormControl className={className}>
+            <TextField
+              error={latError !== ""}
+              value={
+                parseFloat(latitude) === state.viewport.latitude
+                  ? latitude
+                  : state.viewport.latitude
+              }
+              onChange={onLatChange}
+              helperText={latError || "Latitude"}
+            />
+          </FormControl>
+        </Grid>
       </Grid>
       <Grid item>
         <FormControl className={className}>
           <TextField
-            error={latError !== ""}
-            value={parseFloat(latitude) === state.viewport.latitude ? latitude : state.viewport.latitude}
-            onChange={onLatChange}
-            helperText={latError || "Latitude"}
+            value={state.aoi || ""}
+            helperText="Area of Interest (acres)"
           />
         </FormControl>
       </Grid>
