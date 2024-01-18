@@ -25,6 +25,29 @@ export async function getMunames(mukeys) {
     .catch(console.error);
 }
 
+export async function getMapUnits(polygon) {
+  const response = await window
+    .fetch(`${BASE_URL}/mapunits`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        polygon,
+      }),
+    })
+    .then((response) => response.json())
+    .catch(console.error);
+  const result = await getMunames(response.region_mukey_ids);
+  if (!result.Table) return {};
+  const mukeyNameMap = {};
+  result.Table.forEach((row) => {
+    const [id, name] = row;
+    mukeyNameMap[id] = name;
+  });
+  return mukeyNameMap;
+}
+
 export async function uniformSample(polygon, acre, triangleOffset) {
   return window
     .fetch(`${BASE_URL}/uniform`, {
