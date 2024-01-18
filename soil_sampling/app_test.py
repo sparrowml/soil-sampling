@@ -101,3 +101,9 @@ def test_clustering(client: FlaskClient):
     request["includeElevation"] = False
     response = client.post("/clustering", json=request)
     assert response.status_code == 200
+
+
+def test_mapunits(client: FlaskClient):
+    request = {"polygon": POLYGON}
+    response = client.post("/mapunits", json=request)
+    assert response.status_code == 200

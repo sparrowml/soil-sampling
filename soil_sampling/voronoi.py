@@ -211,4 +211,3 @@ def get_mukey_regions(polygon: np.ndarray) -> Tuple[List[np.ndarray], List[str]]
                 shapely_regions.append(np.stack(shapely_mukey.exterior.coords.xy, -1))
                 mukey_ids.append(mukey_id)
     return shapely_regions, mukey_ids
-    return shapely_regions, mukey_ids

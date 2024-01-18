@@ -64,6 +64,57 @@ def uniform():
         ), 400
 
 
+@app.route("/mapunits", methods=["POST"])
+def map_units():
+    try:
+        body = request.get_json()
+        polygon = np.array(body.get("polygon"))
+        polygon_x, polygon_y, z_number, z_letter = utm.from_latlon(
+            polygon[:, 1], polygon[:, 0]
+        )
+        utm_polygon = np.stack([polygon_x, polygon_y], -1)
+    except Exception as e:
+        print(e)
+        return (
+            jsonify({"error": "Invalid request. Check your inputs and try again."}),
+            400,
+        )
+    try:
+        check_area(utm_polygon)
+    except:
+        return (
+            jsonify({"error": "Invalid polygon. The maximum area is 2 square miles."}),
+            400,
+        )
+    regions = []
+    for _ in range(3):
+        try:
+            regions, region_mukey_ids = get_mukey_regions(polygon)
+            assert len(regions) > 0, "Empty region list"
+            break
+        except Exception as e:
+            time.sleep(1)
+            print(e)
+    if len(regions) == 0:
+        return (
+            jsonify(
+                {
+                    "error": (
+                        "Error requesting the MUKEY regions. "
+                        "You can wait a minute and try again."
+                    )
+                }
+            ),
+            400,
+        )
+    return jsonify(
+        {
+            "regions": [region.tolist() for region in regions],
+            "region_mukey_ids": region_mukey_ids,
+        }
+    )
+
+
 @app.route("/voronoi", methods=["POST"])
 def voronoi():
     try:
