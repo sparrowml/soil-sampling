@@ -40,4 +40,4 @@ RUN pip install -U pip
 RUN pip install -e .
 ADD . .
 
-ENTRYPOINT [ "make" ]
+ENTRYPOINT [ "make", "serve" ]
