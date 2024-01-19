@@ -1,5 +1,5 @@
 import React from "react";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 
 import Grid from "@material-ui/core/Grid";
 import Button from "@material-ui/core/Button";
@@ -34,18 +34,19 @@ const polygonMap = (polygon) => ({
 });
 
 export default function SubmitActions({ className }) {
-  const { state, dispatch } = React.useContext(legacyStore);
+  const { state, dispatch: legacyDispatch } = React.useContext(legacyStore);
+  const dispatch = useDispatch();
   const fieldPolygons = useSelector((state) => state.fieldPolygons);
 
   const generatePoints = async (event) => {
     event.preventDefault();
-    dispatch(actions.setLoading(true));
-    dispatch(actions.setMode("select"));
-    dispatch(actions.setTrigger("clearEditor"));
-    dispatch(actions.setFieldPoints([]));
-    dispatch(actions.setFieldRegions([]));
-    dispatch(actions.setFieldRegionIds([]));
-    dispatch(actions.setFieldPath([]));
+    legacyDispatch(actions.setLoading(true));
+    legacyDispatch(actions.setMode("select"));
+    legacyDispatch(actions.setTrigger("clearEditor"));
+    legacyDispatch(actions.setFieldPoints([]));
+    legacyDispatch(actions.setFieldRegions([]));
+    legacyDispatch(actions.setFieldRegionIds([]));
+    legacyDispatch(actions.setFieldPath([]));
     const fieldPath = [];
     const fieldPoints = [];
     const fieldRegions = [];
@@ -125,21 +126,21 @@ export default function SubmitActions({ className }) {
         }
       }
       if (response.error) {
-        dispatch(actions.setLoading(false));
+        legacyDispatch(actions.setLoading(false));
         alert(response.error);
         return;
       }
     }
     if (fieldPoints.length === 0) {
-      dispatch(actions.setLoading(false));
+      legacyDispatch(actions.setLoading(false));
       alert("An error occurred with the API");
       return;
     }
-    dispatch(actions.setFieldPoints(fieldPoints));
-    dispatch(actions.setFieldRegions(fieldRegions));
-    dispatch(actions.setFieldRegionIds(fieldRegionIds));
-    dispatch(actions.setFieldPath(fieldPath));
-    dispatch(actions.setLoading(false));
+    legacyDispatch(actions.setFieldPoints(fieldPoints));
+    legacyDispatch(actions.setFieldRegions(fieldRegions));
+    legacyDispatch(actions.setFieldRegionIds(fieldRegionIds));
+    legacyDispatch(actions.setFieldPath(fieldPath));
+    legacyDispatch(actions.setLoading(false));
   };
 
   return (

@@ -7,6 +7,7 @@ import * as actions from "./actions";
 const initialState = {
   aoi: null,
   fieldPolygons: [],
+  regionNameMap: {},
 };
 
 const reducer = (state = initialState, action) => {
@@ -15,6 +16,8 @@ const reducer = (state = initialState, action) => {
       return { ...state, aoi: action.aoi };
     case actions.SET_FIELD_POLYGONS:
       return { ...state, fieldPolygons: action.fieldPolygons };
+    case actions.SET_REGION_NAME_MAP:
+      return { ...state, regionNameMap: action.regionNameMap };
     default:
       return state;
   }
@@ -22,6 +25,7 @@ const reducer = (state = initialState, action) => {
 
 export const store = configureStore({ reducer });
 
+// Legacy store. Move data to redux over time.
 const legacyInitialState = {
   mode: "polygon",
   mapboxMode: new DrawPolygonMode(),
@@ -35,7 +39,6 @@ const legacyInitialState = {
   fieldPoints: [],
   fieldRegions: [],
   fieldRegionIds: [],
-  regionNameMap: {},
   fieldPathMode: false,
   fieldPath: [],
   viewport: {
@@ -89,9 +92,6 @@ export const StateProvider = ({ children }) => {
         break;
       case actions.SET_FIELD_REGION_IDS:
         newState = { ...state, fieldRegionIds: action.fieldRegionIds };
-        break;
-      case actions.SET_REGION_NAME_MAP:
-        newState = { ...state, regionNameMap: action.regionNameMap };
         break;
       case actions.SET_FIELD_PATH:
         newState = { ...state, fieldPath: action.fieldPath };

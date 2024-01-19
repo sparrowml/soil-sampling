@@ -1,4 +1,5 @@
 import React from "react";
+import { useSelector } from "react-redux";
 
 import useStyles from "../styles";
 import { legacyStore } from "../store";
@@ -23,6 +24,7 @@ function inside(point, polygon) {
 
 export default function Display({ point }) {
   const { state } = React.useContext(legacyStore);
+  const regionNameMap = useSelector((state) => state.regionNameMap);
   const classes = useStyles();
 
   if (state.mode !== "select") return null;
@@ -31,7 +33,7 @@ export default function Display({ point }) {
     const regionPolygon = state.fieldRegions[i].geometry.coordinates[0];
     if (inside(point, regionPolygon)) {
       const regionId = state.fieldRegionIds[i];
-      const description = state.regionNameMap[regionId];
+      const description = regionNameMap[regionId];
       if (!description) return null;
       return (
         <div className={classes.display}>

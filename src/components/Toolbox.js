@@ -1,5 +1,5 @@
 import * as React from "react";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import {
   DrawPolygonMode,
   DrawPointMode,
@@ -81,6 +81,7 @@ function Icon(props) {
 
 export default function Toolbox() {
   const { state, dispatch: legacyDispatch } = React.useContext(legacyStore);
+  const regionNameMap = useSelector((state) => state.regionNameMap);
   const dispatch = useDispatch();
   const classes = useStyles();
 
@@ -122,7 +123,7 @@ export default function Toolbox() {
       state.fieldPoints
     );
     if (fileType === "csv") {
-      const output = path.toCsv(orderedPoints, state.regionNameMap);
+      const output = path.toCsv(orderedPoints, regionNameMap);
       const blob = new Blob([output], { type: "text/csv;charset=utf-8;" });
       let safeFileName = fileName || "download.csv";
       safeFileName = safeFileName.endsWith(".csv")
@@ -130,7 +131,7 @@ export default function Toolbox() {
         : `${safeFileName}.csv`;
       FileSaver.saveAs(blob, safeFileName);
     } else if (fileType === "kml") {
-      const output = path.toKml(orderedPoints, state.regionNameMap);
+      const output = path.toKml(orderedPoints, regionNameMap);
       const blob = new Blob([output], {
         type: "application/vnd.google-earth.kml+xml;charset=utf-8",
       });
@@ -140,7 +141,7 @@ export default function Toolbox() {
         : `${safeFileName}.kml`;
       FileSaver.saveAs(blob, safeFileName);
     } else if (fileType === "shp") {
-      const output = path.toGeojson(orderedPoints, state.regionNameMap);
+      const output = path.toGeojson(orderedPoints, regionNameMap);
       shpwrite.download(output);
     }
     setSaveOpen(false);
