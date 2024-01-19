@@ -1,3 +1,6 @@
+import { v4 as uuidv4 } from "uuid";
+
+import * as api from "./api";
 import getArea from "./area";
 
 export const SET_MODE = "SET_MODE";
@@ -29,20 +32,38 @@ export const setFieldPolygons = (fieldPolygons) => ({
   fieldPolygons,
 });
 
-export const setFieldPolygonsThunk = (fieldPolygons) => async (dispatch) => {
-  let aoi = 0;
-  for (const feature of fieldPolygons) {
-    const polygon = feature.geometry.coordinates[0];
-    aoi += getArea(polygon);
-  }
-  aoi *= 0.000247105;
-  aoi = Math.round(aoi * 100) / 100;
-  if (aoi === 0) {
-    aoi = null;
-  }
-  dispatch(setAoi(aoi));
-  dispatch(setFieldPolygons(fieldPolygons));
-};
+export const setFieldPolygonsThunk =
+  (fieldPolygons) => async (dispatch, getState) => {
+    dispatch(setRegionNameMap({}));
+    let aoi = 0;
+    for (const feature of fieldPolygons) {
+      const polygon = feature.geometry.coordinates[0];
+      aoi += getArea(polygon);
+    }
+    aoi *= 0.000247105;
+    aoi = Math.round(aoi * 100) / 100;
+    if (aoi === 0) {
+      aoi = null;
+    }
+    dispatch(setAoi(aoi));
+    dispatch(setFieldPolygons(fieldPolygons));
+    const requestId = `${uuidv4()}`;
+    dispatch(setMapUnitRequest(requestId));
+    await new Promise((resolve) => setTimeout(resolve, 250));
+    const { mapUnitRequest } = getState();
+    if (mapUnitRequest !== requestId) {
+      console.log("Cancelled");
+      return;
+    }
+    console.log(mapUnitRequest, requestId);
+    const regionNameMap = {};
+    for (const feature of fieldPolygons) {
+      const polygon = feature.geometry.coordinates[0];
+      const subRegionNameMap = await api.getMapUnits(polygon);
+      Object.assign(regionNameMap, subRegionNameMap);
+    }
+    dispatch(setRegionNameMap(regionNameMap));
+  };
 
 export const SET_INPUT_DATA = "SET_INPUT_DATA";
 export const setInputData = (inputData) => ({
@@ -72,6 +93,12 @@ export const SET_REGION_NAME_MAP = "SET_REGION_NAME_MAP";
 export const setRegionNameMap = (regionNameMap) => ({
   type: SET_REGION_NAME_MAP,
   regionNameMap,
+});
+
+export const SET_MAP_UNIT_REQUEST = "SET_MAP_UNIT_REQUEST";
+export const setMapUnitRequest = (mapUnitRequest) => ({
+  type: SET_MAP_UNIT_REQUEST,
+  mapUnitRequest,
 });
 
 export const SET_FIELD_PATH = "SET_FIELD_PATH";

@@ -8,6 +8,7 @@ const initialState = {
   aoi: null,
   fieldPolygons: [],
   regionNameMap: {},
+  mapUnitRequest: null,
 };
 
 const reducer = (state = initialState, action) => {
@@ -18,6 +19,8 @@ const reducer = (state = initialState, action) => {
       return { ...state, fieldPolygons: action.fieldPolygons };
     case actions.SET_REGION_NAME_MAP:
       return { ...state, regionNameMap: action.regionNameMap };
+    case actions.SET_MAP_UNIT_REQUEST:
+      return { ...state, mapUnitRequest: action.mapUnitRequest };
     default:
       return state;
   }

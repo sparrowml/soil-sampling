@@ -38,6 +38,7 @@
     "spherical-geometry-js": "^3.0.0",
     "styled-components": "^5.3.1",
     "tokml": "^0.4.0",
+    "uuid": "^9.0.1",
     "web-vitals": "^1.0.1"
   },
   "lint-staged": {
