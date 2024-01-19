@@ -1,15 +1,18 @@
 import React from "react";
 import ReactDOM from "react-dom";
+import { Provider } from "react-redux";
 
 import App from "./App";
 import reportWebVitals from "./reportWebVitals";
-import { StateProvider } from "./store";
+import { StateProvider, store } from "./store";
 
 import "./index.css";
 
 const app = (
   <StateProvider>
-    <App />
+    <Provider store={store}>
+      <App />
+    </Provider>
   </StateProvider>
 );
 

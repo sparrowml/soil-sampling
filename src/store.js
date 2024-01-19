@@ -1,8 +1,26 @@
 import React from "react";
+import { configureStore } from "@reduxjs/toolkit";
 import { DrawPolygonMode, EditingMode } from "react-map-gl-draw";
 
 import * as actions from "./actions";
-import getArea from "./area";
+
+const initialState = {
+  aoi: null,
+  fieldPolygons: [],
+};
+
+const reducer = (state = initialState, action) => {
+  switch (action.type) {
+    case actions.SET_AOI:
+      return { ...state, aoi: action.aoi };
+    case actions.SET_FIELD_POLYGONS:
+      return { ...state, fieldPolygons: action.fieldPolygons };
+    default:
+      return state;
+  }
+};
+
+export const store = configureStore({ reducer });
 
 const legacyInitialState = {
   mode: "polygon",
@@ -14,8 +32,6 @@ const legacyInitialState = {
   nPoints: 50,
   inputData: null,
   loading: false,
-  aoi: null,
-  fieldPolygons: [],
   fieldPoints: [],
   fieldRegions: [],
   fieldRegionIds: [],
@@ -64,19 +80,6 @@ export const StateProvider = ({ children }) => {
         break;
       case actions.SET_INPUT_DATA:
         newState = { ...state, inputData: action.inputData };
-        break;
-      case actions.SET_FIELD_POLYGONS:
-        let aoi = 0;
-        for (const feature of action.fieldPolygons) {
-          const polygon = feature.geometry.coordinates[0];
-          aoi += getArea(polygon);
-        }
-        aoi *= 0.000247105;
-        aoi = Math.round(aoi * 100) / 100;
-        if (aoi === 0) {
-          aoi = null;
-        }
-        newState = { ...state, fieldPolygons: action.fieldPolygons, aoi: aoi };
         break;
       case actions.SET_FIELD_POINTS:
         newState = { ...state, fieldPoints: action.fieldPoints };

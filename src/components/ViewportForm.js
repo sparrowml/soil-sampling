@@ -1,4 +1,5 @@
 import React from "react";
+import { useSelector } from "react-redux";
 
 import Grid from "@material-ui/core/Grid";
 import FormControl from "@material-ui/core/FormControl";
@@ -9,6 +10,7 @@ import * as actions from "../actions";
 
 export default function ViewportForm({ className }) {
   const { state, dispatch } = React.useContext(legacyStore);
+  const aoi = useSelector((state) => state.aoi);
   const [longitude, setLongitude] = React.useState(
     `${state.viewport.longitude}`
   );
@@ -72,10 +74,7 @@ export default function ViewportForm({ className }) {
       </Grid>
       <Grid item>
         <FormControl className={className}>
-          <TextField
-            value={state.aoi || ""}
-            helperText="Area of Interest (acres)"
-          />
+          <TextField value={aoi || ""} helperText="Area of Interest (acres)" />
         </FormControl>
       </Grid>
     </Grid>

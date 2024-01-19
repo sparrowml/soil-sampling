@@ -1,4 +1,5 @@
 import React from "react";
+import { useSelector } from "react-redux";
 
 import Grid from "@material-ui/core/Grid";
 import Button from "@material-ui/core/Button";
@@ -34,6 +35,7 @@ const polygonMap = (polygon) => ({
 
 export default function SubmitActions({ className }) {
   const { state, dispatch } = React.useContext(legacyStore);
+  const fieldPolygons = useSelector((state) => state.fieldPolygons);
 
   const generatePoints = async (event) => {
     event.preventDefault();
@@ -49,7 +51,7 @@ export default function SubmitActions({ className }) {
     const fieldRegions = [];
     const fieldRegionIds = [];
     await api.warmup();
-    for (const feature of state.fieldPolygons) {
+    for (const feature of fieldPolygons) {
       const polygon = feature.geometry.coordinates[0];
       let response;
       if (state.algo === "uniform") {

@@ -1,4 +1,5 @@
 import * as React from "react";
+import { useDispatch } from "react-redux";
 import {
   DrawPolygonMode,
   DrawPointMode,
@@ -79,7 +80,8 @@ function Icon(props) {
 }
 
 export default function Toolbox() {
-  const { state, dispatch } = React.useContext(legacyStore);
+  const { state, dispatch: legacyDispatch } = React.useContext(legacyStore);
+  const dispatch = useDispatch();
   const classes = useStyles();
 
   const [saveOpen, setSaveOpen] = React.useState(false);
@@ -96,10 +98,10 @@ export default function Toolbox() {
       try {
         const geojson = await shp(event.target.result);
         const [lon1, lat1, lon2, lat2] = geojson.features[0].geometry.bbox;
-        dispatch(actions.setFieldPolygons(geojson.features));
-        dispatch(actions.setLatitude((lat1 + lat2) / 2));
-        dispatch(actions.setLongitude((lon1 + lon2) / 2));
-        dispatch(actions.setMode("select"));
+        dispatch(actions.setFieldPolygonsThunk(geojson.features));
+        legacyDispatch(actions.setLatitude((lat1 + lat2) / 2));
+        legacyDispatch(actions.setLongitude((lon1 + lon2) / 2));
+        legacyDispatch(actions.setMode("select"));
       } catch (e) {
         console.error(e, e.stack);
         alert(
@@ -145,12 +147,12 @@ export default function Toolbox() {
   };
 
   const trashPoints = () => {
-    dispatch(actions.setTrigger("clearEditor"));
-    dispatch(actions.setFieldPolygons([]));
-    dispatch(actions.setFieldPoints([]));
-    dispatch(actions.setFieldRegions([]));
-    dispatch(actions.setFieldRegionIds([]));
-    dispatch(actions.setFieldPath([]));
+    legacyDispatch(actions.setTrigger("clearEditor"));
+    dispatch(actions.setFieldPolygonsThunk([]));
+    legacyDispatch(actions.setFieldPoints([]));
+    legacyDispatch(actions.setFieldRegions([]));
+    legacyDispatch(actions.setFieldRegionIds([]));
+    legacyDispatch(actions.setFieldPath([]));
     setTrashOpen(false);
   };
 
@@ -188,13 +190,13 @@ export default function Toolbox() {
   const newClick = () => {
     switch (state.mode) {
       case "polygon":
-        dispatch(actions.setMapboxMode(new DrawPolygonMode()));
+        legacyDispatch(actions.setMapboxMode(new DrawPolygonMode()));
         return;
       case "point":
-        dispatch(actions.setMapboxMode(new DrawPointMode()));
+        legacyDispatch(actions.setMapboxMode(new DrawPointMode()));
         return;
       case "path":
-        dispatch(actions.setMapboxMode(new DrawLineStringMode()));
+        legacyDispatch(actions.setMapboxMode(new DrawLineStringMode()));
         return;
       default:
         return;
@@ -204,13 +206,13 @@ export default function Toolbox() {
   const editClick = () => {
     switch (state.mode) {
       case "polygon":
-        dispatch(actions.setMapboxMode(new EditingMode()));
+        legacyDispatch(actions.setMapboxMode(new EditingMode()));
         return;
       case "point":
-        dispatch(actions.setMapboxMode(new EditingMode()));
+        legacyDispatch(actions.setMapboxMode(new EditingMode()));
         return;
       case "path":
-        dispatch(actions.setMapboxMode(new EditingMode()));
+        legacyDispatch(actions.setMapboxMode(new EditingMode()));
         return;
       default:
         return;
@@ -234,7 +236,7 @@ export default function Toolbox() {
           <Button
             key={i}
             active={state.mode === modeConfig.mode}
-            onClick={() => dispatch(actions.setMode(modeConfig.mode))}
+            onClick={() => legacyDispatch(actions.setMode(modeConfig.mode))}
             title={modeConfig.title}
           >
             {modeConfig.content}
@@ -252,7 +254,7 @@ export default function Toolbox() {
         </Button>
 
         <Button
-          onClick={() => dispatch(actions.setTrigger("deleteFeature"))}
+          onClick={() => legacyDispatch(actions.setTrigger("deleteFeature"))}
           title="Cut"
         >
           <Icon name="cut" />

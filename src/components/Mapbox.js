@@ -1,4 +1,5 @@
 import React from "react";
+import { useDispatch, useSelector } from "react-redux";
 import {
   Editor,
   EditingMode,
@@ -29,7 +30,9 @@ function getCursor(mode, mapboxMode) {
 }
 
 export default function Mapbox() {
-  const { state, dispatch } = React.useContext(legacyStore);
+  const { state, dispatch: legacyDispatch } = React.useContext(legacyStore);
+  const dispatch = useDispatch();
+  const fieldPolygons = useSelector((state) => state.fieldPolygons);
   const [featureIndex, setFeatureIndex] = React.useState(null);
   const editorRef = React.useRef(null);
 
@@ -42,19 +45,19 @@ export default function Mapbox() {
     const polygons = features.filter(
       (feature) => feature.geometry.type === "Polygon"
     );
-    if (polygons.length > 0) dispatch(actions.setFieldPolygons(polygons));
+    if (polygons.length > 0) dispatch(actions.setFieldPolygonsThunk(polygons));
     // Send points to state
     const points = features.filter(
       (feature) => feature.geometry.type === "Point"
     );
-    if (points.length > 0) dispatch(actions.setFieldPoints(points));
+    if (points.length > 0) legacyDispatch(actions.setFieldPoints(points));
     // Send lines to state
     const lines = features
       .filter((feature) => feature.geometry.type === "LineString")
       .map((feature) => feature.geometry.coordinates);
     if (lines.length > 0)
-      dispatch(actions.setFieldPath(lines[0].concat(...lines.slice(1))));
-  }, [dispatch]);
+      legacyDispatch(actions.setFieldPath(lines[0].concat(...lines.slice(1))));
+  }, [legacyDispatch, dispatch]);
 
   const clearEditorRef = React.useCallback(async () => {
     if (editorRef.current === null) return;
@@ -75,13 +78,13 @@ export default function Mapbox() {
       await clearEditorRef();
       switch (state.mode) {
         case "polygon":
-          editorRef.current.addFeatures(state.fieldPolygons);
-          dispatch(actions.setFieldPolygons([]));
-          dispatch(actions.setMapboxMode(new DrawPolygonMode()));
+          editorRef.current.addFeatures(fieldPolygons);
+          dispatch(actions.setFieldPolygonsThunk([]));
+          legacyDispatch(actions.setMapboxMode(new DrawPolygonMode()));
           break;
         case "point":
           editorRef.current.addFeatures(state.fieldPoints);
-          dispatch(actions.setFieldPoints([]));
+          legacyDispatch(actions.setFieldPoints([]));
           break;
         case "path":
           editorRef.current.addFeatures([
@@ -91,7 +94,7 @@ export default function Mapbox() {
               properties: {},
             },
           ]);
-          dispatch(actions.setFieldPath([]));
+          legacyDispatch(actions.setFieldPath([]));
           break;
         default:
           break;
@@ -111,10 +114,10 @@ export default function Mapbox() {
       clearTimeout(timeout.current);
       timeout.current = setTimeout(editorRefToState);
       if (editType === "addFeature") {
-        dispatch(actions.setMapboxMode(new EditingMode()));
+        legacyDispatch(actions.setMapboxMode(new EditingMode()));
       }
     },
-    [dispatch, editorRefToState]
+    [legacyDispatch, editorRefToState]
   );
 
   const deleteFeature = React.useCallback(async () => {
@@ -123,24 +126,28 @@ export default function Mapbox() {
       await editorRef.current.deleteFeatures(featureIndex);
       switch (state.mode) {
         case "polygon":
-          const polygons = state.fieldPolygons.filter(
-            (_, i) => i !== featureIndex
-          );
-          dispatch(actions.setFieldPolygons(polygons));
+          const polygons = fieldPolygons.filter((_, i) => i !== featureIndex);
+          dispatch(actions.setFieldPolygonsThunk(polygons));
           break;
         case "point":
           const points = state.fieldPoints.filter((_, i) => i !== featureIndex);
-          dispatch(actions.setFieldPoints(points));
+          legacyDispatch(actions.setFieldPoints(points));
           break;
         case "path":
-          dispatch(actions.setFieldPath([]));
+          legacyDispatch(actions.setFieldPath([]));
           break;
         default:
           break;
       }
     }
-    // eslint-disable-next-line
-  }, [featureIndex]);
+  }, [
+    featureIndex,
+    state.mode,
+    fieldPolygons,
+    state.fieldPoints,
+    dispatch,
+    legacyDispatch,
+  ]);
 
   React.useEffect(() => {
     if (state.trigger === null) return;
@@ -154,8 +161,8 @@ export default function Mapbox() {
       default:
         throw new Error(`Unknown trigger: ${state.trigger}`);
     }
-    dispatch(actions.setTrigger(null));
-  }, [state.trigger, deleteFeature, dispatch, clearEditorRef]);
+    legacyDispatch(actions.setTrigger(null));
+  }, [state.trigger, deleteFeature, legacyDispatch, clearEditorRef]);
 
   let cursorTimeout = React.useRef(null);
   const onCursorMove = React.useCallback((event) => {
@@ -173,7 +180,9 @@ export default function Mapbox() {
         width={MAP_WIDTH}
         height={MAP_HEIGHT}
         mapStyle="mapbox://styles/mapbox/satellite-streets-v11"
-        onViewportChange={(viewport) => dispatch(actions.setViewport(viewport))}
+        onViewportChange={(viewport) =>
+          legacyDispatch(actions.setViewport(viewport))
+        }
         mapboxApiAccessToken={TOKEN}
         onMouseMove={onCursorMove}
       >
@@ -190,7 +199,7 @@ export default function Mapbox() {
         />
         <Source
           type="geojson"
-          data={{ type: "FeatureCollection", features: state.fieldPolygons }}
+          data={{ type: "FeatureCollection", features: fieldPolygons }}
         >
           <Layer
             id="polygons"
