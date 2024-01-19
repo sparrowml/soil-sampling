@@ -68,6 +68,7 @@ export default function SubmitActions({ className }) {
           );
           fieldPath.push(...response.points);
         }
+        dispatch(actions.setRegionNameMap(await api.getMapUnits(polygon)));
       } else if (state.algo === "voronoi") {
         response = await api.voronoiSample(polygon, state.nPoints);
         if (!response) return;

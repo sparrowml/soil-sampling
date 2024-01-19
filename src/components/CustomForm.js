@@ -1,10 +1,17 @@
 import React from "react";
+import { useSelector } from "react-redux";
 
-import { Grid, Paper, InputLabel } from "@material-ui/core";
+import { Grid, Paper, InputLabel, Typography } from "@material-ui/core";
 
 import MenuItem from "@material-ui/core/MenuItem";
 import FormControl from "@material-ui/core/FormControl";
 import Select from "@material-ui/core/Select";
+import Table from "@material-ui/core/Table";
+import TableBody from "@material-ui/core/TableBody";
+import TableContainer from "@material-ui/core/TableContainer";
+import TableCell from "@material-ui/core/TableCell";
+import TableHead from "@material-ui/core/TableHead";
+import TableRow from "@material-ui/core/TableRow";
 
 import Mapbox from "./Mapbox";
 import ClusteringForm from "./ClusteringForm";
@@ -22,6 +29,11 @@ function Form() {
   const classes = useStyles();
 
   const { state, dispatch } = React.useContext(legacyStore);
+  const regionNameMap = useSelector((state) => state.regionNameMap);
+  const regionNames = Array.from(new Set(Object.values(regionNameMap))).sort(
+    (a, b) => a.localeCompare(b)
+  );
+
   const setAlgo = (event) => {
     dispatch({ type: actions.SET_ALGO, value: event.target.value });
   };
@@ -49,6 +61,34 @@ function Form() {
         <Grid item xs={6}>
           <Paper className={classes.paper}>
             <ViewportForm className={classes.formControl} />
+            <Grid item>
+              <FormControl className={classes.formControl}>
+                <Paper>
+                  <TableContainer className={classes.table}>
+                    <Table size="small" aria-label="a dense table">
+                      <TableHead className={classes.tableHeader}>
+                        <TableRow>
+                          <TableCell>
+                            <Typography variant="subtitle2">
+                              Soil Map Units in AOI
+                            </Typography>
+                          </TableCell>
+                        </TableRow>
+                      </TableHead>
+                      <TableBody>
+                        {regionNames.map((name) => (
+                          <TableRow key={name}>
+                            <TableCell component="th" scope="row">
+                              {name}
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </TableContainer>
+                </Paper>
+              </FormControl>
+            </Grid>
             <Grid container direction="column">
               <Grid item>
                 <FormControl className={classes.formControl}>

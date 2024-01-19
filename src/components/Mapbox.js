@@ -79,7 +79,7 @@ export default function Mapbox() {
       switch (state.mode) {
         case "polygon":
           editorRef.current.addFeatures(fieldPolygons);
-          dispatch(actions.setFieldPolygonsThunk([]));
+          dispatch(actions.setFieldPolygons([]));
           legacyDispatch(actions.setMapboxMode(new DrawPolygonMode()));
           break;
         case "point":

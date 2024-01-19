@@ -51,7 +51,17 @@ const useStyles = makeStyles((theme) => ({
   paper: {
     color: theme.palette.text.secondary,
   },
-  // necessary for content to be below app bar
+  table: {
+    minHeight: 175,
+    maxHeight: 175,
+    minWidth: 500,
+    maxWidth: 500,
+    overflowX: "auto",
+    overflowY: "scroll",
+  },
+  tableHeader: {
+    backgroundColor: theme.palette.action.hover,
+  },
   toolbar: theme.mixins.toolbar,
   content: {
     flexGrow: 1,
