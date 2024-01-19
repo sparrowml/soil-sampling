@@ -95,14 +95,12 @@ function Form() {
                   <InputLabel>Algorithm</InputLabel>
                   <Select value={state.algo} onChange={setAlgo}>
                     <MenuItem value="uniform">Uniform</MenuItem>
-                    <MenuItem value="voronoi">
-                      Soil Map Unit (Standard)
+                    <MenuItem value="voronoi">Soil Map Unit</MenuItem>
+                    <MenuItem value="cema221scss">
+                      Soil Carbon Stock Sampling (CEMA 221)
                     </MenuItem>
-                    <MenuItem value="cema221">
-                      Soil Map Unit (CEMA 221)
-                    </MenuItem>
-                    <MenuItem value="cema212">
-                      Soil Map Unit (CEMA 212)
+                    <MenuItem value="cema221cs">
+                      Citizen Science (CEMA 221)
                     </MenuItem>
                     <MenuItem value="clustering">Clustering</MenuItem>
                   </Select>

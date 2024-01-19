@@ -35,6 +35,8 @@ const polygonMap = (polygon) => ({
 
 export default function SubmitActions({ className }) {
   const { state, dispatch: legacyDispatch } = React.useContext(legacyStore);
+  const aoi = useSelector((state) => state.aoi);
+  const currentRegionNameMap = useSelector((state) => state.regionNameMap);
   const dispatch = useDispatch();
   const fieldPolygons = useSelector((state) => state.fieldPolygons);
 
@@ -71,6 +73,49 @@ export default function SubmitActions({ className }) {
         dispatch(actions.setRegionNameMap(await api.getMapUnits(polygon)));
       } else if (state.algo === "voronoi") {
         response = await api.voronoiSample(polygon, state.nPoints);
+        if (!response) return;
+        if (response.points) {
+          fieldPoints.push(
+            ...response.points.map((point, i) =>
+              pointMap(point, i + 1, response.mukey_ids[i])
+            )
+          );
+          fieldPath.push(...response.points);
+        }
+        if (response.regions) {
+          fieldRegions.push(...response.regions.map(polygonMap));
+          fieldRegionIds.push(...response.region_mukey_ids);
+        }
+        api.getMunames(response.region_mukey_ids).then((result) => {
+          if (!result.Table) return;
+          const mukeyNameMap = {};
+          result.Table.forEach((row) => {
+            const [id, name] = row;
+            mukeyNameMap[id] = name;
+          });
+          dispatch(actions.setRegionNameMap(mukeyNameMap));
+        });
+      } else if (state.algo?.startsWith("cema221")) {
+        if (aoi > 10) {
+          legacyDispatch(actions.setLoading(false));
+          alert("Select another AOI with 10 or fewer acres");
+          return;
+        }
+        if (state.algo === "cema221scss") {
+          if (Object.keys(currentRegionNameMap).length > 3) {
+            legacyDispatch(actions.setLoading(false));
+            alert("Select another AOI with 3 or fewer soil map units");
+            return;
+          }
+          response = await api.voronoiSample(polygon, 6);
+        } else if (state.algo === "cema221cs") {
+          if (Object.keys(currentRegionNameMap).length !== 3) {
+            legacyDispatch(actions.setLoading(false));
+            alert("Select another AOI with exactly 3 soil map units");
+            return;
+          }
+          response = await api.voronoiSample(polygon, 9);
+        }
         if (!response) return;
         if (response.points) {
           fieldPoints.push(
