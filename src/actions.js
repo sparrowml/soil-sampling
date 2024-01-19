@@ -1,3 +1,5 @@
+import getArea from "./area";
+
 export const SET_MODE = "SET_MODE";
 export const setMode = (mode) => ({ type: SET_MODE, mode });
 
@@ -17,12 +19,30 @@ export const toggleTriangleOffset = (triangleOffset) => ({
   triangleOffset,
 });
 
+export const SET_AOI = "SET_AOI";
+export const setAoi = (aoi) => ({ type: SET_AOI, aoi });
+
 export const SET_N_POINTS = "SET_N_POINTS";
 export const SET_FIELD_POLYGONS = "SET_FIELD_POLYGONS";
 export const setFieldPolygons = (fieldPolygons) => ({
   type: SET_FIELD_POLYGONS,
   fieldPolygons,
 });
+
+export const setFieldPolygonsThunk = (fieldPolygons) => async (dispatch) => {
+  let aoi = 0;
+  for (const feature of fieldPolygons) {
+    const polygon = feature.geometry.coordinates[0];
+    aoi += getArea(polygon);
+  }
+  aoi *= 0.000247105;
+  aoi = Math.round(aoi * 100) / 100;
+  if (aoi === 0) {
+    aoi = null;
+  }
+  dispatch(setAoi(aoi));
+  dispatch(setFieldPolygons(fieldPolygons));
+};
 
 export const SET_INPUT_DATA = "SET_INPUT_DATA";
 export const setInputData = (inputData) => ({
