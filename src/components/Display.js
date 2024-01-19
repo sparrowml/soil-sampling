@@ -1,7 +1,7 @@
 import React from "react";
 
 import useStyles from "../styles";
-import { store } from "../store";
+import { legacyStore } from "../store";
 
 function inside(point, polygon) {
   // ray-casting algorithm
@@ -22,7 +22,7 @@ function inside(point, polygon) {
 }
 
 export default function Display({ point }) {
-  const { state } = React.useContext(store);
+  const { state } = React.useContext(legacyStore);
   const classes = useStyles();
 
   if (state.mode !== "select") return null;

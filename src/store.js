@@ -4,7 +4,7 @@ import { DrawPolygonMode, EditingMode } from "react-map-gl-draw";
 import * as actions from "./actions";
 import getArea from "./area";
 
-const initialState = {
+const legacyInitialState = {
   mode: "polygon",
   mapboxMode: new DrawPolygonMode(),
   algo: "uniform",
@@ -30,10 +30,10 @@ const initialState = {
     pitch: 0,
   },
 };
-const store = React.createContext(initialState);
-const { Provider } = store;
+export const legacyStore = React.createContext(legacyInitialState);
+const { Provider } = legacyStore;
 
-const StateProvider = ({ children }) => {
+export const StateProvider = ({ children }) => {
   const [state, dispatch] = React.useReducer((state, action) => {
     let newState;
     switch (action.type) {
@@ -128,9 +128,7 @@ const StateProvider = ({ children }) => {
         throw new Error();
     }
     return newState;
-  }, initialState);
+  }, legacyInitialState);
 
   return <Provider value={{ state, dispatch }}>{children}</Provider>;
 };
-
-export { store, StateProvider };

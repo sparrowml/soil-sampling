@@ -19,7 +19,7 @@ import FormHelperText from "@material-ui/core/FormHelperText";
 import MUIButton from "@material-ui/core/Button";
 import "boxicons";
 
-import { store } from "../store";
+import { legacyStore } from "../store";
 import * as actions from "../actions";
 import useStyles from "../styles";
 import * as path from "../path";
@@ -79,7 +79,7 @@ function Icon(props) {
 }
 
 export default function Toolbox() {
-  const { state, dispatch } = React.useContext(store);
+  const { state, dispatch } = React.useContext(legacyStore);
   const classes = useStyles();
 
   const [saveOpen, setSaveOpen] = React.useState(false);
@@ -102,7 +102,9 @@ export default function Toolbox() {
         dispatch(actions.setMode("select"));
       } catch (e) {
         console.error(e, e.stack);
-        alert("Error reading shapefile. Make sure to upload a zip archive of the component files.");
+        alert(
+          "Error reading shapefile. Make sure to upload a zip archive of the component files."
+        );
       }
     };
     if (event.target.files) {
@@ -258,13 +260,16 @@ export default function Toolbox() {
 
         <br />
         <input
-            type="file"
-            hidden
-            className={classes.input}
-            onChange={onUpload}
-            ref={inputRef}
-          />
-        <Button title="Upload Boundary" onClick={() => inputRef.current && inputRef.current.click()}>
+          type="file"
+          hidden
+          className={classes.input}
+          onChange={onUpload}
+          ref={inputRef}
+        />
+        <Button
+          title="Upload Boundary"
+          onClick={() => inputRef.current && inputRef.current.click()}
+        >
           <Icon name="cloud-upload" />
         </Button>
         <Button onClick={() => setSaveOpen(true)} title="Export">
@@ -273,7 +278,7 @@ export default function Toolbox() {
         <Button onClick={() => setTrashOpen(true)} title="Delete">
           <Icon name="trash" />
         </Button>
-      </Tools> 
+      </Tools>
       <Modal open={saveOpen} onClose={() => setSaveOpen(false)}>
         <div style={getModalStyle()} className={classes.modalPaper}>
           <h2 id="simple-modal-title">Save Points</h2>

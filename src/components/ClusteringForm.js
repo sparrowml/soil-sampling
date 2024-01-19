@@ -5,13 +5,13 @@ import FormControl from "@material-ui/core/FormControl";
 import TextField from "@material-ui/core/TextField";
 
 import useStyles from "../styles";
-import { store } from "../store";
+import { legacyStore } from "../store";
 import * as actions from "../actions";
 
 export default function ClusteringForm() {
   const classes = useStyles();
 
-  const { state, dispatch } = React.useContext(store);
+  const { state, dispatch } = React.useContext(legacyStore);
   const [nPoints, setNPoints] = React.useState(state.nPoints);
   const [errorMessage, setErrorMessage] = React.useState("");
 

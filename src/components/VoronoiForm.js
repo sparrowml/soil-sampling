@@ -3,11 +3,11 @@ import React from "react";
 import FormControl from "@material-ui/core/FormControl";
 import TextField from "@material-ui/core/TextField";
 
-import { store } from "../store";
+import { legacyStore } from "../store";
 import * as actions from "../actions";
 
 export default function VoronoiForm({ className }) {
-  const { state, dispatch } = React.useContext(store);
+  const { state, dispatch } = React.useContext(legacyStore);
   const [nPoints, setNPoints] = React.useState(state.nPoints);
   const [errorMessage, setErrorMessage] = React.useState("");
 

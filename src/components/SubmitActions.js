@@ -3,7 +3,7 @@ import React from "react";
 import Grid from "@material-ui/core/Grid";
 import Button from "@material-ui/core/Button";
 
-import { store } from "../store";
+import { legacyStore } from "../store";
 import * as actions from "../actions";
 import * as api from "../api";
 
@@ -33,7 +33,7 @@ const polygonMap = (polygon) => ({
 });
 
 export default function SubmitActions({ className }) {
-  const { state, dispatch } = React.useContext(store);
+  const { state, dispatch } = React.useContext(legacyStore);
 
   const generatePoints = async (event) => {
     event.preventDefault();

@@ -4,11 +4,11 @@ import Grid from "@material-ui/core/Grid";
 import FormControl from "@material-ui/core/FormControl";
 import TextField from "@material-ui/core/TextField";
 
-import { store } from "../store";
+import { legacyStore } from "../store";
 import * as actions from "../actions";
 
 export default function ViewportForm({ className }) {
-  const { state, dispatch } = React.useContext(store);
+  const { state, dispatch } = React.useContext(legacyStore);
   const [longitude, setLongitude] = React.useState(
     `${state.viewport.longitude}`
   );

@@ -14,14 +14,14 @@ import Instructions from "./Instructions";
 import ViewportForm from "./ViewportForm";
 import SubmitActions from "./SubmitActions";
 
-import { store } from "../store";
+import { legacyStore } from "../store";
 import * as actions from "../actions";
 import useStyles from "../styles";
 
 function Form() {
   const classes = useStyles();
 
-  const { state, dispatch } = React.useContext(store);
+  const { state, dispatch } = React.useContext(legacyStore);
   const setAlgo = (event) => {
     dispatch({ type: actions.SET_ALGO, value: event.target.value });
   };

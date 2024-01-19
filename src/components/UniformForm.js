@@ -9,12 +9,12 @@ import MenuItem from "@material-ui/core/MenuItem";
 import FormHelperText from "@material-ui/core/FormHelperText";
 
 import useStyles from "../styles";
-import { store } from "../store";
+import { legacyStore } from "../store";
 import * as actions from "../actions";
 
 export default function UniformForm({ className }) {
   const classes = useStyles();
-  const { state, dispatch } = React.useContext(store);
+  const { state, dispatch } = React.useContext(legacyStore);
 
   const onSampleAreaChange = (event) => {
     event.preventDefault();

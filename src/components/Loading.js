@@ -3,7 +3,7 @@ import React from "react";
 import Loader from "react-loader-spinner";
 import Modal from "@material-ui/core/Modal";
 
-import { store } from "../store";
+import { legacyStore } from "../store";
 import useStyles from "../styles";
 
 function getModalStyle() {
@@ -18,7 +18,7 @@ function getModalStyle() {
 }
 
 export default function Loading() {
-  const { state } = React.useContext(store);
+  const { state } = React.useContext(legacyStore);
   const classes = useStyles();
 
   return (

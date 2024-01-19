@@ -10,7 +10,7 @@ import MapGL, { Source, Layer } from "react-map-gl";
 import Display from "./Display";
 import Toolbox from "./Toolbox";
 import * as actions from "../actions";
-import { store } from "../store";
+import { legacyStore } from "../store";
 import { getFeatureStyle, getEditHandleStyle } from "../styles";
 
 const TOKEN =
@@ -29,7 +29,7 @@ function getCursor(mode, mapboxMode) {
 }
 
 export default function Mapbox() {
-  const { state, dispatch } = React.useContext(store);
+  const { state, dispatch } = React.useContext(legacyStore);
   const [featureIndex, setFeatureIndex] = React.useState(null);
   const editorRef = React.useRef(null);
 
