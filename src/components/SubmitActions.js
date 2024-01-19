@@ -107,14 +107,14 @@ export default function SubmitActions({ className }) {
             alert("Select another AOI with 3 or fewer soil map units");
             return;
           }
-          response = await api.voronoiSample(polygon, 6);
+          response = await api.cema221(polygon, 6);
         } else if (state.algo === "cema221cs") {
           if (Object.keys(currentRegionNameMap).length !== 3) {
             legacyDispatch(actions.setLoading(false));
             alert("Select another AOI with exactly 3 soil map units");
             return;
           }
-          response = await api.voronoiSample(polygon, 9);
+          response = await api.cema221(polygon, 9);
         }
         if (!response) return;
         if (response.points) {

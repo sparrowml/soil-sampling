@@ -7,7 +7,6 @@ import utm
 from flask import Flask, jsonify, request
 from flask_cors import CORS
 from shapely.geometry import Polygon
-from shapely.geometry import mapping as shapely_mapping
 
 from soil_sampling import (
     DimensionException,
@@ -15,7 +14,8 @@ from soil_sampling import (
     cluster_regions,
     download_shapefile,
     enrich_points,
-    fake_voronoi_sample,
+    fake_voronoi_sample_minmax,
+    fake_voronoi_sample_uniform,
     get_mukey_regions,
     order_points,
     uniform_sample,
@@ -174,7 +174,7 @@ def voronoi():
             if n_region_points == 0:
                 continue
             elif n_region_points < 4:
-                points = fake_voronoi_sample(utm_region, n_region_points)
+                points = fake_voronoi_sample_uniform(utm_region, n_region_points)
                 if points is not None:
                     grid_points.append(points)
                     point_mukey_ids.extend([mukey_id] * len(points))
@@ -183,6 +183,106 @@ def voronoi():
                 grid_points.append(points)
                 point_mukey_ids.extend([mukey_id] * len(points))
                 all_voronoi_regions += voronoi_regions
+        grid = order_points(np.concatenate(grid_points))
+        lat, lon = utm.to_latlon(grid[:, 0], grid[:, 1], z_number, z_letter)
+        grid = np.stack([lon, lat], -1)
+        updated_voronoi_regions = []
+        for region in all_voronoi_regions:
+            lat, lon = utm.to_latlon(region[:, 0], region[:, 1], z_number, z_letter)
+            updated_voronoi_regions.append(np.stack([lon, lat], -1).tolist())
+        return jsonify(
+            {
+                "points": grid.tolist(),
+                "mukey_ids": point_mukey_ids,
+                "regions": [region.tolist() for region in regions],
+                "region_mukey_ids": region_mukey_ids,
+                "voronoi_regions": updated_voronoi_regions,
+            }
+        )
+    except Exception as e:
+        print(e)
+        return (
+            jsonify(
+                {
+                    "error": (
+                        "Error running the sampling algorithm. "
+                        "You can wait a minute and try again."
+                    )
+                }
+            ),
+            400,
+        )
+
+
+@app.route("/cema221", methods=["POST"])
+def cema221():
+    try:
+        body = request.get_json()
+        polygon = np.array(body.get("polygon"))
+        n_points = body.get("nPoints", 6)
+        polygon_x, polygon_y, z_number, z_letter = utm.from_latlon(
+            polygon[:, 1], polygon[:, 0]
+        )
+        utm_polygon = np.stack([polygon_x, polygon_y], -1)
+    except Exception as e:
+        print(e)
+        return (
+            jsonify({"error": "Invalid request. Check your inputs and try again."}),
+            400,
+        )
+    try:
+        check_area(utm_polygon)
+    except:
+        return (
+            jsonify({"error": "Invalid polygon. The maximum area is 2 square miles."}),
+            400,
+        )
+    regions = []
+    for _ in range(3):
+        try:
+            regions, region_mukey_ids = get_mukey_regions(polygon)
+            assert len(regions) > 0, "Empty region list"
+            break
+        except Exception as e:
+            time.sleep(1)
+            print(e)
+    region_map = {}
+    for mukey_id, region in zip(region_mukey_ids, regions):
+        if mukey_id not in region_map:
+            region_map[mukey_id] = region
+        elif Polygon(region_map[mukey_id]).area < Polygon(region).area:
+            region_map[mukey_id] = region
+    regions = []
+    region_mukey_ids = []
+    for mukey_id, region in region_map.items():
+        regions.append(region)
+        region_mukey_ids.append(mukey_id)
+    if len(regions) == 0:
+        return (
+            jsonify(
+                {
+                    "error": (
+                        "Error requesting the MUKEY regions. "
+                        "You can wait a minute and try again."
+                    )
+                }
+            ),
+            400,
+        )
+    try:
+        grid_points = []
+        point_mukey_ids = []
+        all_voronoi_regions: list[Polygon] = []
+        for region, mukey_id in zip(regions, region_mukey_ids):
+            x, y, _, __ = utm.from_latlon(
+                region[:, 1], region[:, 0], z_number, z_letter
+            )
+            utm_region = np.stack([x, y], -1)
+            n_region_points = round(n_points / len(regions))
+            points = fake_voronoi_sample_minmax(utm_region, n_region_points)
+            if points is not None:
+                grid_points.append(points)
+                point_mukey_ids.extend([mukey_id] * len(points))
         grid = order_points(np.concatenate(grid_points))
         lat, lon = utm.to_latlon(grid[:, 0], grid[:, 1], z_number, z_letter)
         grid = np.stack([lon, lat], -1)

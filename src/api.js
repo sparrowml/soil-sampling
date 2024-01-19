@@ -81,6 +81,22 @@ export async function voronoiSample(polygon, nPoints) {
     .catch(console.error);
 }
 
+export async function cema221(polygon, nPoints) {
+  return window
+    .fetch(`${BASE_URL}/cema221`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        polygon,
+        nPoints,
+      }),
+    })
+    .then((response) => response.json())
+    .catch(console.error);
+}
+
 export async function clusteringSample(polygon, nPoints, data) {
   const body = { polygon, nPoints, includeElevation: true };
   if (data) {

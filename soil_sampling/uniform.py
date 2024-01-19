@@ -20,14 +20,13 @@ def in_polygon_filter(grid: np.ndarray, polygon: np.ndarray) -> np.ndarray:
 
 
 def boundary_distance_filter(
-    grid: np.ndarray, polygon: np.ndarray, acre: str
+    grid: np.ndarray, polygon: np.ndarray, threshold: float
 ) -> np.ndarray:
     """Filter out grid points that are within <threshold> of the polygon boundary."""
     shapely_polygon = Polygon(polygon)
-    boundary_threshold = SQUARE_SIDE[acre] / 4
     keepers = []
     for point in grid:
-        if shapely_polygon.exterior.distance(Point(point)) > boundary_threshold:
+        if shapely_polygon.exterior.distance(Point(point)) > threshold:
             keepers.append(point)
     return np.array(keepers)
 
@@ -61,5 +60,5 @@ def uniform_sample(
         i += 1
     grid = np.array(grid)
     grid = in_polygon_filter(grid, polygon)
-    grid = boundary_distance_filter(grid, polygon, acre)
+    grid = boundary_distance_filter(grid, polygon, SQUARE_SIDE[acre] / 4)
     return grid

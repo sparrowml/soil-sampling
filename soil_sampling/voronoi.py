@@ -5,10 +5,10 @@ import numpy as np
 import requests
 from bs4 import BeautifulSoup
 from scipy.spatial import Voronoi
-from shapely.geometry import MultiPolygon, Polygon
+from shapely.geometry import MultiPolygon, Point, Polygon
 from shapely.geometry import mapping as shapely_mapping
 
-from .uniform import uniform_sample
+from .uniform import in_polygon_filter, uniform_sample
 
 
 def get_components(data: np.ndarray, n_components: int = 2) -> np.ndarray:
@@ -48,7 +48,7 @@ def voronoi_sample(
     return points, updated_regions
 
 
-def fake_voronoi_sample(polygon: np.ndarray, n_points: int) -> np.ndarray:
+def fake_voronoi_sample_uniform(polygon: np.ndarray, n_points: int) -> np.ndarray:
     """Randomly select n uniform grid points inside a smaller polygon"""
     xmin = polygon[:, 0].min()
     ymin = polygon[:, 1].min()
@@ -81,6 +81,43 @@ def fake_voronoi_sample(polygon: np.ndarray, n_points: int) -> np.ndarray:
             picked_points.append(points[indices[mask][median_i]])
 
         points = np.stack(picked_points, 0)
+    points[:, 0] += xmin
+    points[:, 1] += ymin
+    return points
+
+
+def fake_voronoi_sample_minmax(polygon: np.ndarray, n_points: int) -> np.ndarray:
+    """Randomly select n uniform grid points inside a smaller polygon"""
+    xmin = polygon[:, 0].min()
+    ymin = polygon[:, 1].min()
+    polygon[:, 0] -= xmin
+    polygon[:, 1] -= ymin
+
+    # 100 x 100 grid
+    x = np.linspace(polygon[:, 0].min(), polygon[:, 0].max(), 20)
+    y = np.linspace(polygon[:, 1].min(), polygon[:, 1].max(), 20)
+    xx, yy = np.meshgrid(x, y)
+
+    points = np.stack([xx.ravel(), yy.ravel()], -1)
+    points = in_polygon_filter(points, polygon)
+
+    boundary_distances = []
+    for point in points:
+        boundary_distances.append(Polygon(polygon).exterior.distance(Point(point)))
+    boundary_distances = np.array(boundary_distances)
+
+    best_point_index = boundary_distances.argmax()
+    best_points = points[best_point_index][None]
+
+    for _ in range(1, n_points):
+        point_distances = np.linalg.norm(points[:, None] - best_points[None], axis=-1)
+        point_distances[point_distances == 0] = -np.inf
+        point_distances = point_distances.min(axis=-1)
+        overall_distances = np.minimum(point_distances, 2 * boundary_distances)
+        best_point_index = overall_distances.argmax()
+        best_points = np.concatenate([best_points, points[best_point_index][None]], 0)
+
+    points = best_points
     points[:, 0] += xmin
     points[:, 1] += ymin
     return points
