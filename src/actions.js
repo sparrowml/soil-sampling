@@ -52,10 +52,8 @@ export const setFieldPolygonsThunk =
     await new Promise((resolve) => setTimeout(resolve, 250));
     const { mapUnitRequest } = getState();
     if (mapUnitRequest !== requestId) {
-      console.log("Cancelled");
       return;
     }
-    console.log(mapUnitRequest, requestId);
     const regionNameMap = {};
     for (const feature of fieldPolygons) {
       const polygon = feature.geometry.coordinates[0];
