@@ -6,7 +6,7 @@ import {
   DrawPolygonMode,
   DrawPointMode,
 } from "react-map-gl-draw";
-import MapGL, { Source, Layer } from "react-map-gl";
+import MapGL, { Source, Layer, ScaleControl } from "react-map-gl";
 
 import Display from "./Display";
 import Toolbox from "./Toolbox";
@@ -186,6 +186,7 @@ export default function Mapbox() {
         mapboxApiAccessToken={TOKEN}
         onMouseMove={onCursorMove}
       >
+        <ScaleControl />
         <Display point={cursorLocation} />
         <Editor
           ref={editorRef}
