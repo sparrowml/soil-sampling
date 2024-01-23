@@ -28,7 +28,7 @@ CORS(app)
 
 @app.route("/")
 def hello():
-    return "Hello World!"
+    return jsonify(message="Hello World!")
 
 
 @app.route("/uniform", methods=["POST"])
@@ -75,15 +75,12 @@ def map_units():
         utm_polygon = np.stack([polygon_x, polygon_y], -1)
     except Exception as e:
         print(e)
-        return (
-            jsonify({"error": "Invalid request. Check your inputs and try again."}),
-            400,
-        )
+        return ("Invalid request. Check your inputs and try again.", 400)
     try:
         check_area(utm_polygon)
     except:
         return (
-            jsonify({"error": "Invalid polygon. The maximum area is 2 square miles."}),
+            "Invalid polygon. The maximum area is 2 square miles.",
             400,
         )
     regions = []
@@ -97,14 +94,7 @@ def map_units():
             print(e)
     if len(regions) == 0:
         return (
-            jsonify(
-                {
-                    "error": (
-                        "Error requesting the MUKEY regions. "
-                        "You can wait a minute and try again."
-                    )
-                }
-            ),
+            "Error requesting the MUKEY regions. You can wait a minute and try again.",
             400,
         )
     return jsonify(
@@ -127,17 +117,11 @@ def voronoi():
         utm_polygon = np.stack([polygon_x, polygon_y], -1)
     except Exception as e:
         print(e)
-        return (
-            jsonify({"error": "Invalid request. Check your inputs and try again."}),
-            400,
-        )
+        return ("Invalid request. Check your inputs and try again.", 400)
     try:
         check_area(utm_polygon)
     except:
-        return (
-            jsonify({"error": "Invalid polygon. The maximum area is 2 square miles."}),
-            400,
-        )
+        return ("Invalid polygon. The maximum area is 2 square miles.", 400)
     regions = []
     for _ in range(3):
         try:
@@ -149,14 +133,7 @@ def voronoi():
             print(e)
     if len(regions) == 0:
         return (
-            jsonify(
-                {
-                    "error": (
-                        "Error requesting the MUKEY regions. "
-                        "You can wait a minute and try again."
-                    )
-                }
-            ),
+            "Error requesting the MUKEY regions. You can wait a minute and try again.",
             400,
         )
     try:
@@ -196,20 +173,13 @@ def voronoi():
                 "mukey_ids": point_mukey_ids,
                 "regions": [region.tolist() for region in regions],
                 "region_mukey_ids": region_mukey_ids,
-                "voronoi_regions": updated_voronoi_regions,
+                # "voronoi_regions": updated_voronoi_regions,
             }
         )
     except Exception as e:
         print(e)
         return (
-            jsonify(
-                {
-                    "error": (
-                        "Error running the sampling algorithm. "
-                        "You can wait a minute and try again."
-                    )
-                }
-            ),
+            "Error running the sampling algorithm. You can wait a minute and try again.",
             400,
         )
 
@@ -227,14 +197,14 @@ def cema221():
     except Exception as e:
         print(e)
         return (
-            jsonify({"error": "Invalid request. Check your inputs and try again."}),
+            "Invalid request. Check your inputs and try again.",
             400,
         )
     try:
         check_area(utm_polygon)
     except:
         return (
-            jsonify({"error": "Invalid polygon. The maximum area is 2 square miles."}),
+            "Invalid polygon. The maximum area is 2 square miles.",
             400,
         )
     regions = []
@@ -259,14 +229,7 @@ def cema221():
         region_mukey_ids.append(mukey_id)
     if len(regions) == 0:
         return (
-            jsonify(
-                {
-                    "error": (
-                        "Error requesting the MUKEY regions. "
-                        "You can wait a minute and try again."
-                    )
-                }
-            ),
+            "Error requesting the MUKEY regions. You can wait a minute and try again.",
             400,
         )
     try:
@@ -296,20 +259,13 @@ def cema221():
                 "mukey_ids": point_mukey_ids,
                 "regions": [region.tolist() for region in regions],
                 "region_mukey_ids": region_mukey_ids,
-                "voronoi_regions": updated_voronoi_regions,
+                # "voronoi_regions": updated_voronoi_regions,
             }
         )
     except Exception as e:
         print(e)
         return (
-            jsonify(
-                {
-                    "error": (
-                        "Error running the sampling algorithm. "
-                        "You can wait a minute and try again."
-                    )
-                }
-            ),
+            "Error running the sampling algorithm. You can wait a minute and try again.",
             400,
         )
 
@@ -368,7 +324,9 @@ def clustering():
                 # Warning: one of the sampling sub-regions is too small for the number of points you picked
                 # Indicate what percentage of the area is in this sub-region
                 # If 50% or more of total area is in a failed sub-region, throw an error
-                utm_sample_points = fake_voronoi_sample(utm_region, n_region_points)
+                utm_sample_points = fake_voronoi_sample_uniform(
+                    utm_region, n_region_points
+                )
                 if utm_sample_points is not None:
                     all_utm_sample_points.append(utm_sample_points)
                     point_descriptions.extend([description] * len(utm_sample_points))
@@ -396,7 +354,7 @@ def clustering():
                 "point_descriptions": point_descriptions,
                 "regions": [region.tolist() for region in lng_lat_regions],
                 "region_descriptions": region_descriptions,
-                "voronoi_regions": updated_voronoi_regions,
+                # "voronoi_regions": updated_voronoi_regions,
             }
         )
     except Exception as e:
