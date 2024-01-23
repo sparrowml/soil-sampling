@@ -24,15 +24,17 @@ function inside(point, polygon) {
 
 export default function Display({ point }) {
   const { state } = React.useContext(legacyStore);
+  const fieldRegions = useSelector((state) => state.fieldRegions);
+  const fieldRegionIds = useSelector((state) => state.fieldRegionIds);
   const regionNameMap = useSelector((state) => state.regionNameMap);
   const classes = useStyles();
 
   if (state.mode !== "select") return null;
 
-  for (let i = 0; i < state.fieldRegions.length; i++) {
-    const regionPolygon = state.fieldRegions[i].geometry.coordinates[0];
+  for (let i = 0; i < fieldRegions.length; i++) {
+    const regionPolygon = fieldRegions[i].geometry.coordinates[0];
     if (inside(point, regionPolygon)) {
-      const regionId = state.fieldRegionIds[i];
+      const regionId = fieldRegionIds[i];
       const description = regionNameMap[regionId];
       if (!description) return null;
       return (

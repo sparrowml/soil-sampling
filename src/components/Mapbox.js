@@ -32,6 +32,7 @@ function getCursor(mode, mapboxMode) {
 export default function Mapbox() {
   const { state, dispatch: legacyDispatch } = React.useContext(legacyStore);
   const dispatch = useDispatch();
+  const fieldRegions = useSelector((state) => state.fieldRegions);
   const fieldPolygons = useSelector((state) => state.fieldPolygons);
   const [featureIndex, setFeatureIndex] = React.useState(null);
   const editorRef = React.useRef(null);
@@ -233,7 +234,7 @@ export default function Mapbox() {
         </Source>
         <Source
           type="geojson"
-          data={{ type: "FeatureCollection", features: state.fieldRegions }}
+          data={{ type: "FeatureCollection", features: fieldRegions }}
         >
           <Layer
             id="regions"

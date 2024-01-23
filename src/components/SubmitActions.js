@@ -46,14 +46,14 @@ export default function SubmitActions({ className }) {
     legacyDispatch(actions.setMode("select"));
     legacyDispatch(actions.setTrigger("clearEditor"));
     legacyDispatch(actions.setFieldPoints([]));
-    legacyDispatch(actions.setFieldRegions([]));
-    legacyDispatch(actions.setFieldRegionIds([]));
+    dispatch(actions.setFieldRegions([]));
+    dispatch(actions.setFieldRegionIds([]));
     legacyDispatch(actions.setFieldPath([]));
     const fieldPath = [];
     const fieldPoints = [];
     const fieldRegions = [];
     const fieldRegionIds = [];
-    await api.warmup();
+    // await api.warmup();
     for (const feature of fieldPolygons) {
       const polygon = feature.geometry.coordinates[0];
       let response;
@@ -183,8 +183,8 @@ export default function SubmitActions({ className }) {
       return;
     }
     legacyDispatch(actions.setFieldPoints(fieldPoints));
-    legacyDispatch(actions.setFieldRegions(fieldRegions));
-    legacyDispatch(actions.setFieldRegionIds(fieldRegionIds));
+    dispatch(actions.setFieldRegions(fieldRegions));
+    dispatch(actions.setFieldRegionIds(fieldRegionIds));
     legacyDispatch(actions.setFieldPath(fieldPath));
     legacyDispatch(actions.setLoading(false));
   };

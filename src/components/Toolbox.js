@@ -151,8 +151,8 @@ export default function Toolbox() {
     legacyDispatch(actions.setTrigger("clearEditor"));
     dispatch(actions.setFieldPolygonsThunk([]));
     legacyDispatch(actions.setFieldPoints([]));
-    legacyDispatch(actions.setFieldRegions([]));
-    legacyDispatch(actions.setFieldRegionIds([]));
+    dispatch(actions.setFieldRegions([]));
+    dispatch(actions.setFieldRegionIds([]));
     legacyDispatch(actions.setFieldPath([]));
     setTrashOpen(false);
   };

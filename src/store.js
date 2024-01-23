@@ -7,8 +7,10 @@ import * as actions from "./actions";
 const initialState = {
   aoi: null,
   fieldPolygons: [],
-  regionNameMap: {},
+  fieldRegions: [],
+  fieldRegionIds: [],
   mapUnitRequest: null,
+  regionNameMap: {},
 };
 
 const reducer = (state = initialState, action) => {
@@ -21,6 +23,10 @@ const reducer = (state = initialState, action) => {
       return { ...state, regionNameMap: action.regionNameMap };
     case actions.SET_MAP_UNIT_REQUEST:
       return { ...state, mapUnitRequest: action.mapUnitRequest };
+    case actions.SET_FIELD_REGIONS:
+      return { ...state, fieldRegions: action.fieldRegions };
+    case actions.SET_FIELD_REGION_IDS:
+      return { ...state, fieldRegionIds: action.fieldRegionIds };
     default:
       return state;
   }
@@ -40,8 +46,6 @@ const legacyInitialState = {
   inputData: null,
   loading: false,
   fieldPoints: [],
-  fieldRegions: [],
-  fieldRegionIds: [],
   fieldPathMode: false,
   fieldPath: [],
   viewport: {
@@ -89,12 +93,6 @@ export const StateProvider = ({ children }) => {
         break;
       case actions.SET_FIELD_POINTS:
         newState = { ...state, fieldPoints: action.fieldPoints };
-        break;
-      case actions.SET_FIELD_REGIONS:
-        newState = { ...state, fieldRegions: action.fieldRegions };
-        break;
-      case actions.SET_FIELD_REGION_IDS:
-        newState = { ...state, fieldRegionIds: action.fieldRegionIds };
         break;
       case actions.SET_FIELD_PATH:
         newState = { ...state, fieldPath: action.fieldPath };
