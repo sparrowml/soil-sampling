@@ -30,9 +30,7 @@ function Form() {
 
   const { state, dispatch } = React.useContext(legacyStore);
   const regionNameMap = useSelector((state) => state.regionNameMap);
-  const regionNames = Array.from(new Set(Object.values(regionNameMap))).sort(
-    (a, b) => a.localeCompare(b)
-  );
+  const regionNames = Array.from(new Set(Object.values(regionNameMap)));
 
   const setAlgo = (event) => {
     dispatch({ type: actions.SET_ALGO, value: event.target.value });
