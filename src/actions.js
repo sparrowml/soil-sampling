@@ -46,6 +46,9 @@ export const setFieldPolygonsThunk =
     }
     dispatch(setAoi(aoi));
     dispatch(setFieldPolygons(fieldPolygons));
+    dispatch(setFieldRegions([]));
+    dispatch(setFieldRegionIds([]));
+    dispatch(setRegionNameMap({}));
     const requestId = `${uuidv4()}`;
     dispatch(setMapUnitRequest(requestId));
     await new Promise((resolve) => setTimeout(resolve, 250));
@@ -53,9 +56,6 @@ export const setFieldPolygonsThunk =
     if (mapUnitRequest !== requestId) {
       return;
     }
-    dispatch(setFieldRegions([]));
-    dispatch(setFieldRegionIds([]));
-    dispatch(setRegionNameMap({}));
     const fieldRegions = [];
     const fieldRegionIds = [];
     const regionNameMap = {};
