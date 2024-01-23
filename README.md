@@ -14,8 +14,7 @@ The base URL for all API requests is:
 
 ## Endpoints
 
-<details>
-<summary>## `GET /`</summary>
+## `GET /`
 
 Basic status check
 
@@ -24,7 +23,6 @@ Basic status check
 Returns a JSON object with the following properties:
 
 - `message`: A friendly hello world message
-</details>
 
 ## `POST /uniform`
 
