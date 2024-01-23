@@ -5,6 +5,28 @@ export async function warmup() {
   await window.fetch(`${BASE_URL}`);
 }
 
+export const pointMap = (point, id, regionId, pointData = null) => ({
+  type: "Feature",
+  geometry: {
+    type: "Point",
+    coordinates: point,
+  },
+  properties: {
+    id,
+    regionId,
+    pointData,
+  },
+});
+
+export const polygonMap = (polygon) => ({
+  type: "Feature",
+  geometry: {
+    type: "Polygon",
+    coordinates: [polygon],
+  },
+  properties: {},
+});
+
 export async function getMunames(mukeys) {
   const url = "https://SDMDataAccess.sc.egov.usda.gov/Tabular/post.rest";
   const uniqueMukeys = Array.from(new Set(mukeys));
@@ -26,6 +48,8 @@ export async function getMunames(mukeys) {
 }
 
 export async function getMapUnits(polygon) {
+  const fieldRegions = [];
+  const fieldRegionIds = [];
   const response = await window
     .fetch(`${BASE_URL}/mapunits`, {
       method: "POST",
@@ -38,6 +62,8 @@ export async function getMapUnits(polygon) {
     })
     .then((response) => response.json())
     .catch(console.error);
+  fieldRegions.push(...response.regions.map(polygonMap));
+  fieldRegionIds.push(...response.region_mukey_ids);
   const result = await getMunames(response.region_mukey_ids);
   if (!result.Table) return {};
   const mukeyNameMap = {};
@@ -45,7 +71,7 @@ export async function getMapUnits(polygon) {
     const [id, name] = row;
     mukeyNameMap[id] = name;
   });
-  return mukeyNameMap;
+  return [fieldRegions, fieldRegionIds, mukeyNameMap];
 }
 
 export async function uniformSample(polygon, acre, triangleOffset) {

@@ -11,28 +11,6 @@ import * as api from "../api";
 const clusterId = (description) =>
   description.split("Cluster: ")[1].split(";")[0];
 
-const pointMap = (point, id, regionId, pointData = null) => ({
-  type: "Feature",
-  geometry: {
-    type: "Point",
-    coordinates: point,
-  },
-  properties: {
-    id,
-    regionId,
-    pointData,
-  },
-});
-
-const polygonMap = (polygon) => ({
-  type: "Feature",
-  geometry: {
-    type: "Polygon",
-    coordinates: [polygon],
-  },
-  properties: {},
-});
-
 export default function SubmitActions({ className }) {
   const { state, dispatch: legacyDispatch } = React.useContext(legacyStore);
   const aoi = useSelector((state) => state.aoi);
@@ -66,7 +44,9 @@ export default function SubmitActions({ className }) {
         if (!response) return;
         if (response.points) {
           fieldPoints.push(
-            ...response.points.map((point, i) => pointMap(point, i + 1, "", ""))
+            ...response.points.map((point, i) =>
+              api.pointMap(point, i + 1, "", "")
+            )
           );
           fieldPath.push(...response.points);
         }
@@ -77,13 +57,13 @@ export default function SubmitActions({ className }) {
         if (response.points) {
           fieldPoints.push(
             ...response.points.map((point, i) =>
-              pointMap(point, i + 1, response.mukey_ids[i])
+              api.pointMap(point, i + 1, response.mukey_ids[i])
             )
           );
           fieldPath.push(...response.points);
         }
         if (response.regions) {
-          fieldRegions.push(...response.regions.map(polygonMap));
+          fieldRegions.push(...response.regions.map(api.polygonMap));
           fieldRegionIds.push(...response.region_mukey_ids);
         }
         api.getMunames(response.region_mukey_ids).then((result) => {
@@ -120,13 +100,13 @@ export default function SubmitActions({ className }) {
         if (response.points) {
           fieldPoints.push(
             ...response.points.map((point, i) =>
-              pointMap(point, i + 1, response.mukey_ids[i])
+              api.pointMap(point, i + 1, response.mukey_ids[i])
             )
           );
           fieldPath.push(...response.points);
         }
         if (response.regions) {
-          fieldRegions.push(...response.regions.map(polygonMap));
+          fieldRegions.push(...response.regions.map(api.polygonMap));
           fieldRegionIds.push(...response.region_mukey_ids);
         }
         api.getMunames(response.region_mukey_ids).then((result) => {
@@ -148,7 +128,7 @@ export default function SubmitActions({ className }) {
         if (response.points) {
           fieldPoints.push(
             ...response.points.map((point, i) =>
-              pointMap(
+              api.pointMap(
                 point,
                 i + 1,
                 clusterId(response.point_descriptions[i]),
@@ -159,7 +139,7 @@ export default function SubmitActions({ className }) {
           fieldPath.push(...response.points);
         }
         if (response.regions) {
-          fieldRegions.push(...response.regions.map(polygonMap));
+          fieldRegions.push(...response.regions.map(api.polygonMap));
           fieldRegionIds.push(...response.region_descriptions.map(clusterId));
         }
         if (response.region_descriptions) {

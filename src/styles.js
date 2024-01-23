@@ -41,8 +41,8 @@ const useStyles = makeStyles((theme) => ({
     color: "#2c7fb8",
     padding: theme.spacing(0.5),
     fontSize: theme.typography.fontSize,
-    top: "10px",
-    left: "10px",
+    top: "20px",
+    left: "0px",
   },
   displayText: {
     fontSize: "10px",

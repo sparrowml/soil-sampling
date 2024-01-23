@@ -34,7 +34,6 @@ export const setFieldPolygons = (fieldPolygons) => ({
 
 export const setFieldPolygonsThunk =
   (fieldPolygons) => async (dispatch, getState) => {
-    dispatch(setRegionNameMap({}));
     let aoi = 0;
     for (const feature of fieldPolygons) {
       const polygon = feature.geometry.coordinates[0];
@@ -54,12 +53,22 @@ export const setFieldPolygonsThunk =
     if (mapUnitRequest !== requestId) {
       return;
     }
+    dispatch(setFieldRegions([]));
+    dispatch(setFieldRegionIds([]));
+    dispatch(setRegionNameMap({}));
+    const fieldRegions = [];
+    const fieldRegionIds = [];
     const regionNameMap = {};
     for (const feature of fieldPolygons) {
       const polygon = feature.geometry.coordinates[0];
-      const subRegionNameMap = await api.getMapUnits(polygon);
+      const [subFieldRegions, subFieldRegionIds, subRegionNameMap] =
+        await api.getMapUnits(polygon);
+      fieldRegions.push(...subFieldRegions);
+      fieldRegionIds.push(...subFieldRegionIds);
       Object.assign(regionNameMap, subRegionNameMap);
     }
+    dispatch(setFieldRegions(fieldRegions));
+    dispatch(setFieldRegionIds(fieldRegionIds));
     dispatch(setRegionNameMap(regionNameMap));
   };
 

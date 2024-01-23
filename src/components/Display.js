@@ -2,7 +2,6 @@ import React from "react";
 import { useSelector } from "react-redux";
 
 import useStyles from "../styles";
-import { legacyStore } from "../store";
 
 function inside(point, polygon) {
   // ray-casting algorithm
@@ -23,13 +22,10 @@ function inside(point, polygon) {
 }
 
 export default function Display({ point }) {
-  const { state } = React.useContext(legacyStore);
   const fieldRegions = useSelector((state) => state.fieldRegions);
   const fieldRegionIds = useSelector((state) => state.fieldRegionIds);
   const regionNameMap = useSelector((state) => state.regionNameMap);
   const classes = useStyles();
-
-  if (state.mode !== "select") return null;
 
   for (let i = 0; i < fieldRegions.length; i++) {
     const regionPolygon = fieldRegions[i].geometry.coordinates[0];
