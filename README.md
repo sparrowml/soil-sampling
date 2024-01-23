@@ -1,5 +1,3 @@
-# Soil Sampling API
-
 # Soil Sampling API Docs
 
 ## Description
