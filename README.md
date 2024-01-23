@@ -322,6 +322,7 @@ Soil Map Unit sampling algorithm
 - `polygon`: A 2-dimensional longitude, latitude polygon array
 - `nPoints` (optional): The number of points to sample. Defaults to `10`.
 - `includeElevation` (optional): Whether to include elevation as one of the columns to cluster on. Defaults to `false`.
+- `pointDataShapefile` (optional): A URL to a Shapefile archive with point data to include in clustering. (See example Shapefile archive [here](https://sparrowcomputing.s3.amazonaws.com/soil-sampling-test.zip)). Note: either `includeElevation` must be set to `true` or `pointDataShapefile` must be included. It's fine to include both, but a maximum of 3 columns will be used for clustering.
 
 ### Response
 
