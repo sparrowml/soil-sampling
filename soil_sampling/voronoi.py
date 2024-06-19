@@ -35,7 +35,7 @@ def voronoi_sample(
     try:
         points, regions = lloyds_algorithm(starters, normalized_polygon)
     except:
-        return fake_voronoi_sample(polygon, n_points), []
+        return fake_voronoi_sample_uniform(polygon, n_points), []
     points += polygon_min
     updated_regions = []
     for region in regions:
