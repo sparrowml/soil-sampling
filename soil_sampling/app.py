@@ -47,7 +47,7 @@ def uniform():
     try:
         check_area(utm_polygon)
     except:
-        return "Invalid polygon. The maximum area is 2 square miles.", 400
+        return "Invalid polygon. The maximum area is 10 square miles.", 400
     try:
         grid = order_points(uniform_sample(utm_polygon, acre, triangle_offset))
         lat, lon = utm.to_latlon(grid[:, 0], grid[:, 1], z_number, z_letter)
@@ -80,7 +80,7 @@ def map_units():
         check_area(utm_polygon)
     except:
         return (
-            "Invalid polygon. The maximum area is 2 square miles.",
+            "Invalid polygon. The maximum area is 10 square miles.",
             400,
         )
     regions = []
@@ -121,7 +121,7 @@ def voronoi():
     try:
         check_area(utm_polygon)
     except:
-        return ("Invalid polygon. The maximum area is 2 square miles.", 400)
+        return ("Invalid polygon. The maximum area is 10 square miles.", 400)
     regions = []
     for _ in range(3):
         try:
@@ -204,7 +204,7 @@ def cema221():
         check_area(utm_polygon)
     except:
         return (
-            "Invalid polygon. The maximum area is 2 square miles.",
+            "Invalid polygon. The maximum area is 10 square miles.",
             400,
         )
     regions = []
@@ -292,7 +292,7 @@ def clustering():
     try:
         check_area(utm_polygon)
     except:
-        return "Invalid polygon. The maximum area is 2 square miles.", 400
+        return "Invalid polygon. The maximum area is 10 square miles.", 400
     try:
         try:
             utm_regions, region_descriptions = cluster_regions(
