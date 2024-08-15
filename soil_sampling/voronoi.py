@@ -248,3 +248,18 @@ def get_mukey_regions(polygon: np.ndarray) -> Tuple[List[np.ndarray], List[str]]
                 shapely_regions.append(np.stack(shapely_mukey.exterior.coords.xy, -1))
                 mukey_ids.append(mukey_id)
     return shapely_regions, mukey_ids
+
+
+def get_mukey_region_names(mukey_ids: list[str]) -> list[str]:
+    url = "https://SDMDataAccess.sc.egov.usda.gov/Tabular/post.rest"
+    mukey_ids_string = ", ".join([f"'{i}'" for i in set(mukey_ids)])
+    query = f"""
+      SELECT mukey, muname
+      FROM mapunit
+      WHERE mukey IN ({mukey_ids_string});
+    """
+    response = requests.post(url, json={"QUERY": query, "FORMAT": "JSON"})
+    response.raise_for_status()
+    data = response.json()
+    region_name_map = dict(data["Table"])
+    return [region_name_map[mukey] for mukey in mukey_ids]

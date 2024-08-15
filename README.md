@@ -432,7 +432,7 @@ Response:
 
 ## `POST /mapunits`
 
-Return only the MUKEY map unit polygons and IDs for a region.
+Return only the MUKEY map unit polygons, IDs and names for a region.
 
 ### Parameters
 
@@ -488,6 +488,12 @@ Response:
     "2745842",
     "1691418"
   ],
+  "region_mukey_names": [
+    "Filbert silt loam, 0 to 1 percent slopes",
+    "Tomek silt loam, 0 to 2 percent slopes",
+    "Tomek silt loam, 0 to 2 percent slopes",
+    "Fillmore silt loam, terrace, occasionally ponded"
+  ],
   "regions": [
     [
       [
@@ -506,6 +512,62 @@ Response:
     ]
 		
   ]
+}
+```
+
+## `POST /order-points`
+
+Sort a list of points to create a sampling path.
+
+### Parameters
+
+- `points`: A 2-dimensional longitude, latitude point array
+
+### Response
+
+Returns a JSON object with the following properties:
+
+- `points`: A 2-dimensional list of points sorted in sampling order.
+
+### Example
+
+Request:
+
+```
+POST /order-points
+```
+
+Payload:
+
+```json
+{
+    "points": [
+        [
+            -96.46446016777954,
+            41.16152832915371
+        ],
+        [
+            -96.46483892654908,
+            41.16153667129834
+        ]
+    ]
+}
+```
+
+Response:
+
+```json
+{
+    "points": [
+        [
+            -96.4648389252272,
+            41.16153670366586
+        ],
+        [
+            -96.4644601664563,
+            41.161528361549735
+        ]
+    ]
 }
 ```
 

@@ -1,3 +1,4 @@
+import numpy as np
 import pytest
 from flask import Flask
 from flask.testing import FlaskClient
@@ -42,6 +43,20 @@ CLUSTERING_POLYGON = [
     [-96.46621271647872, 41.16301548619598],
     [-96.46601492036488, 41.16586877928358],
     [-96.46895154557672, 41.16833861956085],
+]
+POINTS = [
+    [-96.46539602836998, 41.16183545509763],
+    [-96.46559644324635, 41.161553384166],
+    [-96.46521768415727, 41.161545044537924],
+    [-96.46501726771564, 41.161827114764016],
+    [-96.46481684950992, 41.16210918457887],
+    [-96.4648389252272, 41.16153670366586],
+    [-96.4644601664563, 41.161528361549735],
+    [-96.46463850722039, 41.161818773186376],
+    [-96.46443808744947, 41.16210084229565],
+    [-96.46461642954, 41.162391253982456],
+    [-96.46423766591431, 41.16238291099364],
+    [-96.46425974688431, 41.16181043036471],
 ]
 
 
@@ -107,3 +122,14 @@ def test_mapunits(client: FlaskClient):
     request = {"polygon": POLYGON}
     response = client.post("/mapunits", json=request)
     assert response.status_code == 200
+
+
+def test_order_points(client: FlaskClient):
+    original_points = np.array(POINTS).copy()
+    shuffled_points = np.array(POINTS).copy()
+    np.random.shuffle(shuffled_points)
+    request = {"points": shuffled_points.tolist()}
+    response = client.post("/order-points", json=request)
+    assert response.status_code == 200
+    new_points = np.array(response.json["points"])
+    assert np.linalg.norm(original_points - new_points) < 1e-5

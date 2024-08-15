@@ -16,6 +16,7 @@ from soil_sampling import (
     enrich_points,
     fake_voronoi_sample_minmax,
     fake_voronoi_sample_uniform,
+    get_mukey_region_names,
     get_mukey_regions,
     order_points,
     uniform_sample,
@@ -87,6 +88,7 @@ def map_units():
     for _ in range(3):
         try:
             regions, region_mukey_ids = get_mukey_regions(polygon)
+            region_names = get_mukey_region_names(region_mukey_ids)
             assert len(regions) > 0, "Empty region list"
             break
         except Exception as e:
@@ -101,6 +103,7 @@ def map_units():
         {
             "regions": [region.tolist() for region in regions],
             "region_mukey_ids": region_mukey_ids,
+            "region_mukey_names": region_names,
         }
     )
 
@@ -363,6 +366,30 @@ def clustering():
             "Error running the clustering algorithm. "
             "You can wait a minute and try again."
         ), 400
+
+
+@app.route("/order-points", methods=["POST"])
+def order_points_route():
+    try:
+        body = request.get_json()
+        points = np.array(body.get("points"))
+        points_x, points_y, z_number, z_letter = utm.from_latlon(
+            points[:, 1], points[:, 0]
+        )
+        utm_points = np.stack([points_x, points_y], -1)
+    except Exception as e:
+        print(e)
+        return "Invalid request. Check your inputs and try again.", 400
+    try:
+        ordered_utm_points = order_points(utm_points)
+        lat, lon = utm.to_latlon(
+            ordered_utm_points[:, 0], ordered_utm_points[:, 1], z_number, z_letter
+        )
+        ordered_points = np.stack([lon, lat], -1)
+        return jsonify({"points": ordered_points.tolist()})
+    except Exception as e:
+        print(e)
+        return "Error ordering the points. You can wait a minute and try again.", 400
 
 
 if __name__ == "__main__":
