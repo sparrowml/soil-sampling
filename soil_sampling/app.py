@@ -8,20 +8,12 @@ from flask import Flask, jsonify, request
 from flask_cors import CORS
 from shapely.geometry import Polygon
 
-from soil_sampling import (
-    DimensionException,
-    check_area,
-    cluster_regions,
-    download_shapefile,
-    enrich_points,
-    fake_voronoi_sample_minmax,
-    fake_voronoi_sample_uniform,
-    get_mukey_region_names,
-    get_mukey_regions,
-    order_points,
-    uniform_sample,
-    voronoi_sample,
-)
+from soil_sampling import (DimensionException, check_area, cluster_regions,
+                           download_shapefile, enrich_points,
+                           fake_voronoi_sample_minmax,
+                           fake_voronoi_sample_uniform, get_mukey_region_names,
+                           get_mukey_regions, order_points, uniform_sample,
+                           voronoi_sample)
 
 app = Flask(__name__)
 CORS(app)
@@ -44,7 +36,7 @@ def uniform():
         )
         utm_polygon = np.stack([polygon_x, polygon_y], -1)
     except:
-        return "Invalid request. Check your inputs and try again.", 400
+        return "Invalid request. Check your inputs and try again.", 400    
     try:
         check_area(utm_polygon)
     except:
@@ -121,6 +113,11 @@ def voronoi():
     except Exception as e:
         print(e)
         return ("Invalid request. Check your inputs and try again.", 400)
+    if n_points > 200:
+        return (
+            "The maximum number of points is 200. Please reduce the number of points and try again.",
+            400,
+        )
     try:
         check_area(utm_polygon)
     except:
@@ -203,6 +200,11 @@ def cema221():
             "Invalid request. Check your inputs and try again.",
             400,
         )
+    if n_points > 200:
+        return (
+            "The maximum number of points is 200. Please reduce the number of points and try again.",
+            400,
+        )        
     try:
         check_area(utm_polygon)
     except:
@@ -292,6 +294,11 @@ def clustering():
     except Exception as e:
         print(e)
         return "Invalid request. Check your inputs and try again.", 400
+    if n_points > 200:
+        return (
+            "The maximum number of points is 200. Please reduce the number of points and try again.",
+            400,
+        )        
     try:
         check_area(utm_polygon)
     except:
