@@ -8,7 +8,7 @@ Endpoints for running soil sampling algorithms
 
 The base URL for all API requests is:
 
-`https://pdi-staging.scinet.usda.gov`
+`https://soil-sampling.ngrok.dev`
 
 ## Endpoints
 
