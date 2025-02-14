@@ -1,4 +1,4 @@
-const BASE_URL = "https://pdi-staging.scinet.usda.gov";
+const BASE_URL = "https://soil-sampling.ngrok.dev";
 // const BASE_URL = "http://localhost:5000";
 
 export async function warmup() {
