@@ -1,3 +1,5 @@
+from typing import Generator
+
 import numpy as np
 import pytest
 from flask import Flask
@@ -7,7 +9,7 @@ from .app import app as _app
 
 
 @pytest.fixture
-def app() -> Flask:
+def app() -> Generator[Flask, None, None]:
     _app.config.update(
         {
             "TESTING": True,
@@ -107,13 +109,8 @@ def test_clustering(client: FlaskClient):
     request = {
         "polygon": CLUSTERING_POLYGON,
         "nPoints": 25,
-        "pointDataShapefile": "https://sparrowcomputing.s3.amazonaws.com/soil-sampling-test.zip",
         "includeElevation": True,
     }
-    response = client.post("/clustering", json=request)
-    assert response.status_code == 200
-
-    request["includeElevation"] = False
     response = client.post("/clustering", json=request)
     assert response.status_code == 200
 

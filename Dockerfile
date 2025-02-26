@@ -1,4 +1,4 @@
-FROM python:3.9
+FROM python:3.10-slim
 
 ARG USER=dev
 ARG USER_UID=1000
@@ -36,8 +36,9 @@ RUN mkdir soil_sampling && \
   touch soil_sampling/__init__.py
 COPY setup.cfg .
 COPY setup.py .
+COPY requirements.txt .
 RUN pip install -U pip
-RUN pip install -e .
+RUN pip install -r requirements.txt
 ADD . .
 
 ENTRYPOINT [ "make", "serve" ]
