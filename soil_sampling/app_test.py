@@ -32,6 +32,13 @@ POLYGON = [
     [-96.4744173709418, 41.16787943930536],
     [-96.47882643688598, 41.16871517217296],
 ]
+SSURGO_OVERLAP_POLYGON = [
+    [-98.8137037565644, 39.37402206010996],
+    [-98.79529307388569, 39.37402206010996],
+    [-98.79529307388569, 39.36489848362068],
+    [-98.8137037565644, 39.36489848362068],
+    [-98.8137037565644, 39.37402206010996],
+]
 LARGE_POLYGON = [
     [-96.60259503656569, 41.24930694871123],
     [-96.49592539790267, 41.12561457973746],
@@ -103,6 +110,22 @@ def test_voronoi(client: FlaskClient):
     request = {"polygon": POLYGON, "nPoints": 50}
     response = client.post("/voronoi", json=request)
     assert response.status_code == 200
+
+    # Check that the number of points is close to 50
+    delta = abs(len(response.json["points"]) - 50)
+    relative_difference = delta / 50
+    assert relative_difference < 0.03, f"Relative difference: {relative_difference}"
+
+
+def test_voronoi_in_ssurgo_overlap(client: FlaskClient):
+    request = {"polygon": SSURGO_OVERLAP_POLYGON, "nPoints": 100}
+    response = client.post("/voronoi", json=request)
+    assert response.status_code == 200
+
+    # Check that the number of points is close to 100
+    delta = abs(len(response.json["points"]) - 100)
+    relative_difference = delta / 100
+    assert relative_difference < 0.03, f"Relative difference: {relative_difference}"
 
 
 def test_clustering(client: FlaskClient):

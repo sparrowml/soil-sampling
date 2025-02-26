@@ -224,8 +224,8 @@ def get_mukey_regions(polygon: np.ndarray) -> Tuple[List[np.ndarray], List[str]]
     response = requests.get(url, params=params)
     soup = BeautifulSoup(response.content, features="html.parser")
 
-    shapely_regions = []
-    mukey_ids = []
+    shapely_regions: list[Polygon | MultiPolygon] = []
+    original_mukey_ids: list[str] = []
     for feature_member in soup.find_all("gml:featuremember"):
         mukey_id = feature_member.find("ms:mukey").text
         points = (
@@ -237,17 +237,53 @@ def get_mukey_regions(polygon: np.ndarray) -> Tuple[List[np.ndarray], List[str]]
         points = points[:, ::-1]
         shapely_mukey = Polygon(points)
         shapely_mukey = shapely_polygon.intersection(shapely_mukey)
+        shapely_regions.append(shapely_mukey)
+        original_mukey_ids.append(mukey_id)
+
+    # Dedupe overlapping regions
+    for region_i in range(len(shapely_regions)):
+        for region_j in range(region_i + 1, len(shapely_regions)):
+            if shapely_regions[region_i] is None or shapely_regions[region_j] is None:
+                continue
+            if shapely_regions[region_i].intersects(shapely_regions[region_j]):
+                intersection = shapely_regions[region_i].intersection(
+                    shapely_regions[region_j]
+                )
+                larger_region_index = (
+                    region_i
+                    if shapely_regions[region_i].area > shapely_regions[region_j].area
+                    else region_j
+                )
+                smaller_region_index = (
+                    region_j if larger_region_index == region_i else region_i
+                )
+                shapely_regions[larger_region_index] = shapely_regions[
+                    larger_region_index
+                ].union(intersection)
+                remaining_smaller_region = shapely_regions[
+                    smaller_region_index
+                ].difference(intersection)
+                if remaining_smaller_region.is_empty:
+                    shapely_regions[smaller_region_index] = None
+                else:
+                    shapely_regions[smaller_region_index] = remaining_smaller_region
+
+    np_regions = []
+    mukey_ids = []
+    for shapely_mukey, mukey_id in zip(shapely_regions, original_mukey_ids):
+        if shapely_mukey is None:
+            continue
         if isinstance(shapely_mukey, MultiPolygon):
             multi_regions = [
                 np.stack(mk.exterior.coords.xy, -1) for mk in shapely_mukey
             ]
-            shapely_regions += multi_regions
+            np_regions += multi_regions
             mukey_ids += [mukey_id] * len(multi_regions)
         else:
             if shapely_mukey.exterior.coords:
-                shapely_regions.append(np.stack(shapely_mukey.exterior.coords.xy, -1))
+                np_regions.append(np.stack(shapely_mukey.exterior.coords.xy, -1))
                 mukey_ids.append(mukey_id)
-    return shapely_regions, mukey_ids
+    return np_regions, mukey_ids
 
 
 def get_mukey_region_names(mukey_ids: list[str]) -> list[str]:
