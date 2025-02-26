@@ -32,10 +32,7 @@ def voronoi_sample(
     polygon_min = polygon.min(axis=0)
     normalized_polygon = polygon - polygon_min
     starters = np.random.permutation(uniform_sample(normalized_polygon))[:n_points]
-    try:
-        points, regions = lloyds_algorithm(starters, normalized_polygon)
-    except:
-        return fake_voronoi_sample_uniform(polygon, n_points), []
+    points, regions = lloyds_algorithm(starters, normalized_polygon)
     points += polygon_min
     updated_regions = []
     for region in regions:
@@ -128,7 +125,7 @@ def lloyds_algorithm(
 ) -> tuple[np.ndarray, list[np.ndarray]]:
     """Get the optimally spaced points inside a boundary polygon"""
     shapely_boundary = Polygon(boundary)
-    diameter = np.linalg.norm(boundary.ptp(axis=0))
+    diameter = np.linalg.norm(np.ptp(boundary, axis=0))
     points = starters
     for _ in range(20):
         regions = []
