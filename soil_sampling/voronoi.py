@@ -32,7 +32,10 @@ def voronoi_sample(
     polygon_min = polygon.min(axis=0)
     normalized_polygon = polygon - polygon_min
     starters = np.random.permutation(uniform_sample(normalized_polygon))[:n_points]
-    points, regions = lloyds_algorithm(starters, normalized_polygon)
+    try:
+        points, regions = lloyds_algorithm(starters, normalized_polygon)
+    except:
+        return fake_voronoi_sample_uniform(polygon, n_points), []
     points += polygon_min
     updated_regions = []
     for region in regions:
