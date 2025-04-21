@@ -38,7 +38,7 @@ docker-remove:
 
 .PHONY: freeze
 freeze:
-	uv pip compile -q -o requirements.txt setup.cfg
-	echo "-e ." >> requirements.txt
+	uv pip compile -q -o requirements-main.txt setup.cfg
+	echo "-e ." >> requirements-main.txt
 	uv pip compile -q --extra dev -o requirements-dev.txt setup.cfg
 	echo "-e ." >> requirements-dev.txt

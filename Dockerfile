@@ -36,9 +36,9 @@ RUN mkdir soil_sampling && \
   touch soil_sampling/__init__.py
 COPY setup.cfg .
 COPY setup.py .
-COPY requirements.txt .
+COPY requirements-main.txt .
 RUN pip install -U pip
-RUN pip install -r requirements.txt
+RUN pip install -r requirements-main.txt
 ADD . .
 
 ENTRYPOINT [ "make", "serve" ]
