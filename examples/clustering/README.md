@@ -77,3 +77,22 @@ The current endpoint expects `pointDataShapefile`, not that old `data` field.
 K-means initialization is random and sample counts are rounded per region.
 Repeated calls can return different polygons, labels, coordinates, and counts;
 `nPoints` is a target rather than a guarantee of an exact count.
+
+## Hosted verification — September 8, 2026
+
+Both the curl command and Python runner succeeded against the hosted USDA
+endpoint: HTTP 200, three cluster regions and eight sample points from 441 input
+measurements (`nPoints: 9`). See [response.json](response.json) for the actual
+Python-run response. No services or elevation results were mocked. The curl
+response was additionally checked for valid region polygons, finite sample
+coordinates, points within the requested boundary, and consistent response lengths.
+
+On this Mac, Python needed the system CA bundle configured explicitly; curl
+worked with its normal trust settings. If your Python installation has the same
+certificate-chain error and this system bundle is available, use:
+
+```sh
+SSL_CERT_FILE=/etc/ssl/cert.pem python3 examples/clustering/run_hosted.py
+```
+
+TLS verification remains enabled.

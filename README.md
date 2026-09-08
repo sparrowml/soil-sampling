@@ -325,7 +325,7 @@ to the hosted USDA endpoint, see the [clustering developer example](examples/clu
 - `polygon`: A 2-dimensional longitude, latitude polygon array
 - `nPoints` (optional): The number of points to sample. Defaults to `10`.
 - `includeElevation` (optional): Whether to include elevation as one of the columns to cluster on. Defaults to `false`.
-- `pointDataShapefile` (optional): A URL to a Shapefile archive with point data to include in clustering. (See example Shapefile archive [here](https://sparrowcomputing.s3.amazonaws.com/soil-sampling-test.zip)). Note: either `includeElevation` must be set to `true` or `pointDataShapefile` must be included. It's fine to include both, but a maximum of 3 columns will be used for clustering.
+- `pointDataShapefile` (optional): A URL to a Shapefile archive with point data to include in clustering. (See example Shapefile archive [here](https://raw.githubusercontent.com/sparrowml/soil-sampling/codex/clustering-example/examples/clustering/points.zip)). Note: either `includeElevation` must be set to `true` or `pointDataShapefile` must be included. It's fine to include both, but a maximum of 3 columns will be used for clustering.
 
 ### Response
 
@@ -349,98 +349,40 @@ Payload:
 
 ```json
 {
-    "polygon": [
-        [
-            -96.46895154557672,
-            41.16833861956085
-        ],
-        [
-            -96.47238993837597,
-            41.16323898810186
-        ],
-        [
-            -96.46890535170685,
-            41.16207840278774
-        ],
-        [
-            -96.46621271647872,
-            41.16301548619598
-        ],
-        [
-            -96.46601492036488,
-            41.16586877928358
-        ],
-        [
-            -96.46895154557672,
-            41.16833861956085
-        ]
+  "polygon": [
+    [
+      -96.46999999869641,
+      41.165000000547785
     ],
-    "nPoints": 4,
-    "pointDataShapefile": "https://sparrowcomputing.s3.amazonaws.com/soil-sampling-test.zip",
-    "includeElevation": true
+    [
+      -96.46642744926278,
+      41.164921424565065
+    ],
+    [
+      -96.46632339030639,
+      41.16762117062945
+    ],
+    [
+      -96.4698960860899,
+      41.167699754034984
+    ],
+    [
+      -96.46999999869641,
+      41.165000000547785
+    ]
+  ],
+  "nPoints": 9,
+  "includeElevation": false,
+  "pointDataShapefile": "https://raw.githubusercontent.com/sparrowml/soil-sampling/codex/clustering-example/examples/clustering/points.zip"
 }
 ```
 
 Response:
 
-```json
-{
-  "point_descriptions": [
-    "Cluster: 1",
-    "Cluster: 2",
-    "Cluster: 3",
-    "Cluster: 3"
-  ],
-  "point_enrichments": [
-    "Elevation: 355.94",
-    "Elevation: 355.21",
-    "Elevation: 355.05",
-    "Elevation: 354.98"
-  ],
-  "points": [
-    [
-      -96.465673269076,
-      41.16154220965342
-    ],
-    [
-      -96.46491540066452,
-      41.16159219248645
-    ],
-    [
-      -96.46477164522221,
-      41.161866707034086
-    ],
-    [
-      -96.46439288457226,
-      41.161858364613735
-    ]
-  ],
-  "region_descriptions": [
-    "Cluster: 1",
-    "Cluster: 1",
-    "Cluster: 2",
-    "Cluster: 3"
-  ],
-  "regions": [
-    [
-      [
-        -96.46538287957983,
-        41.16202774348823
-      ],
-      [
-        -96.46538114484183,
-        41.16207273925453
-      ],
-			
-      [
-        -96.46538287957983,
-        41.16202774348823
-      ]
-    ]
-		
-  ]
-}
-```
+The actual hosted response is saved in [response.json](examples/clustering/response.json).
+On September 8, 2026, this request returned HTTP 200, three regions and eight
+sample points. Results vary because initialization is random.
+
 
 ## `POST /mapunits`
 
