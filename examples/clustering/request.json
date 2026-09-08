@@ -23,5 +23,5 @@
   ],
   "nPoints": 9,
   "includeElevation": false,
-  "pointDataShapefile": "https://raw.githubusercontent.com/sparrowml/soil-sampling/codex/clustering-example/examples/clustering/points.zip"
+  "pointDataShapefile": "https://raw.githubusercontent.com/sparrowml/soil-sampling/01f93110c3c00bb26a812a327a96f9cc6eb4c1c4/examples/clustering/points.zip"
 }

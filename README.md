@@ -325,7 +325,7 @@ to the hosted USDA endpoint, see the [clustering developer example](examples/clu
 - `polygon`: A 2-dimensional longitude, latitude polygon array
 - `nPoints` (optional): The number of points to sample. Defaults to `10`.
 - `includeElevation` (optional): Whether to include elevation as one of the columns to cluster on. Defaults to `false`.
-- `pointDataShapefile` (optional): A URL to a Shapefile archive with point data to include in clustering. (See example Shapefile archive [here](https://raw.githubusercontent.com/sparrowml/soil-sampling/codex/clustering-example/examples/clustering/points.zip)). Note: either `includeElevation` must be set to `true` or `pointDataShapefile` must be included. It's fine to include both, but a maximum of 3 columns will be used for clustering.
+- `pointDataShapefile` (optional): A URL to a Shapefile archive with point data to include in clustering. (See example Shapefile archive [here](https://raw.githubusercontent.com/sparrowml/soil-sampling/01f93110c3c00bb26a812a327a96f9cc6eb4c1c4/examples/clustering/points.zip)). Note: either `includeElevation` must be set to `true` or `pointDataShapefile` must be included. It's fine to include both, but a maximum of 3 columns will be used for clustering.
 
 ### Response
 
@@ -373,7 +373,7 @@ Payload:
   ],
   "nPoints": 9,
   "includeElevation": false,
-  "pointDataShapefile": "https://raw.githubusercontent.com/sparrowml/soil-sampling/codex/clustering-example/examples/clustering/points.zip"
+  "pointDataShapefile": "https://raw.githubusercontent.com/sparrowml/soil-sampling/01f93110c3c00bb26a812a327a96f9cc6eb4c1c4/examples/clustering/points.zip"
 }
 ```
 
