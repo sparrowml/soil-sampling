@@ -315,7 +315,10 @@ Response:
 
 ## `POST /clustering`
 
-Soil Map Unit sampling algorithm
+Cluster field measurements into regions and generate sample points.
+
+For a CSV-to-shapefile conversion, downloadable synthetic data, and a request
+to the hosted USDA endpoint, see the [clustering developer example](examples/clustering/README.md).
 
 ### Parameters
 

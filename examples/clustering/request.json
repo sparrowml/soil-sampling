@@ -1,0 +1,27 @@
+{
+  "polygon": [
+    [
+      -96.46999999869641,
+      41.165000000547785
+    ],
+    [
+      -96.46642744926278,
+      41.164921424565065
+    ],
+    [
+      -96.46632339030639,
+      41.16762117062945
+    ],
+    [
+      -96.4698960860899,
+      41.167699754034984
+    ],
+    [
+      -96.46999999869641,
+      41.165000000547785
+    ]
+  ],
+  "nPoints": 9,
+  "includeElevation": false,
+  "pointDataShapefile": "https://raw.githubusercontent.com/sparrowml/soil-sampling/codex/clustering-example/examples/clustering/points.zip"
+}
