@@ -1,13 +1,18 @@
-version: '3.8'
 services:
   app:
     build:
       context: .
       dockerfile: Dockerfile
     restart: unless-stopped
+    ports:
+      - "${BIND_ADDRESS:-127.0.0.1}:${PORT:-5000}:5000"
+    environment:
+      OPENBLAS_NUM_THREADS: "1"
+      OMP_NUM_THREADS: "1"
   ngrok:
+    profiles: ["ngrok"]
     image: ngrok/ngrok:latest
     restart: unless-stopped
     environment:
-      NGROK_AUTHTOKEN: ${NGROK_AUTHTOKEN}
-    command: http --domain=soil-sampling.ngrok.dev app:5000
+      NGROK_AUTHTOKEN: ${NGROK_AUTHTOKEN:-}
+    command: http --domain=${NGROK_DOMAIN:-sspot.ngrok.dev} app:5000

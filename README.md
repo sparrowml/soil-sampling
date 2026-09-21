@@ -6,9 +6,13 @@ Endpoints for running soil sampling algorithms
 
 ## Base URL
 
-The base URL for all API requests is:
+The USDA staging base URL is:
 
 `https://pdi-staging.scinet.usda.gov`
+
+The CSV-upload test deployment for frontend integration uses
+[https://sspot.ngrok.dev](https://sspot.ngrok.dev). Use this test base URL for the
+new multipart example below; the PR remains open during frontend development.
 
 ## Endpoints
 
@@ -315,129 +319,82 @@ Response:
 
 ## `POST /clustering`
 
-Soil Map Unit sampling algorithm
+Cluster field measurements and return sampling points and regions. The existing
+endpoint accepts either a CSV upload (`multipart/form-data`) or the legacy JSON
+request containing `pointDataShapefile` and/or `includeElevation`.
 
-### Parameters
+### CSV format
 
-- `polygon`: A 2-dimensional longitude, latitude polygon array
-- `nPoints` (optional): The number of points to sample. Defaults to `10`.
-- `includeElevation` (optional): Whether to include elevation as one of the columns to cluster on. Defaults to `false`.
-- `pointDataShapefile` (optional): A URL to a Shapefile archive with point data to include in clustering. (See example Shapefile archive [here](https://sparrowcomputing.s3.amazonaws.com/soil-sampling-test.zip)). Note: either `includeElevation` must be set to `true` or `pointDataShapefile` must be included. It's fine to include both, but a maximum of 3 columns will be used for clustering.
+Use UTF-8 CSV with a header containing `lon`, `lat`, and one to three numeric
+measurement columns. Coordinates are WGS84 longitude/latitude (UTM coverage:
+latitude -80 to 84, longitude -180 to 180). All values must be finite numbers;
+blank cells, duplicate headers and extra text columns are rejected. Include at
+least three rows, three distinct locations and three distinct measurement value
+combinations. At most 10000 rows are accepted. These are synthetic example
+measurements, not agricultural recommendations:
 
-### Response
+```csv
+lon,lat,yield
+-96.470000,41.163000,110
+-96.469250,41.163000,130
+-96.468500,41.163000,150
+```
 
-Returns a JSON object with the following properties:
+The complete [public sample CSV](https://sparrowcomputing.s3.amazonaws.com/soil-sampling/examples/clustering-v1.csv)
+is also in `examples/clustering.csv`. Its matching polygon and options are in
+`examples/clustering.json`.
 
-- `points`: A 2-dimensional longitude, latitude array of points sampled points
-- `point_descriptions`: A list of simple point descriptions. Each point description corresponds with the element of `points` at the same index.
-- `point_enrichments`: A list of strings with columns stats. Each point enrichments corresponds with the element of `points` at the same index.
-- `regions`: A 3-dimensional list of polygons. Each polygon is a 2-dimensional longitude, latitude polygon array representing one regions defined by clustering.
-- `region_descriptions`: A list of simple region descriptions. Each region description corresponds with the element of `regions` at the same index.
+### Multipart fields
+
+- `pointDataCsv`: exactly one CSV file.
+- `options`: a JSON object with `polygon`, optional `nPoints` (integer 1–200,
+  default 10), and optional `includeElevation` (boolean, default false).
+- Instead of `options`, individual form fields `polygon`, `nPoints`, and
+  `includeElevation` are accepted; each value must be JSON encoded. Do not mix
+  the two option styles.
+
+`polygon` is an array of longitude/latitude pairs forming a valid polygon.
+Including elevation uses one of the maximum three clustering dimensions. CSV and
+shapefile input cannot be combined in one request. The server does not fetch CSV
+URLs: download the sample, then upload it directly.
 
 ### Example
 
-Request:
+From the repository root, against the public test deployment:
 
-```
-POST /clustering
-```
-
-Payload:
-
-```json
-{
-    "polygon": [
-        [
-            -96.46895154557672,
-            41.16833861956085
-        ],
-        [
-            -96.47238993837597,
-            41.16323898810186
-        ],
-        [
-            -96.46890535170685,
-            41.16207840278774
-        ],
-        [
-            -96.46621271647872,
-            41.16301548619598
-        ],
-        [
-            -96.46601492036488,
-            41.16586877928358
-        ],
-        [
-            -96.46895154557672,
-            41.16833861956085
-        ]
-    ],
-    "nPoints": 4,
-    "pointDataShapefile": "https://sparrowcomputing.s3.amazonaws.com/soil-sampling-test.zip",
-    "includeElevation": true
-}
+```sh
+curl --fail --location \
+  https://sparrowcomputing.s3.amazonaws.com/soil-sampling/examples/clustering-v1.csv \
+  --output /tmp/clustering.csv
+curl --fail-with-body https://sspot.ngrok.dev/clustering \
+  --form 'pointDataCsv=@/tmp/clustering.csv;type=text/csv' \
+  --form 'options=<examples/clustering.json'
 ```
 
-Response:
+Browser clients can append a `File` as `pointDataCsv` and
+`JSON.stringify(options)` as `options` to `FormData`. Let the browser set the
+Content-Type header including its multipart boundary.
 
-```json
-{
-  "point_descriptions": [
-    "Cluster: 1",
-    "Cluster: 2",
-    "Cluster: 3",
-    "Cluster: 3"
-  ],
-  "point_enrichments": [
-    "Elevation: 355.94",
-    "Elevation: 355.21",
-    "Elevation: 355.05",
-    "Elevation: 354.98"
-  ],
-  "points": [
-    [
-      -96.465673269076,
-      41.16154220965342
-    ],
-    [
-      -96.46491540066452,
-      41.16159219248645
-    ],
-    [
-      -96.46477164522221,
-      41.161866707034086
-    ],
-    [
-      -96.46439288457226,
-      41.161858364613735
-    ]
-  ],
-  "region_descriptions": [
-    "Cluster: 1",
-    "Cluster: 1",
-    "Cluster: 2",
-    "Cluster: 3"
-  ],
-  "regions": [
-    [
-      [
-        -96.46538287957983,
-        41.16202774348823
-      ],
-      [
-        -96.46538114484183,
-        41.16207273925453
-      ],
-			
-      [
-        -96.46538287957983,
-        41.16202774348823
-      ]
-    ]
-		
-  ]
-}
-```
+Existing JSON clients can continue sending `polygon`, `nPoints`,
+`includeElevation`, and `pointDataShapefile` (a URL to a zipped shapefile).
+
+### Response and limits
+
+The response shape is unchanged: `points`, `point_descriptions`,
+`point_enrichments`, `regions`, and `region_descriptions`. Point counts can differ
+from `nPoints` due to allocation across cluster regions. Sampling is randomized.
+Elevation enrichment of output points currently contacts the USGS elevation
+service even when `includeElevation` is false; that option controls clustering
+inputs, not output enrichment.
+
+Malformed CSV/options return 400 with an explanatory message. The entire request,
+including multipart overhead, is limited to 5 MiB (413 if exceeded). Uploads are
+request-local and are not retained; Werkzeug may spool larger files to temporary
+disk. For both JSON and multipart requests, polygons must fit within the existing
+10-square-mile area limit and a 100000-cell bounding grid at 5-meter spacing.
+Long, narrow polygons can hit the grid limit before the area limit. Requests have
+a 180-second timeout. These initial resource limits should be calibrated against
+the USDA server before production rollout.
 
 ## `POST /mapunits`
 
