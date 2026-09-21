@@ -5,6 +5,8 @@ import numpy as np
 import pandas as pd
 import utm
 from flask import Flask, jsonify, request
+from werkzeug.exceptions import RequestEntityTooLarge
+from soil_sampling.csv_upload import clustering_input, MAX_UPLOAD_BYTES, MAX_GRID_CELLS
 from flask_cors import CORS
 from shapely.geometry import Polygon
 
@@ -17,6 +19,12 @@ from soil_sampling import (DimensionException, check_area, cluster_regions,
 
 app = Flask(__name__)
 CORS(app)
+app.config["MAX_CONTENT_LENGTH"] = MAX_UPLOAD_BYTES
+
+
+@app.errorhandler(RequestEntityTooLarge)
+def upload_too_large(error):
+    return "Request exceeds the 5 MiB limit.", 413
 
 
 @app.route("/")
@@ -278,31 +286,34 @@ def cema221():
 @app.route("/clustering", methods=["POST"])
 def clustering():
     try:
-        body = request.get_json()
-        polygon = np.array(body.get("polygon"))
-        n_points = body.get("nPoints", 10)
+        body, point_data = clustering_input(request)
+        polygon = np.asarray(body.get("polygon"), dtype=float)
+        if polygon.ndim != 2 or polygon.shape[1] != 2 or not 3 <= len(polygon) <= 10000 or not np.isfinite(polygon).all():
+            raise ValueError("polygon must contain 3 to 10000 finite longitude/latitude pairs.")
         polygon_x, polygon_y, z_number, z_letter = utm.from_latlon(
             polygon[:, 1], polygon[:, 0]
         )
         utm_polygon = np.stack([polygon_x, polygon_y], -1)
+        shape = Polygon(utm_polygon)
+        if not shape.is_valid or shape.area <= 0:
+            raise ValueError("polygon must be a valid, nonempty polygon without self-intersections.")
+        check_area(utm_polygon)
+        grid_shape = np.ceil(np.ptp(utm_polygon, axis=0) / 5)
+        if np.prod(grid_shape) > MAX_GRID_CELLS:
+            raise ValueError("Polygon bounding box exceeds the 100000 cell clustering grid limit; reduce its extent.")
+        n_points = body.get("nPoints", 10)
         include_elevation = body.get("includeElevation", False)
-        point_data: Optional[pd.DataFrame] = None
         if "pointDataShapefile" in body:
             point_data = download_shapefile(body["pointDataShapefile"])
         if not include_elevation and point_data is None:
-            return "You must include elevation or provide point data.", 400
+            raise ValueError("You must include elevation or provide point data.")
+    except RequestEntityTooLarge:
+        raise
+    except (ValueError, TypeError, IndexError) as e:
+        return str(e), 400
     except Exception as e:
         print(e)
         return "Invalid request. Check your inputs and try again.", 400
-    if n_points > 200:
-        return (
-            "The maximum number of points is 200. Please reduce the number of points and try again.",
-            400,
-        )        
-    try:
-        check_area(utm_polygon)
-    except:
-        return "Invalid polygon. The maximum area is 10 square miles.", 400
     try:
         try:
             utm_regions, region_descriptions = cluster_regions(
