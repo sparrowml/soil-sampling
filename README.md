@@ -6,9 +6,13 @@ Endpoints for running soil sampling algorithms
 
 ## Base URL
 
-The base URL for all API requests is:
+The USDA staging base URL is:
 
 `https://pdi-staging.scinet.usda.gov`
+
+The CSV-upload test deployment for frontend integration uses
+[https://sspot.ngrok.dev](https://sspot.ngrok.dev). Use this test base URL for the
+new multipart example below; the PR remains open during frontend development.
 
 ## Endpoints
 
@@ -356,13 +360,13 @@ URLs: download the sample, then upload it directly.
 
 ### Example
 
-From the repository root, with a local server on port 5000:
+From the repository root, against the public test deployment:
 
 ```sh
 curl --fail --location \
   https://sparrowcomputing.s3.amazonaws.com/soil-sampling/examples/clustering-v1.csv \
   --output /tmp/clustering.csv
-curl --fail-with-body http://localhost:5000/clustering \
+curl --fail-with-body https://sspot.ngrok.dev/clustering \
   --form 'pointDataCsv=@/tmp/clustering.csv;type=text/csv' \
   --form 'options=<examples/clustering.json'
 ```
@@ -411,6 +415,26 @@ Tailscale client. No ngrok service starts by default; it is behind the optional
 `ngrok` Compose profile and should only be enabled after configuring its token
 and domain. To stop this test deployment, run
 `docker compose -p soil-sampling-csv down` in its deployment directory.
+
+### Optional public test tunnel
+
+The ngrok service forwards to `app:5000` inside the Compose network. Its domain
+defaults to `sspot.ngrok.dev`; override it with `NGROK_DOMAIN` when needed. Provide
+`NGROK_AUTHTOKEN` through the deployment environment using the authorized secrets
+wrapper. Do not commit the token or include it in command history or logs.
+
+With the token already supplied to the process environment, enable the profile:
+
+```sh
+NGROK_DOMAIN=sspot.ngrok.dev docker compose -p soil-sampling-csv --profile ngrok up -d
+curl --fail https://sspot.ngrok.dev/
+```
+
+This publishes the API for frontend integration. To disable only the tunnel while
+keeping local/Tailscale access, run
+`docker compose -p soil-sampling-csv --profile ngrok stop ngrok`.
+For local testing, substitute `http://localhost:5000` (with the default loopback binding) or
+`http://100.113.66.30:5000` (with the moviebox Tailscale binding) for the public URL in the upload example.
 
 Run focused offline tests with `pytest -q soil_sampling/csv_upload_test.py`.
 The older endpoint integration tests also require external USDA/USGS services.

@@ -15,4 +15,4 @@ services:
     restart: unless-stopped
     environment:
       NGROK_AUTHTOKEN: ${NGROK_AUTHTOKEN:-}
-    command: http --domain=soil-sampling.ngrok.dev app:5000
+    command: http --domain=${NGROK_DOMAIN:-sspot.ngrok.dev} app:5000
