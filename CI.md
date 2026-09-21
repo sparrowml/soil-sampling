@@ -20,9 +20,9 @@ python -m pytest -q soil_sampling/csv_upload_test.py
 python -m pytest -q soil_sampling/app_test.py -k 'uniform or order_points'
 ```
 
-These cover CSV uploads, CSV URLs, validation, legacy shapefile compatibility,
+These cover CSV uploads, validation, legacy shapefile compatibility,
 and offline uniform sampling/point ordering. Other existing endpoint tests call
-USDA services and are deliberately excluded from the required offline suite.
+USDA services and are deliberately excluded from the offline suite.
 They can be run separately when those services are available. CI does not deploy.
 
 Operations use `moviebox-ci@soil-sampling.service`. Verify actual online runner
