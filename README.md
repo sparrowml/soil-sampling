@@ -392,52 +392,9 @@ including multipart overhead, is limited to 5 MiB (413 if exceeded). Uploads are
 request-local and are not retained; Werkzeug may spool larger files to temporary
 disk. For both JSON and multipart requests, polygons must fit within the existing
 10-square-mile area limit and a 100000-cell bounding grid at 5-meter spacing.
-Long, narrow polygons can hit the grid limit before the area limit. Deployments
-below use one synchronous worker to bound concurrent algorithm memory use, with
-a 180-second request timeout. These initial resource limits should be calibrated
-against the USDA server before production rollout.
-
-## Local Docker Compose deployment
-
-```sh
-docker compose up --build -d app
-curl --fail http://localhost:5000/
-```
-
-The default binding is loopback only. To test across Tailscale on moviebox:
-
-```sh
-BIND_ADDRESS=100.113.66.30 PORT=5000 docker compose -p soil-sampling-csv up --build -d app
-```
-
-Use `http://moviebox:5000` (or `http://100.113.66.30:5000`) from a connected
-Tailscale client. No ngrok service starts by default; it is behind the optional
-`ngrok` Compose profile and should only be enabled after configuring its token
-and domain. To stop this test deployment, run
-`docker compose -p soil-sampling-csv down` in its deployment directory.
-
-### Optional public test tunnel
-
-The ngrok service forwards to `app:5000` inside the Compose network. Its domain
-defaults to `sspot.ngrok.dev`; override it with `NGROK_DOMAIN` when needed. Provide
-`NGROK_AUTHTOKEN` through the deployment environment using the authorized secrets
-wrapper. Do not commit the token or include it in command history or logs.
-
-With the token already supplied to the process environment, enable the profile:
-
-```sh
-NGROK_DOMAIN=sspot.ngrok.dev docker compose -p soil-sampling-csv --profile ngrok up -d
-curl --fail https://sspot.ngrok.dev/
-```
-
-This publishes the API for frontend integration. To disable only the tunnel while
-keeping local/Tailscale access, run
-`docker compose -p soil-sampling-csv --profile ngrok stop ngrok`.
-For local testing, substitute `http://localhost:5000` (with the default loopback binding) or
-`http://100.113.66.30:5000` (with the moviebox Tailscale binding) for the public URL in the upload example.
-
-Run focused offline tests with `pytest -q soil_sampling/csv_upload_test.py`.
-The older endpoint integration tests also require external USDA/USGS services.
+Long, narrow polygons can hit the grid limit before the area limit. Requests have
+a 180-second timeout. These initial resource limits should be calibrated against
+the USDA server before production rollout.
 
 ## `POST /mapunits`
 
