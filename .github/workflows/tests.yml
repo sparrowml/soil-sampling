@@ -47,3 +47,4 @@ jobs:
         run: |
           python -m pytest -q soil_sampling/csv_upload_test.py
           python -m pytest -q soil_sampling/app_test.py -k 'uniform or order_points'
+          python -m pytest -q ops/reconcile_test.py
