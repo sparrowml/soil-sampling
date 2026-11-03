@@ -1,5 +1,11 @@
 # Soil Sampling API Docs
 
+## Acknowledgments
+
+SSPOT was originally developed by **Dr. Trenton Franz** at the **University of Nebraska–Lincoln**, who developed the scientific methodology and sampling algorithms, and **Ben Cook**, who collaborated on the original software implementation. SSPOT was subsequently expanded through collaboration with the **USDA Agricultural Research Service (ARS)** and its **Partnership for Data Innovations (PDI)**.
+
+SSPOT is freely available at [https://sspot.scinet.usda.gov](https://sspot.scinet.usda.gov), and its open-source code is available under the MIT License at [GitHub – sparrowml/soil-sampling](https://github.com/sparrowml/soil-sampling).
+
 ## Description
 
 Endpoints for running soil sampling algorithms
