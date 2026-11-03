@@ -6,6 +6,7 @@ import pandas as pd
 import utm
 from flask import Flask, jsonify, request
 from werkzeug.exceptions import RequestEntityTooLarge
+from soil_sampling.clustering import sample_fragment
 from soil_sampling.csv_upload import clustering_input, MAX_UPLOAD_BYTES, MAX_GRID_CELLS
 from flask_cors import CORS
 from shapely.geometry import Polygon
@@ -319,6 +320,10 @@ def clustering():
             utm_regions, region_descriptions = cluster_regions(
                 utm_polygon, z_number, z_letter, include_elevation, point_data
             )
+        except ValueError as error:
+            if str(error).startswith("The area of interest is too narrow"):
+                return str(error), 400
+            raise
         except DimensionException:
             return (
                 "Too many dimensions for clustering. A maximum of 3 (including elevation) is supported.",
@@ -329,36 +334,37 @@ def clustering():
         point_descriptions = []
         lng_lat_regions = []
         all_voronoi_regions = []
-        for utm_region, description in zip(utm_regions, region_descriptions):
+        areas = np.array([Polygon(region).area for region in utm_regions])
+        quotas = n_points * areas / areas.sum()
+        allocations = np.floor(quotas).astype(int)
+        remainder = n_points - allocations.sum()
+        allocations[np.argsort(-(quotas - allocations), kind="stable")[:remainder]] += 1
+        for utm_region, description, n_region_points in zip(utm_regions, region_descriptions, allocations):
             lat, lon = utm.to_latlon(
                 utm_region[:, 0], utm_region[:, 1], z_number, z_letter
             )
             shapely_utm_region = Polygon(utm_region)
             lng_lat_regions.append(np.stack([lon, lat], -1))
-            n_region_points = round(
-                n_points * shapely_utm_region.area / shapely_utm.area
-            )
             if n_region_points == 0:
                 continue
             elif n_region_points < 4:
-                # TODO: return a warning message
-                # Warning: one of the sampling sub-regions is too small for the number of points you picked
-                # Indicate what percentage of the area is in this sub-region
-                # If 50% or more of total area is in a failed sub-region, throw an error
                 utm_sample_points = fake_voronoi_sample_uniform(
-                    utm_region, n_region_points
+                    utm_region.copy(), n_region_points
                 )
-                if utm_sample_points is not None:
-                    all_utm_sample_points.append(utm_sample_points)
-                    point_descriptions.extend([description] * len(utm_sample_points))
             else:
                 utm_sample_points, voronoi_regions = voronoi_sample(
-                    utm_region, n_region_points
+                    utm_region.copy(), n_region_points
                 )
-                all_utm_sample_points.append(utm_sample_points)
-                point_descriptions.extend([description] * len(utm_sample_points))
                 all_voronoi_regions += voronoi_regions
-        utm_sample_points = order_points(np.concatenate(all_utm_sample_points))
+            if utm_sample_points is None or len(utm_sample_points) != n_region_points:
+                utm_sample_points = sample_fragment(shapely_utm_region, n_region_points)
+            all_utm_sample_points.append(utm_sample_points)
+            point_descriptions.extend([description] * len(utm_sample_points))
+        unordered_points = np.concatenate(all_utm_sample_points)
+        utm_sample_points = order_points(unordered_points)
+        # Keep labels aligned with their coordinates after route ordering.
+        point_descriptions = [point_descriptions[np.argmin(np.linalg.norm(unordered_points - point, axis=1))]
+                              for point in utm_sample_points]
         point_enrichments = enrich_points(utm_sample_points, z_number, z_letter)
         lat, lon = utm.to_latlon(
             utm_sample_points[:, 0], utm_sample_points[:, 1], z_number, z_letter

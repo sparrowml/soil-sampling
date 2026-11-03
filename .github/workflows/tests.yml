@@ -45,6 +45,6 @@ jobs:
         run: python -m pip install -r requirements-main.txt pytest==8.3.5
       - name: Test CSV inputs and offline endpoints
         run: |
-          python -m pytest -q soil_sampling/csv_upload_test.py
+          python -m pytest -q soil_sampling/csv_upload_test.py soil_sampling/clustering_test.py
           python -m pytest -q soil_sampling/app_test.py -k 'uniform or order_points'
           python -m pytest -q ops/reconcile_test.py

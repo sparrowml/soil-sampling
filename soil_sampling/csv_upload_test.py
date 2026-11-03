@@ -34,7 +34,7 @@ def test_csv_pipeline(monkeypatch):
     (b'lat,lon\n41,-96\n', 'requires lat'),
     (b'lat,lon,x,x\n41,-96,1,2', 'unique'),
     (b'lat,lon,x\n41,-96,no', 'numeric'),
-    (b'lat,lon,x\n41,-96,nan', 'non-finite'),
+    (b'lat,lon,x\n41,-96,nan', 'usable data rows'),
     (b'lat,lon,x\n41,-96,1,2', 'number of columns'),
     (b'lat,lon,x\n91,-96,1\n41,-97,2\n41,-98,3', 'coordinates'),
     (b'lat,lon,x\n41,-96,1', 'at least 3'),
@@ -73,3 +73,42 @@ def test_legacy_json_and_individual_fields(monkeypatch):
     assert response.status_code == 400 and 'dimensions' in response.text
     assert len(received) == 2
     assert received[0].equals(received[1])
+
+
+def test_nan_empty_rows_and_headers():
+    frame = read_csv(io.BytesIO(b" lon , lat , yield \n-96,41,1\n,,,,\nNaN,41,no\n-96,41.001,2\n\n-96,41.002,3\n"))
+    assert list(frame.columns) == ['lon', 'lat', 'yield']
+    assert len(frame) == 3
+    with pytest.raises(ValueError, match='missing required column.*lon'):
+        read_csv(io.BytesIO(b'long,lat,yield\n'))
+    with pytest.raises(ValueError, match='row limit'):
+        read_csv(io.BytesIO(b'lon,lat,x\n' + b'NaN,NaN,NaN\n' * 10001))
+
+
+def test_one_sample_and_complete_coverage(monkeypatch):
+    from shapely.geometry import Polygon
+    from shapely.ops import unary_union
+    monkeypatch.setattr(api, 'enrich_points', lambda points, *args: [''] * len(points))
+    np.random.seed(4)
+    response = upload(api.app.test_client(), CSV + b'NaN,NaN,NaN\n', nPoints=1)
+    assert response.status_code == 200, response.text
+    assert len(response.json['points']) == 1
+    regions = [Polygon(region) for region in response.json['regions']]
+    aoi = Polygon(OPTIONS['polygon'])
+    assert unary_union(regions).symmetric_difference(aoi).area / aoi.area < 1e-5
+    assert abs(sum(region.area for region in regions) - unary_union(regions).area) / aoi.area < 1e-8
+
+
+def test_fragment_fallback_keeps_count_and_labels(monkeypatch):
+    from shapely.geometry import Polygon, Point
+    monkeypatch.setattr(api, 'enrich_points', lambda points, *args: [''] * len(points))
+    monkeypatch.setattr(api, 'fake_voronoi_sample_uniform', lambda *args: None)
+    np.random.seed(4)
+    response = upload(api.app.test_client(), nPoints=6)
+    assert response.status_code == 200, response.text
+    result = response.json
+    assert len(result['points']) == 6
+    for point, description in zip(result['points'], result['point_descriptions']):
+        assert any(Polygon(region).buffer(1e-9).covers(Point(point))
+                   for region, label in zip(result['regions'], result['region_descriptions'])
+                   if label == description)

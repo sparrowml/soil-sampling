@@ -56,31 +56,43 @@ def read_csv(stream):
         raise ValueError('CSV must be at most 5 MiB.')
     try:
         reader = csv.reader(io.StringIO(raw.decode('utf-8-sig')), strict=True)
-        header = next(reader, [])
+        header = [name.strip() for name in next(reader, [])]
+        if not header:
+            raise ValueError("CSV is empty. Add a header row with lon, lat, and 1 to 3 numeric measurement columns.")
         if len(header) != len(set(header)) or any(not name.strip() for name in header):
             raise ValueError('CSV column names must be nonempty and unique.')
-        if 'lat' not in header or 'lon' not in header or not 3 <= len(header) <= 5:
+        missing = [name for name in ('lat', 'lon') if name not in header]
+        if missing:
+            raise ValueError(f"CSV is missing required column(s): {', '.join(missing)}. "
+                             "Use exactly lat for latitude and lon for longitude in the first row; "
+                             "column order does not matter. Example: lon,lat,yield.")
+        if not 3 <= len(header) <= 5:
             raise ValueError('CSV requires lat, lon, and 1 to 3 numeric clustering columns.')
         rows = []
         for index, row in enumerate(reader, 2):
-            if len(rows) >= MAX_CSV_ROWS:
+            if index - 1 > MAX_CSV_ROWS:
                 raise ValueError('CSV exceeds the 10000 row limit.')
+            if not row or all(not value.strip() for value in row):
+                continue
             if len(row) != len(header):
                 raise ValueError(f'CSV row {index} has the wrong number of columns.')
+            # A NaN in any column invalidates the entire observation.
+            if any(value.strip().lower() in ('nan', '+nan', '-nan') for value in row):
+                continue
             try:
                 values = [float(value) for value in row]
             except ValueError as exc:
-                raise ValueError(f'CSV row {index} must contain only numeric values, with no blanks.') from exc
+                raise ValueError(f'CSV row {index} has a blank or nonnumeric value. Use numbers in every column, or NaN to skip the row.') from exc
             if not np.isfinite(values).all():
                 raise ValueError(f'CSV row {index} contains a non-finite value.')
             rows.append(values)
     except (UnicodeError, csv.Error) as exc:
         raise ValueError('CSV must be valid UTF-8 comma-separated text.') from exc
     if len(rows) < 3:
-        raise ValueError('CSV requires at least 3 data rows.')
+        raise ValueError('CSV requires at least 3 usable data rows after ignoring NaN and empty rows.')
     frame = pd.DataFrame(rows, columns=header)
     if not frame.lat.between(-80, 84).all() or not frame.lon.between(-180, 180).all():
-        raise ValueError('CSV coordinates must be WGS84: latitude -80 to 84, longitude -180 to 180 (UTM coverage).')
+        raise ValueError('CSV coordinates are out of range. Use WGS84 decimal degrees: lat (latitude) -80 to 84 and lon (longitude) -180 to 180. Check whether the lat and lon column headers are swapped.')
     if len(frame.drop_duplicates(['lat', 'lon'])) < 3:
         raise ValueError('CSV requires at least 3 distinct point locations.')
     if len(frame.drop(columns=['lat', 'lon']).drop_duplicates()) < 3:
