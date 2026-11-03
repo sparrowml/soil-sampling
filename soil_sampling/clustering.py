@@ -146,6 +146,8 @@ def grid_regions(poly, grid, mask, classes):
 def sample_fragment(poly, count):
     """Fallback for narrow/concave pieces the existing sampler cannot populate."""
     triangles = [triangle for triangle in triangulate(poly) if poly.covers(triangle)]
+    if not triangles:
+        return np.repeat(np.asarray(poly.representative_point().coords), count, axis=0)
     weights = np.array([triangle.area for triangle in triangles])
     chosen = np.random.choice(len(triangles), size=count, p=weights / weights.sum())
     points = []

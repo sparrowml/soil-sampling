@@ -99,10 +99,11 @@ def test_one_sample_and_complete_coverage(monkeypatch):
     assert abs(sum(region.area for region in regions) - unary_union(regions).area) / aoi.area < 1e-8
 
 
-def test_fragment_fallback_keeps_count_and_labels(monkeypatch):
+@pytest.mark.parametrize("bad_points", [None, np.array([[0., 0.], [0., 0.]])])
+def test_fragment_fallback_keeps_count_and_labels(monkeypatch, bad_points):
     from shapely.geometry import Polygon, Point
     monkeypatch.setattr(api, 'enrich_points', lambda points, *args: [''] * len(points))
-    monkeypatch.setattr(api, 'fake_voronoi_sample_uniform', lambda *args: None)
+    monkeypatch.setattr(api, 'fake_voronoi_sample_uniform', lambda *args: bad_points)
     np.random.seed(4)
     response = upload(api.app.test_client(), nPoints=6)
     assert response.status_code == 200, response.text

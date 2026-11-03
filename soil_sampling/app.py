@@ -9,7 +9,7 @@ from werkzeug.exceptions import RequestEntityTooLarge
 from soil_sampling.clustering import sample_fragment
 from soil_sampling.csv_upload import clustering_input, MAX_UPLOAD_BYTES, MAX_GRID_CELLS
 from flask_cors import CORS
-from shapely.geometry import Polygon
+from shapely.geometry import Point, Polygon
 
 from soil_sampling import (DimensionException, check_area, cluster_regions,
                            download_shapefile, enrich_points,
@@ -356,7 +356,9 @@ def clustering():
                     utm_region.copy(), n_region_points
                 )
                 all_voronoi_regions += voronoi_regions
-            if utm_sample_points is None or len(utm_sample_points) != n_region_points:
+            if (utm_sample_points is None or len(utm_sample_points) != n_region_points
+                    or not np.isfinite(utm_sample_points).all()
+                    or any(not shapely_utm_region.covers(Point(point)) for point in utm_sample_points)):
                 utm_sample_points = sample_fragment(shapely_utm_region, n_region_points)
             all_utm_sample_points.append(utm_sample_points)
             point_descriptions.extend([description] * len(utm_sample_points))
