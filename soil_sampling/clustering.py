@@ -1,12 +1,13 @@
 from typing import List, Optional, Tuple
 
-import alphashape
 import numpy as np
 import pandas as pd
 import py3dep
 import utm
 from scipy.interpolate import griddata
-from shapely.geometry import Point, Polygon
+from scipy.spatial import cKDTree
+from shapely.geometry import Point, Polygon, LineString, box
+from shapely.ops import split, unary_union, triangulate
 
 from .exceptions import DimensionException
 
@@ -78,61 +79,85 @@ def cluster_regions(
             grid_mask[i] = True
 
     if grid_mask.sum() == 0:
-        return
+        raise ValueError("The area of interest is too narrow for the 5-meter clustering grid. Enlarge it and try again.")
 
     cluster_points = data[grid_mask]
     classes, _ = kmeans(cluster_points)
 
-    all_pixels = np.zeros(xx.shape) * np.nan
-    all_pixels[grid_mask] = classes
-    multips = []
-    for i in range(3):
-        class_mask = all_pixels[grid_mask] == i
-        class_points = np.stack(
-            (xx[grid_mask][class_mask], yy[grid_mask][class_mask]), -1
-        )
-        polys = alphashape.alphashape(class_points, 0.2)
-        multips.append(polys)
+    return grid_regions(poly, grid, grid_mask, classes)
 
-    for i in range(len(multips)):
-        if isinstance(multips[i], Polygon):
+
+def polygon_parts(geometry):
+    if geometry.is_empty:
+        return
+    if isinstance(geometry, Polygon):
+        yield geometry
+    elif hasattr(geometry, "geoms"):
+        for part in geometry.geoms:
+            yield from polygon_parts(part)
+
+
+def exterior_parts(geometry):
+    """Split holes without changing area: the public API supports exterior rings only."""
+    pending = list(polygon_parts(geometry))
+    while pending:
+        poly = pending.pop()
+        if not poly.interiors:
+            yield poly
             continue
-        for p in multips[i]:
-            # TODO: make 10% region size configurable
-            # Sum up ignored sub-regions, if > 50%, throw an error
-            # % value should be configurable
-            if p.area / multips[i].area < 0.1:
-                multips[i] -= p
+        hole = Polygon(poly.interiors[0])
+        y = hole.representative_point().y
+        xmin, _, xmax, _ = poly.bounds
+        pieces = split(poly, LineString([(xmin - 1, y), (xmax + 1, y)]))
+        pending.extend(polygon_parts(pieces))
 
-    for i in range(len(multips)):
-        for j in range(len(multips)):
-            if i == j:
-                continue
-            if multips[i].area > multips[j].area:
-                multips[i] -= multips[j]
-            else:
-                multips[j] -= multips[i]
 
-    for i in range(len(multips)):
-        if isinstance(multips[i], Polygon):
-            continue
-        for p in multips[i]:
-            if p.area / multips[i].area < 0.1:
-                multips[i] -= p
+def grid_regions(poly, grid, mask, classes):
+    """Partition the AOI using nearest-neighbor labels on the existing 5m grid.
 
-    regions = []
-    region_descriptions = []
-    for i in range(len(multips)):
-        description = f"Cluster: {i+1}"
-        if isinstance(multips[i], Polygon):
-            regions.append(np.array(multips[i].exterior))
-            region_descriptions.append(description)
-            continue
-        for p in multips[i]:
-            regions.append(np.array(p.exterior))
-            region_descriptions.append(description)
+    Unlabelled boundary sites inherit their closest labelled site's class. Cell
+    edges lie midway between grid sites; the outer cells extend to the AOI bounds.
+    Row runs avoid constructing a separate geometry for every grid cell.
+    """
+    labels = np.empty(len(grid), dtype=int)
+    labels[mask] = classes
+    if (~mask).any():
+        _, nearest = cKDTree(grid[mask]).query(grid[~mask])
+        labels[~mask] = classes[nearest]
+    xs, ys = np.unique(grid[:, 0]), np.unique(grid[:, 1])
+    xmin, ymin, xmax, ymax = poly.bounds
+    xe = np.r_[xmin, (xs[:-1] + xs[1:]) / 2, xmax]
+    ye = np.r_[ymin, (ys[:-1] + ys[1:]) / 2, ymax]
+    labels = labels.reshape(len(ys), len(xs))
+    runs = {int(label): [] for label in np.unique(labels)}
+    for row, values in enumerate(labels):
+        edges = np.r_[0, np.flatnonzero(values[1:] != values[:-1]) + 1, len(xs)]
+        for start, end in zip(edges[:-1], edges[1:]):
+            runs[int(values[start])].append(box(xe[start], ye[row], xe[end], ye[row + 1]))
+    regions, descriptions = [], []
+    for label, rectangles in sorted(runs.items()):
+        geometry = unary_union(rectangles).intersection(poly)
+        for part in exterior_parts(geometry):
+            regions.append(np.asarray(part.exterior.coords))
+            descriptions.append(f"Cluster: {label + 1}")
+    return regions, descriptions
 
-    return regions, region_descriptions
+
+def sample_fragment(poly, count):
+    """Fallback for narrow/concave pieces the existing sampler cannot populate."""
+    triangles = [triangle for triangle in triangulate(poly) if poly.covers(triangle)]
+    if not triangles:
+        return np.repeat(np.asarray(poly.representative_point().coords), count, axis=0)
+    weights = np.array([triangle.area for triangle in triangles])
+    chosen = np.random.choice(len(triangles), size=count, p=weights / weights.sum())
+    points = []
+    for index in chosen:
+        vertices = np.asarray(triangles[index].exterior.coords)[:3]
+        u, v = np.random.random(2)
+        if u + v > 1:
+            u, v = 1 - u, 1 - v
+        points.append(vertices[0] + u * (vertices[1] - vertices[0]) + v * (vertices[2] - vertices[0]))
+    return np.asarray(points)
 
 
 def initialize_centroids(points: np.ndarray, k: int = 3) -> np.ndarray:

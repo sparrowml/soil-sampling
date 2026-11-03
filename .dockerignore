@@ -4,3 +4,8 @@
 __pycache__
 /data
 /node_modules
+.env
+.env.*
+
+.recovery-state*
+.maintenance
