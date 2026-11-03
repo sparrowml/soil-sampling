@@ -397,6 +397,16 @@ Long, narrow polygons can hit the grid limit before the area limit. Requests hav
 a 180-second timeout. These initial resource limits should be calibrated against
 the USDA server before production rollout.
 
+Clustering uses a 5-meter grid. Region boundaries partition the entire AOI,
+including small disconnected pieces, with nearest-neighbor filling at that grid
+resolution and clipping to the AOI. Regions with holes are returned as multiple
+hole-free polygons with the same cluster description, preserving the existing
+response format. Sum all polygons for a cluster when calculating its acreage.
+The 10,000-row limit counts input rows, including ignored rows. At least three
+usable rows with distinct locations and clustering value combinations must remain.
+Missing `lat`/`lon` headers and invalid coordinates return actionable 400 messages;
+coordinates must be decimal degrees, not projected eastings/northings.
+
 ## `POST /mapunits`
 
 Return only the MUKEY map unit polygons, IDs and names for a region.
@@ -545,12 +555,3 @@ This API uses the following error codes:
 - `400 Bad Request`: The request was malformed or there was an expected error during processing. The response will contain a message describing the error.
 - `404 Not Found`: The requested resource was not found.
 - `500 Internal Server Error`: An unexpected error occurred on the server.
-Clustering uses a 5-meter grid. Region boundaries partition the entire AOI,
-including small disconnected pieces, with nearest-neighbor filling at that grid
-resolution and clipping to the AOI. Regions with holes are returned as multiple
-hole-free polygons with the same cluster description, preserving the existing
-response format. Sum all polygons for a cluster when calculating its acreage.
-The 10,000-row limit counts input rows, including ignored rows. At least three
-usable rows with distinct locations and clustering value combinations must remain.
-Missing `lat`/`lon` headers and invalid coordinates return actionable 400 messages;
-coordinates must be decimal degrees, not projected eastings/northings.
