@@ -18,7 +18,7 @@ def test_partition(outline, pattern):
     mask = np.array([poly.contains(Point(p)) for p in grid])
     points = grid[mask]
     if pattern == 'island':
-        classes = ((points[:,0] == 15) & (points[:,1] == 5)).astype(int)
+        classes = ((points[:,0] == 15) & (points[:,1] == 15)).astype(int)
     elif pattern == 'checker':
         classes = (points.sum(axis=1) / 5).astype(int) % 3
     else:
