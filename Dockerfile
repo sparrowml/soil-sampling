@@ -40,5 +40,7 @@ COPY requirements-main.txt .
 RUN pip install -U pip
 RUN pip install -r requirements-main.txt
 ADD . .
+ARG APP_REVISION=development
+ENV APP_REVISION=${APP_REVISION}
 
 ENTRYPOINT [ "make", "serve" ]

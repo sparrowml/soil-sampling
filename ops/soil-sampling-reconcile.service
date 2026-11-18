@@ -1,0 +1,8 @@
+[Unit]
+Description=Reconcile soil-sampling test API only
+
+[Service]
+Type=oneshot
+WorkingDirectory=%h/deploy/soil-sampling-csv
+ExecStart=/usr/bin/python3 %h/deploy/soil-sampling-csv/ops/reconcile.py
+TimeoutStartSec=100

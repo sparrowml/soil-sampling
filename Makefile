@@ -17,7 +17,7 @@ debug:
 
 .PHONY: serve
 serve:
-	gunicorn -b 0.0.0.0:5000 soil_sampling.app:app --timeout 90 --threads 4	
+	gunicorn -b 0.0.0.0:5000 soil_sampling.app:app --timeout 180 --workers 1 --threads 1	
 
 #* Docker
 # Example: make docker-build VERSION=latest
