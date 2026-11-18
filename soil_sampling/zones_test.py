@@ -11,7 +11,7 @@ from shapely.ops import transform, unary_union
 
 from soil_sampling.zones import cluster_zones, sample_zones, smooth_inside, classify, standardize
 from soil_sampling.clustering import exterior_parts
-from soil_sampling.csv_upload import read_csv
+from soil_sampling.csv_upload import read_csv, resolve_elevation
 import importlib
 api = importlib.import_module('soil_sampling.app')
 
@@ -102,6 +102,17 @@ def test_csv_missing_counts_and_duplicate_locations():
         read_csv(io.BytesIO(csv+b'-96,41.002,7,\n'))
     with pytest.raises(ValueError, match='1000 column'):
         read_csv(io.BytesIO(b','.join([b'x']*1001)))
+
+
+@pytest.mark.parametrize('name', ['Elev', 'elevation', 'Elev Relative', 'relative_elevation', 'absolute-elev'])
+def test_explicit_elevation_aliases_preserve_all_measurements(name):
+    data=pd.DataFrame({'lat':[41.,41.001,41.002],'lon':[-96.]*3,'ECD':[1.,2.,3.],
+                       'Yield':[4.,5.,6.],name:[7.,8.,9.]})
+    options={'includeElevation':True}
+    resolve_elevation(options,data)
+    assert options['includeElevation'] is False
+    assert list(data.columns)==['lat','lon','ECD','Yield',name]
+    assert data.attrs['input_diagnostics']['elevation']['uploaded_columns']==[name]
 
 
 @pytest.mark.parametrize('count', [1,200])

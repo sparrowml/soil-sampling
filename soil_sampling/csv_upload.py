@@ -2,6 +2,7 @@
 import csv
 import io
 import json
+import re
 
 import numpy as np
 import pandas as pd
@@ -61,7 +62,10 @@ def clustering_input(request):
 
 def resolve_elevation(body, point_data):
     """Uploaded elevation takes precedence; never silently discard a CSV feature."""
-    uploaded = [name for name in point_data.columns if name.lower() in ('elev', 'elevation')]
+    elevation_names = {'elev', 'elevation', 'elev relative', 'relative elev', 'elevation relative',
+                       'relative elevation', 'elev absolute', 'absolute elev', 'elevation absolute', 'absolute elevation'}
+    uploaded = [name for name in point_data.columns
+                if re.sub(r'[\s_-]+', ' ', name.strip().lower()) in elevation_names]
     metadata = point_data.attrs.setdefault('input_diagnostics', {'warnings': []})
     requested = body.get('includeElevation', False)
     if uploaded and requested:

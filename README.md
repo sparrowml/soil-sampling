@@ -378,7 +378,10 @@ When an uploaded `Elev` or `elevation` column is present (case-insensitive), it
 takes precedence over `includeElevation:true`: all uploaded measurements are
 retained and fetched elevation is not added again. This decision is reported in
 `diagnostics.input.elevation` and `diagnostics.warnings`. Other names are not
-guessed to mean elevation. Three other measurement columns plus requested
+guessed to mean elevation, except explicit `relative`/`absolute` modifiers before
+or after those two names (spaces, underscores and hyphens are equivalent), such
+as `Elev Relative`. This uses the uploaded relative measurement as requested;
+it does not convert relative values to absolute altitude. Three other measurement columns plus requested
 automatic elevation still produce an actionable dimension-limit error.
 
 ### Example
