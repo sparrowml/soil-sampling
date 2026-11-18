@@ -16,8 +16,9 @@ registration are discarded after each job; one job runs at a time for this repo.
 CI installs Python 3.10 and `requirements-main.txt`, then runs:
 
 ```sh
-python -m pytest -q soil_sampling/csv_upload_test.py
+python -m pytest -q soil_sampling/csv_upload_test.py soil_sampling/clustering_test.py soil_sampling/zones_test.py
 python -m pytest -q soil_sampling/app_test.py -k 'uniform or order_points'
+python -m pytest -q ops/reconcile_test.py
 ```
 
 These cover CSV uploads, validation, legacy shapefile compatibility,

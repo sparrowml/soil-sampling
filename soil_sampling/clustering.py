@@ -109,7 +109,10 @@ def exterior_parts(geometry):
         y = hole.representative_point().y
         xmin, _, xmax, _ = poly.bounds
         pieces = split(poly, LineString([(xmin - 1, y), (xmax + 1, y)]))
-        pending.extend(polygon_parts(pieces))
+        parts = list(polygon_parts(pieces))
+        if len(parts) < 2 or any(part.equals(poly) for part in parts):
+            raise ValueError('Unable to serialize polygon holes safely in the legacy region format.')
+        pending.extend(parts)
 
 
 def grid_regions(poly, grid, mask, classes):

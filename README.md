@@ -333,11 +333,17 @@ request containing `pointDataShapefile` and/or `includeElevation`.
 
 Use UTF-8 CSV with a header containing `lon`, `lat`, and one to three numeric
 measurement columns. Coordinates are WGS84 longitude/latitude (UTM coverage:
-latitude -80 to 84, longitude -180 to 180). Rows containing `NaN` (case-insensitive) and completely empty rows are ignored.
-Other values must be finite numbers; partially blank rows, duplicate headers and
-extra text columns are rejected. Whitespace around headers and values is allowed. Include at
+latitude -80 to 84, longitude -180 to 180). Coordinate aliases `latitude`, `long`,
+and `longitude` are accepted case-insensitively. Completely empty columns are
+ignored. Empty rows and rows with missing/`NaN` measurements are skipped; the
+response reports original, retained, empty, incomplete and duplicate row counts.
+Other values must be finite numbers; duplicate headers and extra text columns
+are rejected. Identical observations at one coordinate are collapsed; conflicting
+measurements at the same coordinate require correction, rather than arbitrary
+nearest-neighbor selection or an undocumented averaging policy.
+Whitespace around headers and values is allowed. Include at
 least three rows, three distinct locations and three distinct measurement value
-combinations. At most 10000 rows are accepted. These are synthetic example
+combinations. At most 10000 rows and 1000 columns (including empty columns) are accepted. These are synthetic example
 measurements, not agricultural recommendations:
 
 ```csv
@@ -356,6 +362,9 @@ is also in `examples/clustering.csv`. Its matching polygon and options are in
 - `pointDataCsv`: exactly one CSV file.
 - `options`: a JSON object with `polygon`, optional `nPoints` (integer 1–200,
   default 10), and optional `includeElevation` (boolean, default false).
+  `polygonGeoJson` may replace `polygon` to supply a WGS84 Polygon/MultiPolygon
+  geometry (or Feature) preserving holes and detached pieces.
+  Optional `clusteringOptions` staging settings are described below.
 - Instead of `options`, individual form fields `polygon`, `nPoints`, and
   `includeElevation` are accepted; each value must be JSON encoded. Do not mix
   the two option styles.
@@ -364,6 +373,13 @@ is also in `examples/clustering.csv`. Its matching polygon and options are in
 Including elevation uses one of the maximum three clustering dimensions. CSV and
 shapefile input cannot be combined in one request. The server does not fetch CSV
 URLs: download the sample, then upload it directly.
+
+When an uploaded `Elev` or `elevation` column is present (case-insensitive), it
+takes precedence over `includeElevation:true`: all uploaded measurements are
+retained and fetched elevation is not added again. This decision is reported in
+`diagnostics.input.elevation` and `diagnostics.warnings`. Other names are not
+guessed to mean elevation. Three other measurement columns plus requested
+automatic elevation still produce an actionable dimension-limit error.
 
 ### Example
 
@@ -387,12 +403,20 @@ Existing JSON clients can continue sending `polygon`, `nPoints`,
 
 ### Response and limits
 
-The response shape is unchanged: `points`, `point_descriptions`,
-`point_enrichments`, `regions`, and `region_descriptions`. Point counts can differ
-from `nPoints` due to allocation across cluster regions. Sampling is randomized.
+The existing response fields remain: `points`, `point_descriptions`,
+`point_enrichments`, `regions`, and `region_descriptions`. Successful responses
+contain exactly `nPoints` distinct, deterministic locations inside their assigned
+connected zone. Bounded area allocation and constrained Lloyd refinement support
+1–200 samples; unusually narrow/complex geometry returns a clear error if the
+processing limit prevents safe placement. Some components remain unsampled when
+the budget is small. Their area is reported, not treated as adequately sampled.
+Additive `point_component_ids`, `regions_geojson` and `diagnostics` fields provide
+component identity, hole-preserving polygons, cleanup settings and input warnings.
 Elevation enrichment of output points currently contacts the USGS elevation
 service even when `includeElevation` is false; that option controls clustering
-inputs, not output enrichment.
+inputs, not output enrichment. If output enrichment fails, valid samples are
+returned with an explicit elevation-unavailable warning instead of discarding
+the sampling result.
 
 Malformed CSV/options return 400 with an explanatory message. The entire request,
 including multipart overhead, is limited to 5 MiB (413 if exceeded). Uploads are
@@ -412,6 +436,42 @@ The 10,000-row limit counts input rows, including ignored rows. At least three
 usable rows with distinct locations and clustering value combinations must remain.
 Missing `lat`/`lon` headers and invalid coordinates return actionable 400 messages;
 coordinates must be decimal degrees, not projected eastings/northings.
+
+### Staging spatial cleanup (PR preview only)
+
+The test endpoint uses nearest-neighbor measurements on a 5 m grid, a local
+3×3 median constrained to neighbors within the AOI, standardized measurements,
+and deterministic k-means with a fixed maximum of three classes. No automatic
+2–5-class research CLI is deployed. Constant measurements within the AOI return
+an explanatory error; two distinct combinations can produce two classes.
+
+Small connected patches are merged only into a truly adjacent class using
+shared-boundary contact and standardized measurement similarity. The default
+minimum is **5000 m² (0.5 ha), capped at 1% of the AOI area** so small AOIs are
+not erased by the fixed threshold. Large disconnected regions are retained;
+cleanup and smoothing do not join across excluded AOI holes/gaps. Grid-edge
+extrapolation is clipped to the exact AOI, including sub-grid detached pieces.
+
+Optional `clusteringOptions` accepts `smoothingCells` of 1, 3 (default), or 5,
+and `minPatchAreaM2` between 0 and 10000 (default 5000; the 1% cap still applies).
+Use 1 and 0 for a standardized, unsmoothed control. Diagnostics include raw/clean
+grid component counts, final polygon and legacy-ring counts, cleanup-reassigned
+cells, projected coverage/overlap areas, samples and build revision. Reassignment
+counts describe patch cleanup after smoothing/classification, not all differences
+from the previous unscaled algorithm. Coordinate serialization has finite
+projection precision; coverage tolerances are evaluated in projected meters.
+
+These are staging defaults for visual/scientific review, **not calibrated
+agronomic thresholds**. Independent synthetic tests exercise holes, gaps,
+concavity, noisy patches, units, missing values and small/large sample budgets.
+Private field validation must remain outside this public repository.
+
+Legacy rings preserve area by splitting polygons with holes and may still show
+internal straight outlines if drawn independently. Render `regions_geojson` (or
+dissolve same-class polygons) to eliminate those artificial outlines. Clients
+must also send every AOI ring via `polygonGeoJson`; a frontend that submits only
+its first exterior ring cannot convey holes to the server. `GET /version`
+identifies the deployed revision; the root health response is unchanged.
 
 ## `POST /mapunits`
 

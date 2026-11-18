@@ -57,14 +57,15 @@ def test_limits():
         read_csv(io.BytesIO(b'lon,lat,x\n' + b'-96,41,1\n' * 10001))
     response = upload(client, b'lat,lon,a,b,c\n41,-96,1,2,3\n42,-96,2,3,4\n43,-96,3,4,5', includeElevation=True)
     assert response.status_code == 400 and 'maximum of 3' in response.text
+    assert 'includeElevation=false' in response.text
 
 
 def test_legacy_json_and_individual_fields(monkeypatch):
     received = []
-    def cluster(polygon, zone, letter, elevation, data):
+    def cluster(polygon, zone, letter, elevation, data, config):
         received.append(data)
-        raise api.DimensionException()
-    monkeypatch.setattr(api, 'cluster_regions', cluster)
+        raise ValueError('test dimensions')
+    monkeypatch.setattr(api, 'cluster_zones', cluster)
     monkeypatch.setattr(api, 'download_shapefile', lambda url: read_csv(io.BytesIO(CSV)))
     client = api.app.test_client()
     response = client.post('/clustering', json={**OPTIONS, 'pointDataShapefile': 'https://example.test/data.zip'})
@@ -80,9 +81,29 @@ def test_nan_empty_rows_and_headers():
     assert list(frame.columns) == ['lon', 'lat', 'yield']
     assert len(frame) == 3
     with pytest.raises(ValueError, match='missing required column.*lon'):
-        read_csv(io.BytesIO(b'long,lat,yield\n'))
+        read_csv(io.BytesIO(b'easting,lat,yield\n'))
     with pytest.raises(ValueError, match='row limit'):
         read_csv(io.BytesIO(b'lon,lat,x\n' + b'NaN,NaN,NaN\n' * 10001))
+
+
+@pytest.mark.parametrize('latitude,longitude', [('Latitude', 'Longitude'), ('LAT', 'long'), ('lat', 'LON')])
+def test_coordinate_aliases_and_empty_spreadsheet_columns(latitude, longitude):
+    csv = (f'{longitude},{latitude},yield,,,unused\n'
+           '-96,41,1,,,\n,,,,,\n-96,41.001,2,,,\n-96,41.002,3,,,\n').encode()
+    frame = read_csv(io.BytesIO(csv))
+    expected = read_csv(io.BytesIO(b'lon,lat,yield\n-96,41,1\n-96,41.001,2\n-96,41.002,3\n'))
+    assert frame.equals(expected)
+
+
+@pytest.mark.parametrize('csv,message', [
+    (b'lat,lon,long,x\n41,-96,-96,1\n', 'unique'),
+    (b'lat,lon,x,\n41,-96,1,2\n', 'nonempty'),
+    (b'lat,lon,x,unused\n41,-96,1,\n41.001,-96,2,3\n41.002,-96,3,\n', 'retained 1.*2 incomplete'),
+    (b'lat,lon,a,b,c,d\n41,-96,1,2,3,4\n', '1 to 3'),
+])
+def test_column_cleanup_never_discards_populated_measurements(csv, message):
+    with pytest.raises(ValueError, match=message):
+        read_csv(io.BytesIO(csv))
 
 
 def test_one_sample_and_complete_coverage(monkeypatch):
